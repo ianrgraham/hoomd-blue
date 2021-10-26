@@ -4,4 +4,4 @@
 
 """Example python module."""
 
-from hoomd.example_plugin import update
+from hoomd.updater_plugin import update

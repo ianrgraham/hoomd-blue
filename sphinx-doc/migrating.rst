@@ -206,7 +206,7 @@ Components
   - Add ``NVCC`` as a compile definition to ``.cu`` sources.
 
 * External components require additional updates to work with v3. See
-  ``example_plugin`` for details:
+  ``example_plugins`` for details:
 
   - Remove ``FindHOOMD.cmake``.
   - Replace ``include(FindHOOMD.cmake)`` with

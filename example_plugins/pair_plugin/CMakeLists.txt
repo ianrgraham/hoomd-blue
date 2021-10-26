@@ -1,14 +1,12 @@
-# Maintainer: mspells
 
-set(COMPONENT_NAME example_plugin)
+set(COMPONENT_NAME pair_plugin)
 
 set(_${COMPONENT_NAME}_sources
     module.cc
-    ExampleUpdater.cc
     )
 
 set(_${COMPONENT_NAME}_cu_sources
-    ExampleUpdater.cu
+    ExampleDriverPotentialPairGPU.cu
     )
 
 if (ENABLE_HIP)
@@ -26,7 +24,10 @@ set_target_properties(_${COMPONENT_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/..;\
 endif()
 
 # link the library to its dependencies
-target_link_libraries(_${COMPONENT_NAME} PUBLIC HOOMD::_hoomd)
+target_link_libraries(_${COMPONENT_NAME}
+        PUBLIC HOOMD::_hoomd
+        PUBLIC HOOMD::_md
+        )
 
 fix_cudart_rpath(_${COMPONENT_NAME})
 
@@ -39,7 +40,7 @@ install(TARGETS _${COMPONENT_NAME}
 # copy python modules to the build directory to make it a working python package
 set(files
     __init__.py
-    update.py
+    pair.py
     )
 
 install(FILES ${files}

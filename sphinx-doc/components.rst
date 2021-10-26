@@ -14,9 +14,10 @@ components from source, built-in components compile and install everything at on
 chances for errors (e.g. building **HOOMD-blue** against python 3.6, but the component against
 python 3.7). External components provide more flexibility for packaging purposes.
 
-The **HOOMD-Blue** source provides an example component template in the ``example_plugin``
-subdirectory. ``example_plugin`` demonstrates how to add a new ``update`` command with both CPU and
-GPU implementations. Use this as a template when developing your component.
+The **HOOMD-Blue** source provides example component templates in the ``example_plugins``
+subdirectory. ``update_plugin`` demonstrates how to add a new ``update`` command and ``pair_plugin``
+showcases how to add a new ``pair`` potential. Both of these components are written with CPU and GPU
+implementations. Use these as a template when developing your components.
 
 Built-in components
 -------------------

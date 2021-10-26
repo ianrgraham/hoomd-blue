@@ -101,7 +101,7 @@ option(BUILD_DEM "Build the dem package" on)
 option(ENABLE_TBB "Enable support for Threading Building Blocks (TBB)" off)
 
 # Add list of plugins
-set(PLUGINS "example_plugin;" CACHE STRING "List of plugin directories.")
+set(PLUGINS "example_plugins;" CACHE STRING "List of plugin directories.")
 
 # this needs to go before CUDA setup
 include (HOOMDHIPSetup)
