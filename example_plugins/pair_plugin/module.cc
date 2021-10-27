@@ -12,12 +12,20 @@
 #include "ExampleDriverPotentialPairGPU.cuh"
 #endif
 
+namespace hoomd
+    {
+namespace md
+    {
+
 // specify the python module. Note that the name must explicitly match the PROJECT() name provided
 // in CMakeLists (with an underscore in front)
 PYBIND11_MODULE(_pair_plugin, m)
     {
-    export_PotentialPair<PotentialPairExample>(m, "PotentialPairExample");
+    detail::export_PotentialPair<PotentialPairExample>(m, "PotentialPairExample");
 #ifdef ENABLE_HIP
-    export_PotentialPairGPU<PotentialPairExampleGPU, PotentialPairExample>(m, "PotentialPairExampleGPU");
+    detail::export_PotentialPairGPU<PotentialPairExampleGPU, PotentialPairExample>(m, "PotentialPairExampleGPU");
 #endif
     }
+
+    } // end namespace md
+    } // end namespace hoomd

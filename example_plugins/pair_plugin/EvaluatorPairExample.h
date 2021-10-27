@@ -28,6 +28,8 @@
 #define HOSTDEVICE
 #endif
 
+namespace hoomd {
+
 //! Class for evaluating the LJ pair potential
 /*! <b>Original</b>
     <b>General Overview</b>
@@ -269,5 +271,7 @@ class EvaluatorPairExample
     // Add any additional fields
     Scalar dlt;    //!< dlt parameter extracted from the params passed to the constructor
     };
+
+    } // end namespace hoomd 
 
 #endif // __PAIR_EVALUATOR_EXAMPLE_H__

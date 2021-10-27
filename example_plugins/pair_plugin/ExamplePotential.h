@@ -16,13 +16,20 @@
 #error This header cannot be compiled by nvcc
 #endif
 
-//! Pair potential force compute for example forces
+namespace hoomd
+    {
+namespace md
+    {
 
+//! Pair potential force compute for example forces
 typedef PotentialPair<EvaluatorPairExample> PotentialPairExample;
 
 #ifdef ENABLE_HIP
-//! Pair potential force compute for lj forces on the GPU
-typedef PotentialPairGPU<EvaluatorPairExample, gpu_compute_example_forces> PotentialPairExampleGPU;
+//! Pair potential force compute for example forces on the GPU
+typedef PotentialPairGPU<EvaluatorPairExample, kernel::gpu_compute_example_forces> PotentialPairExampleGPU;
 #endif
+
+    } // end namespace md
+    } // end namespace hoomd
 
 #endif // _EXAMPLE_PAIR_POTENTIAL_H__
