@@ -2,8 +2,8 @@
 #ifndef __EXAMPLE_PAIR_POTENTIAL_H__
 #define __EXAMPLE_PAIR_POTENTIAL_H__
 
-#include "hoomd/md/PotentialPair.h"
 #include "EvaluatorPairExample.h"
+#include "hoomd/md/PotentialPair.h"
 
 // #define ENABLE_HIP // to test
 
@@ -20,13 +20,13 @@ namespace hoomd
     {
 namespace md
     {
-
 //! Pair potential force compute for example forces
 typedef PotentialPair<EvaluatorPairExample> PotentialPairExample;
 
 #ifdef ENABLE_HIP
 //! Pair potential force compute for example forces on the GPU
-typedef PotentialPairGPU<EvaluatorPairExample, kernel::gpu_compute_example_forces> PotentialPairExampleGPU;
+typedef PotentialPairGPU<EvaluatorPairExample, kernel::gpu_compute_example_forces>
+    PotentialPairExampleGPU;
 #endif
 
     } // end namespace md

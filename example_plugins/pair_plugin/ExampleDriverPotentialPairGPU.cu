@@ -5,8 +5,8 @@
     \brief Defines the driver functions for computing all types of pair forces on the GPU
 */
 
-#include "ExampleDriverPotentialPairGPU.cuh"
 #include "EvaluatorPairExample.h"
+#include "ExampleDriverPotentialPairGPU.cuh"
 #include "hoomd/md/PotentialPairGPU.cuh"
 
 namespace hoomd
@@ -15,9 +15,8 @@ namespace md
     {
 namespace kernel
     {
-
 hipError_t gpu_compute_example_forces(const pair_args_t& pair_args,
-                                     const EvaluatorPairExample::param_type* d_params)
+                                      const EvaluatorPairExample::param_type* d_params)
     {
     return gpu_compute_pair_forces<EvaluatorPairExample>(pair_args, d_params);
     }

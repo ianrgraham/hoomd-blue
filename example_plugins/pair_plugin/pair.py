@@ -2,14 +2,14 @@
 # This file is part of the HOOMD-blue project, released under the BSD 3-Clause
 # License.
 
-"""Pair potentials."""
+"""Example Pair."""
 
 from hoomd import _hoomd
 from hoomd.md import _md
 from hoomd.pair_plugin import _pair_plugin
 import hoomd
 from hoomd.md.nlist import NList
-from hoomd.data.parameterdicts import ParameterDict, TypeParameterDict
+from hoomd.data.parameterdicts import TypeParameterDict
 from hoomd.data.typeparam import TypeParameter
 from hoomd.data.typeconverter import (OnlyFrom, OnlyTypes, nonnegative_real)
 import hoomd.md.pair as _pair
@@ -60,7 +60,7 @@ class ExamplePair(_pair.Pair):
         nl = nlist.Cell()
         lj = pair.ExamplePair(nl, default_r_cut=2.5)
         lj.params[('A', 'A')] = {'sigma': 1.0, 'epsilon': 1.0, 'delta': 0.25}
-        lj.r_cut[('A', 'A')] = 2.5  # redundant
+        lj.r_cut[('A', 'A')] = 2.5
     """
 
     # Name of the potential we want to reference on the C++ side
@@ -74,10 +74,10 @@ class ExamplePair(_pair.Pair):
         self._add_typeparam(params)
 
     def _attach(self):
-        """Slightly modified with regard to the base class `md.Pair`
+        """Slightly modified with regard to the base class `md.Pair`.
         
         In particular, we search for `PotentialPairExample` in `_pair_plugin`
-        instead of `md.pair` as we would have done in the source code
+        instead of `md.pair` as we would have done in the source code.
         """
         # create the c++ mirror class
         if not self._nlist._added:
