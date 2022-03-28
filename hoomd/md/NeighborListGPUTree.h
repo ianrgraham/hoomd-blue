@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "NeighborListGPU.h"
 #include "NeighborListGPUTree.cuh"
@@ -126,7 +124,7 @@ class PYBIND11_EXPORT NeighborListGPUTree : public NeighborListGPU
     //! Compute the LBVH domain from the current box
     BoxDim getLBVHBox() const
         {
-        const BoxDim& box = m_pdata->getBox();
+        const BoxDim box = m_pdata->getBox();
 
         // ghost layer padding
         Scalar ghost_layer_width(0.0);

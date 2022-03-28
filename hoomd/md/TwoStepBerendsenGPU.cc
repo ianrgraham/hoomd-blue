@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file TwoStepBerendsenGPU.cc
     \brief Defines TwoStepBerendsenGPU
@@ -33,8 +31,7 @@ TwoStepBerendsenGPU::TwoStepBerendsenGPU(std::shared_ptr<SystemDefinition> sysde
     {
     if (!m_exec_conf->isCUDAEnabled())
         {
-        m_exec_conf->msg->error() << "Creating a BerendsenGPU when CUDA is disabled" << endl;
-        throw std::runtime_error("Error initializing BerendsenGPU");
+        throw std::runtime_error("Cannot create BerendsenGPU on a CPU device.");
         }
 
     m_block_size = 256;
@@ -46,9 +43,6 @@ TwoStepBerendsenGPU::TwoStepBerendsenGPU(std::shared_ptr<SystemDefinition> sysde
 void TwoStepBerendsenGPU::integrateStepOne(uint64_t timestep)
     {
     unsigned int group_size = m_group->getNumMembers();
-
-    if (m_prof)
-        m_prof->push("Berendsen");
 
     // compute the current thermodynamic quantities and get the temperature
     m_thermo->compute(timestep);
@@ -91,17 +85,11 @@ void TwoStepBerendsenGPU::integrateStepOne(uint64_t timestep)
 
     if (m_exec_conf->isCUDAErrorCheckingEnabled())
         CHECK_CUDA_ERROR();
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 void TwoStepBerendsenGPU::integrateStepTwo(uint64_t timestep)
     {
     unsigned int group_size = m_group->getNumMembers();
-
-    if (m_prof)
-        m_prof->push("Berendsen");
 
     // get the net force
     const GlobalArray<Scalar4>& net_force = m_pdata->getNetForce();
@@ -131,9 +119,6 @@ void TwoStepBerendsenGPU::integrateStepTwo(uint64_t timestep)
     // check if an error occurred
     if (m_exec_conf->isCUDAErrorCheckingEnabled())
         CHECK_CUDA_ERROR();
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 namespace detail

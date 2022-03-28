@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "hoomd/ManagedArray.h"
 #include <memory>
@@ -76,7 +76,7 @@ class EvaluatorPairTable
 
         param_type(pybind11::dict v, bool managed = false)
             {
-            const auto V_py = v["V"].cast<pybind11::array_t<Scalar>>().unchecked<1>();
+            const auto V_py = v["U"].cast<pybind11::array_t<Scalar>>().unchecked<1>();
             const auto F_py = v["F"].cast<pybind11::array_t<Scalar>>().unchecked<1>();
 
             if (V_py.size() != F_py.size())
@@ -102,7 +102,7 @@ class EvaluatorPairTable
             const auto V = pybind11::array_t<Scalar>(V_table.size(), V_table.get());
             const auto F = pybind11::array_t<Scalar>(F_table.size(), F_table.get());
             auto params = pybind11::dict();
-            params["V"] = V;
+            params["U"] = V;
             params["F"] = F;
             params["r_min"] = rmin;
             return params;
@@ -201,6 +201,16 @@ class EvaluatorPairTable
             }
         pair_eng = V;
         return true;
+        }
+
+    DEVICE Scalar evalPressureLRCIntegral()
+        {
+        return 0;
+        }
+
+    DEVICE Scalar evalEnergyLRCIntegral()
+        {
+        return 0;
         }
 
 #ifndef __HIPCC__

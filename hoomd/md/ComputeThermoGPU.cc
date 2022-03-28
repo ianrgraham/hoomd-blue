@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file ComputeThermoGPU.cc
     \brief Contains code for the ComputeThermoGPU class
@@ -58,9 +56,6 @@ void ComputeThermoGPU::computeProperties()
         return;
 
     unsigned int group_size = m_group->getNumMembers();
-
-    if (m_prof)
-        m_prof->push(m_exec_conf, "Thermo");
 
     assert(m_pdata);
 
@@ -225,9 +220,6 @@ void ComputeThermoGPU::computeProperties()
     // in MPI, reduce extensive quantities only when they're needed
     m_properties_reduced = !m_pdata->getDomainDecomposition();
 #endif // ENABLE_MPI
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 namespace detail

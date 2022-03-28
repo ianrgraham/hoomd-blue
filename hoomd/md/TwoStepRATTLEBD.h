@@ -1,9 +1,6 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
-// Maintainer: pschoenhoefer
-
-#include "QuaternionMath.h"
 #include "TwoStepLangevinBase.h"
 #include "TwoStepRATTLENVE.h"
 #include "hoomd/HOOMDMath.h"
@@ -155,10 +152,6 @@ template<class Manifold> void TwoStepRATTLEBD<Manifold>::integrateStepOne(uint64
 
     const Scalar currentTemp = (*m_T)(timestep);
 
-    // profile this step
-    if (m_prof)
-        m_prof->push("BD step 1");
-
     const GlobalArray<Scalar4>& net_force = m_pdata->getNetForce();
     ArrayHandle<Scalar4> h_vel(m_pdata->getVelocities(),
                                access_location::host,
@@ -190,7 +183,7 @@ template<class Manifold> void TwoStepRATTLEBD<Manifold>::integrateStepOne(uint64
                                    access_location::host,
                                    access_mode::read);
 
-    const BoxDim& box = m_pdata->getBox();
+    const BoxDim box = m_pdata->getBox();
 
     if (m_box_changed)
         {
@@ -328,9 +321,9 @@ template<class Manifold> void TwoStepRATTLEBD<Manifold>::integrateStepOne(uint64
                 vec3<Scalar> I(h_inertia.data[j]);
 
                 bool x_zero, y_zero, z_zero;
-                x_zero = (I.x < EPSILON);
-                y_zero = (I.y < EPSILON);
-                z_zero = (I.z < EPSILON);
+                x_zero = (I.x == 0);
+                y_zero = (I.y == 0);
+                z_zero = (I.z == 0);
 
                 Scalar3 sigma_r
                     = make_scalar3(fast::sqrt(Scalar(2.0) * gamma_r.x * currentTemp / m_deltaT),
@@ -395,9 +388,6 @@ template<class Manifold> void TwoStepRATTLEBD<Manifold>::integrateStepOne(uint64
                 }
             }
         }
-    // done profiling
-    if (m_prof)
-        m_prof->pop();
     }
 
 /*! \param timestep Current time step

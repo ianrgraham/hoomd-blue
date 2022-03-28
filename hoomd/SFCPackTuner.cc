@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file SFCPackTuner.cc
     \brief Defines the SFCPackTuner class
@@ -97,9 +95,6 @@ void SFCPackTuner::update(uint64_t timestep)
         }
 #endif
 
-    if (m_prof)
-        m_prof->push(m_exec_conf, "SFCPack");
-
     // figure out the sort order we need to apply
     if (m_sysdef->getNDimensions() == 2)
         getSortedOrder2D();
@@ -119,9 +114,6 @@ void SFCPackTuner::update(uint64_t timestep)
         m_comm->communicate(timestep);
         }
 #endif
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 void SFCPackTuner::applySortOrder()

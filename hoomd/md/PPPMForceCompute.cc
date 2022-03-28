@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "PPPMForceCompute.h"
 #include <map>
@@ -74,9 +74,7 @@ void PPPMForceCompute::setParams(unsigned int nx,
 
     if (order < 1 || order > PPPM_MAX_ORDER)
         {
-        m_exec_conf->msg->error() << "charge.pppm: Interpolation order has to be between 1 and "
-                                  << PPPM_MAX_ORDER << std::endl;
-        throw std::runtime_error("Error initializing PPPMForceCompute.");
+        throw std::runtime_error("Invalid interpolation order.");
         }
 
     m_order = order;
@@ -91,38 +89,30 @@ void PPPMForceCompute::setParams(unsigned int nx,
 
         if (!is_pow2(m_mesh_points.x) || !is_pow2(m_mesh_points.y) || !is_pow2(m_mesh_points.z))
             {
-            m_exec_conf->msg->error()
-                << "The number of mesh points along the every direction must be a power of two!"
-                << std::endl;
-            throw std::runtime_error("Error initializing charge.pppm");
+            throw std::runtime_error(
+                "The number of mesh points along the every direction must be a power of two!");
             }
 
         if (nx % didx.getW())
             {
-            m_exec_conf->msg->error() << "The number of mesh points along the x-direction (" << nx
-                                      << ") is not" << std::endl
-                                      << "a multiple of the width (" << didx.getW()
-                                      << ") of the processor grid!" << std::endl
-                                      << std::endl;
-            throw std::runtime_error("Error initializing charge.pppm");
+            std::ostringstream s;
+            s << "The number of mesh points along the x-direction (" << nx << ") is not"
+              << "a multiple of the width (" << didx.getW() << ") of the processor grid!";
+            throw std::runtime_error(s.str());
             }
         if (ny % didx.getH())
             {
-            m_exec_conf->msg->error() << "The number of mesh points along the y-direction (" << ny
-                                      << ") is not" << std::endl
-                                      << "a multiple of the height (" << didx.getH()
-                                      << ") of the processor grid!" << std::endl
-                                      << std::endl;
-            throw std::runtime_error("Error initializing charge.pppm");
+            std::ostringstream s;
+            s << "The number of mesh points along the y-direction (" << ny << ") is not"
+              << "a multiple of the height (" << didx.getH() << ") of the processor grid!";
+            throw std::runtime_error(s.str());
             }
         if (nz % didx.getD())
             {
-            m_exec_conf->msg->error() << "The number of mesh points along the z-direction (" << nz
-                                      << ") is not" << std::endl
-                                      << "a multiple of the depth (" << didx.getD()
-                                      << ") of the processor grid!" << std::endl
-                                      << std::endl;
-            throw std::runtime_error("Error initializing charge.pppm");
+            std::ostringstream s;
+            s << "The number of mesh points along the z-direction (" << nz << ") is not"
+              << "a multiple of the depth (" << didx.getD() << ") of the processor grid!";
+            throw std::runtime_error(s.str());
             }
 
         m_mesh_points.x /= didx.getW();
@@ -611,9 +601,6 @@ inline Scalar sinc(Scalar x)
 
 void PPPMForceCompute::computeInfluenceFunction()
     {
-    if (m_prof)
-        m_prof->push("influence function");
-
     ArrayHandle<Scalar> h_inf_f(m_inf_f, access_location::host, access_mode::overwrite);
     ArrayHandle<Scalar3> h_k(m_k, access_location::host, access_mode::overwrite);
 
@@ -783,17 +770,11 @@ void PPPMForceCompute::computeInfluenceFunction()
 
         h_k.data[cell_idx] = k;
         }
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 //! Assignment of particles to mesh using variable order interpolation scheme
 void PPPMForceCompute::assignParticles()
     {
-    if (m_prof)
-        m_prof->push("assign");
-
     ArrayHandle<Scalar4> h_postype(m_pdata->getPositions(),
                                    access_location::host,
                                    access_mode::read);
@@ -943,17 +924,12 @@ void PPPMForceCompute::assignParticles()
                 }
             }
         } // end loop over particles
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 void PPPMForceCompute::updateMeshes()
     {
     if (m_kiss_fft_initialized)
         {
-        if (m_prof)
-            m_prof->push("FFT");
         // transform the particle mesh locally (forward transform)
         ArrayHandle<kiss_fft_cpx> h_mesh(m_mesh, access_location::host, access_mode::read);
         ArrayHandle<kiss_fft_cpx> h_fourier_mesh(m_fourier_mesh,
@@ -961,26 +937,18 @@ void PPPMForceCompute::updateMeshes()
                                                  access_mode::overwrite);
 
         kiss_fftnd(m_kiss_fft, h_mesh.data, h_fourier_mesh.data);
-        if (m_prof)
-            m_prof->pop();
         }
 
 #ifdef ENABLE_MPI
     if (m_pdata->getDomainDecomposition())
         {
         // update inner cells of particle mesh
-        if (m_prof)
-            m_prof->push("ghost cell update");
         m_exec_conf->msg->notice(8) << "charge.pppm: Ghost cell update" << std::endl;
         m_grid_comm_forward->communicate(m_mesh);
-        if (m_prof)
-            m_prof->pop();
 
         // perform a distributed FFT
         m_exec_conf->msg->notice(8) << "charge.pppm: Distributed FFT mesh" << std::endl;
 
-        if (m_prof)
-            m_prof->push("FFT");
         ArrayHandle<kiss_fft_cpx> h_mesh(m_mesh, access_location::host, access_mode::read);
         ArrayHandle<kiss_fft_cpx> h_fourier_mesh(m_fourier_mesh,
                                                  access_location::host,
@@ -990,15 +958,8 @@ void PPPMForceCompute::updateMeshes()
                      (cpx_t*)h_fourier_mesh.data,
                      0,
                      m_dfft_plan_forward);
-        if (m_prof)
-            m_prof->pop();
         }
 #endif
-
-    if (m_prof)
-        {
-        m_prof->push("update");
-        }
 
         {
         ArrayHandle<Scalar3> h_k(m_k, access_location::host, access_mode::read);
@@ -1038,13 +999,8 @@ void PPPMForceCompute::updateMeshes()
             }
         }
 
-    if (m_prof)
-        m_prof->pop();
-
     if (m_kiss_fft_initialized)
         {
-        if (m_prof)
-            m_prof->push("FFT");
         // do a local inverse transform of the force mesh
         ArrayHandle<kiss_fft_cpx> h_fourier_mesh_G_x(m_fourier_mesh_G_x,
                                                      access_location::host,
@@ -1067,15 +1023,11 @@ void PPPMForceCompute::updateMeshes()
         kiss_fftnd(m_kiss_ifft, h_fourier_mesh_G_x.data, h_inv_fourier_mesh_x.data);
         kiss_fftnd(m_kiss_ifft, h_fourier_mesh_G_y.data, h_inv_fourier_mesh_y.data);
         kiss_fftnd(m_kiss_ifft, h_fourier_mesh_G_z.data, h_inv_fourier_mesh_z.data);
-        if (m_prof)
-            m_prof->pop();
         }
 
 #ifdef ENABLE_MPI
     if (m_pdata->getDomainDecomposition())
         {
-        if (m_prof)
-            m_prof->push("FFT");
         // Distributed inverse transform force on mesh points
         m_exec_conf->msg->notice(8) << "charge.pppm: Distributed iFFT" << std::endl;
 
@@ -1110,8 +1062,6 @@ void PPPMForceCompute::updateMeshes()
                      (cpx_t*)(h_inv_fourier_mesh_z.data + m_ghost_offset),
                      1,
                      m_dfft_plan_inverse);
-        if (m_prof)
-            m_prof->pop();
         }
 #endif
 
@@ -1121,23 +1071,16 @@ void PPPMForceCompute::updateMeshes()
     if (m_pdata->getDomainDecomposition())
         {
         // update outer cells of force mesh using ghost cells from neighboring processors
-        if (m_prof)
-            m_prof->push("ghost cell update");
         m_exec_conf->msg->notice(8) << "charge.pppm: Ghost cell update" << std::endl;
         m_grid_comm_reverse->communicate(m_inv_fourier_mesh_x);
         m_grid_comm_reverse->communicate(m_inv_fourier_mesh_y);
         m_grid_comm_reverse->communicate(m_inv_fourier_mesh_z);
-        if (m_prof)
-            m_prof->pop();
         }
 #endif
     }
 
 void PPPMForceCompute::interpolateForces()
     {
-    if (m_prof)
-        m_prof->push("interpolate");
-
     // access particle data
     ArrayHandle<Scalar4> h_postype(m_pdata->getPositions(),
                                    access_location::host,
@@ -1306,16 +1249,10 @@ void PPPMForceCompute::interpolateForces()
 
         h_force.data[idx] = make_scalar4(force.x, force.y, force.z, 0.0);
         } // end of loop over particles
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 Scalar PPPMForceCompute::computePE()
     {
-    if (m_prof)
-        m_prof->push("sum");
-
     ArrayHandle<kiss_fft_cpx> h_fourier_mesh(m_fourier_mesh,
                                              access_location::host,
                                              access_mode::read);
@@ -1346,9 +1283,6 @@ Scalar PPPMForceCompute::computePE()
                    * h_inf_f.data[k];
             }
         }
-
-    if (m_prof)
-        m_prof->pop();
 
     Scalar V = m_pdata->getGlobalBox().getVolume();
     Scalar scale = Scalar(1.0) / ((Scalar)(m_global_dim.x * m_global_dim.y * m_global_dim.z));
@@ -1390,9 +1324,6 @@ Scalar PPPMForceCompute::computePE()
 
 void PPPMForceCompute::computeForces(uint64_t timestep)
     {
-    if (m_prof)
-        m_prof->push("PPPM");
-
     if (m_need_initialize || m_ptls_added_removed)
         {
         if (!m_params_set)
@@ -1470,16 +1401,10 @@ void PPPMForceCompute::computeForces(uint64_t timestep)
         m_nlist->compute(timestep);
         fixExclusions();
         }
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 void PPPMForceCompute::computeVirial()
     {
-    if (m_prof)
-        m_prof->push("virial");
-
     ArrayHandle<kiss_fft_cpx> h_fourier_mesh(m_fourier_mesh,
                                              access_location::host,
                                              access_mode::overwrite);
@@ -1535,9 +1460,6 @@ void PPPMForceCompute::computeVirial()
         // store this rank's contribution in m_external_virial
         m_external_virial[k] = Scalar(0.5) * virial[k] * V * scale * scale;
         }
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 //! The real space form of the long-range interaction part, for exclusions
@@ -1563,9 +1485,6 @@ eval_pppm_real_space(Scalar alpha, Scalar kappa, Scalar rsq, Scalar& pair_eng, S
 
 void PPPMForceCompute::computeBodyCorrection()
     {
-    if (m_prof)
-        m_prof->push("rigid body correction");
-
     // do an N^2 search over particles in a body, subtracting the real-space long-range part from
     // the PPPM energy
 
@@ -1668,8 +1587,6 @@ void PPPMForceCompute::computeBodyCorrection()
             body_type.insert(std::make_pair(type, body_energy));
             }
         }
-    if (m_prof)
-        m_prof->pop();
     }
 
 void PPPMForceCompute::fixExclusions()
@@ -1678,9 +1595,6 @@ void PPPMForceCompute::fixExclusions()
     // just drop out if the group is an empty group
     if (group_size == 0)
         return;
-
-    if (m_prof)
-        m_prof->push("fix exclusions");
 
     ArrayHandle<Scalar4> h_force(m_force, access_location::host, access_mode::readwrite);
     ArrayHandle<Scalar> h_virial(m_virial, access_location::host, access_mode::readwrite);
@@ -1774,9 +1688,6 @@ void PPPMForceCompute::fixExclusions()
         for (unsigned int k = 0; k < 6; k++)
             h_virial.data[k * virial_pitch + idx] += virial[k];
         }
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 Scalar PPPMForceCompute::getQSum()

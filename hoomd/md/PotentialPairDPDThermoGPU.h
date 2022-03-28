@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: phillicl
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #ifndef __POTENTIAL_PAIR_DPDTHERMO_GPU_H__
 #define __POTENTIAL_PAIR_DPDTHERMO_GPU_H__
@@ -129,10 +127,6 @@ void PotentialPairDPDThermoGPU<evaluator, gpu_cpdf>::computeForces(uint64_t time
     {
     this->m_nlist->compute(timestep);
 
-    // start the profile
-    if (this->m_prof)
-        this->m_prof->push(this->m_exec_conf, this->m_prof_name);
-
     // The GPU implementation CANNOT handle a half neighborlist, error out now
     bool third_law = this->m_nlist->getStorageMode() == NeighborList::half;
     if (third_law)
@@ -150,9 +144,9 @@ void PotentialPairDPDThermoGPU<evaluator, gpu_cpdf>::computeForces(uint64_t time
     ArrayHandle<unsigned int> d_nlist(this->m_nlist->getNListArray(),
                                       access_location::device,
                                       access_mode::read);
-    ArrayHandle<unsigned int> d_head_list(this->m_nlist->getHeadList(),
-                                          access_location::device,
-                                          access_mode::read);
+    ArrayHandle<size_t> d_head_list(this->m_nlist->getHeadList(),
+                                    access_location::device,
+                                    access_mode::read);
 
     // access the particle data
     ArrayHandle<Scalar4> d_pos(this->m_pdata->getPositions(),
@@ -210,9 +204,6 @@ void PotentialPairDPDThermoGPU<evaluator, gpu_cpdf>::computeForces(uint64_t time
         CHECK_CUDA_ERROR();
     if (!m_param)
         this->m_tuner->end();
-
-    if (this->m_prof)
-        this->m_prof->pop(this->m_exec_conf);
     }
 
 namespace detail

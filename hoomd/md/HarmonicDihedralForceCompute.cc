@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: dnlebard
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "HarmonicDihedralForceCompute.h"
 
@@ -11,9 +9,6 @@
 #include <stdexcept>
 
 using namespace std;
-
-// SMALL a relatively small number
-#define SMALL Scalar(0.001)
 
 /*! \file HarmonicDihedralForceCompute.cc
     \brief Contains code for the HarmonicDihedralForceCompute class
@@ -37,8 +32,7 @@ HarmonicDihedralForceCompute::HarmonicDihedralForceCompute(std::shared_ptr<Syste
     // check for some silly errors a user could make
     if (m_dihedral_data->getNTypes() == 0)
         {
-        m_exec_conf->msg->error() << "dihedral.harmonic: No dihedral types specified" << endl;
-        throw runtime_error("Error initializing HarmonicDihedralForceCompute");
+        throw runtime_error("No dihedral types in the system.");
         }
 
     // allocate the parameters
@@ -78,8 +72,7 @@ void HarmonicDihedralForceCompute::setParams(unsigned int type,
     // make sure the type is valid
     if (type >= m_dihedral_data->getNTypes())
         {
-        m_exec_conf->msg->error() << "dihedral.harmonic: Invalid dihedral type specified" << endl;
-        throw runtime_error("Error setting parameters in HarmonicDihedralForceCompute");
+        throw runtime_error("Invalid dihedral type.");
         }
 
     m_K[type] = K;
@@ -122,9 +115,6 @@ pybind11::dict HarmonicDihedralForceCompute::getParams(std::string type)
  */
 void HarmonicDihedralForceCompute::computeForces(uint64_t timestep)
     {
-    if (m_prof)
-        m_prof->push("Harmonic Dihedral");
-
     assert(m_pdata);
     // access the particle data arrays
     ArrayHandle<Scalar4> h_pos(m_pdata->getPositions(), access_location::host, access_mode::read);
@@ -363,9 +353,6 @@ void HarmonicDihedralForceCompute::computeForces(uint64_t timestep)
         for (int k = 0; k < 6; k++)
             h_virial.data[virial_pitch * k + idx_d] += dihedral_virial[k];
         }
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 namespace detail

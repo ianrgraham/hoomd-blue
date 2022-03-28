@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: pschoenhoefer
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "TwoStepLangevinBase.h"
 #include "TwoStepRATTLENVE.h"
@@ -162,10 +160,6 @@ template<class Manifold> void TwoStepRATTLELangevin<Manifold>::integrateStepOne(
     {
     unsigned int group_size = m_group->getNumMembers();
 
-    // profile this step
-    if (m_prof)
-        m_prof->push("Langevin step 1");
-
     ArrayHandle<Scalar4> h_vel(m_pdata->getVelocities(),
                                access_location::host,
                                access_mode::readwrite);
@@ -179,7 +173,7 @@ template<class Manifold> void TwoStepRATTLELangevin<Manifold>::integrateStepOne(
 
     ArrayHandle<Scalar3> h_gamma_r(m_gamma_r, access_location::host, access_mode::read);
 
-    const BoxDim& box = m_pdata->getBox();
+    const BoxDim box = m_pdata->getBox();
 
     if (m_box_changed)
         {
@@ -250,9 +244,9 @@ template<class Manifold> void TwoStepRATTLELangevin<Manifold>::integrateStepOne(
 
             // check for zero moment of inertia
             bool x_zero, y_zero, z_zero;
-            x_zero = (I.x < EPSILON);
-            y_zero = (I.y < EPSILON);
-            z_zero = (I.z < EPSILON);
+            x_zero = (I.x == 0);
+            y_zero = (I.y == 0);
+            z_zero = (I.z == 0);
 
             // ignore torque component along an axis for which the moment of inertia zero
             if (x_zero)
@@ -339,10 +333,6 @@ template<class Manifold> void TwoStepRATTLELangevin<Manifold>::integrateStepOne(
             h_angmom.data[j] = quat_to_scalar4(p);
             }
         }
-
-    // done profiling
-    if (m_prof)
-        m_prof->pop();
     }
 
 /*! \param timestep Current time step
@@ -353,10 +343,6 @@ template<class Manifold> void TwoStepRATTLELangevin<Manifold>::integrateStepTwo(
     unsigned int group_size = m_group->getNumMembers();
 
     const GlobalArray<Scalar4>& net_force = m_pdata->getNetForce();
-
-    // profile this step
-    if (m_prof)
-        m_prof->push("Langevin step 2");
 
     ArrayHandle<Scalar4> h_vel(m_pdata->getVelocities(),
                                access_location::host,
@@ -557,9 +543,9 @@ template<class Manifold> void TwoStepRATTLELangevin<Manifold>::integrateStepTwo(
 
                 // check for degenerate moment of inertia
                 bool x_zero, y_zero, z_zero;
-                x_zero = (I.x < EPSILON);
-                y_zero = (I.y < EPSILON);
-                z_zero = (I.z < EPSILON);
+                x_zero = (I.x == 0);
+                y_zero = (I.y == 0);
+                z_zero = (I.z == 0);
 
                 bf_torque.x = rand_x - gamma_r.x * (s.x / I.x);
                 bf_torque.y = rand_y - gamma_r.y * (s.y / I.y);
@@ -600,9 +586,9 @@ template<class Manifold> void TwoStepRATTLELangevin<Manifold>::integrateStepTwo(
 
             // check for zero moment of inertia
             bool x_zero, y_zero, z_zero;
-            x_zero = (I.x < EPSILON);
-            y_zero = (I.y < EPSILON);
-            z_zero = (I.z < EPSILON);
+            x_zero = (I.x == 0);
+            y_zero = (I.y == 0);
+            z_zero = (I.z == 0);
 
             // ignore torque component along an axis for which the moment of inertia zero
             if (x_zero)
@@ -635,10 +621,6 @@ template<class Manifold> void TwoStepRATTLELangevin<Manifold>::integrateStepTwo(
         m_reservoir_energy -= bd_energy_transfer * m_deltaT;
         m_extra_energy_overdeltaT = 0.5 * bd_energy_transfer;
         }
-
-    // done profiling
-    if (m_prof)
-        m_prof->pop();
     }
 
 template<class Manifold> void TwoStepRATTLELangevin<Manifold>::includeRATTLEForce(uint64_t timestep)

@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file NeighborListGPUStencil.cc
     \brief Defines NeighborListGPUStencil
@@ -115,9 +113,6 @@ void NeighborListGPUStencil::updateRStencil()
  */
 void NeighborListGPUStencil::sortTypes()
     {
-    if (m_prof)
-        m_prof->push(m_exec_conf, "sort");
-
     // always just fill in the particle indexes from 1 to N
     ArrayHandle<unsigned int> d_pids(m_pid_map, access_location::device, access_mode::overwrite);
     ScopedAllocation<unsigned int> d_pids_alt(m_exec_conf->getCachedAllocator(), m_pdata->getN());
@@ -168,18 +163,13 @@ void NeighborListGPUStencil::sortTypes()
                       hipMemcpyDeviceToDevice);
             }
         }
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 void NeighborListGPUStencil::buildNlist(uint64_t timestep)
     {
     if (m_storage_mode != full)
         {
-        m_exec_conf->msg->error() << "Only full mode nlists can be generated on the GPU"
-                                  << std::endl;
-        throw std::runtime_error("Error computing neighbor list");
+        throw std::runtime_error("GPU neighbor lists require a full storage mode.");
         }
 
     if (m_update_cell_size)
@@ -212,9 +202,6 @@ void NeighborListGPUStencil::buildNlist(uint64_t timestep)
         m_needs_resort = false;
         }
 
-    if (m_prof)
-        m_prof->push(m_exec_conf, "compute");
-
     // acquire the particle data
     ArrayHandle<unsigned int> d_pid_map(m_pid_map, access_location::device, access_mode::read);
     ArrayHandle<Scalar4> d_pos(m_pdata->getPositions(), access_location::device, access_mode::read);
@@ -246,7 +233,7 @@ void NeighborListGPUStencil::buildNlist(uint64_t timestep)
                                           access_mode::read);
     const Index2D& stencil_idx = m_cls->getStencilIndexer();
 
-    ArrayHandle<unsigned int> d_head_list(m_head_list, access_location::device, access_mode::read);
+    ArrayHandle<size_t> d_head_list(m_head_list, access_location::device, access_mode::read);
     ArrayHandle<unsigned int> d_Nmax(m_Nmax, access_location::device, access_mode::read);
     ArrayHandle<unsigned int> d_conditions(m_conditions,
                                            access_location::device,
@@ -335,9 +322,6 @@ void NeighborListGPUStencil::buildNlist(uint64_t timestep)
         this->m_tuner->end();
 
     m_last_tuned_timestep = timestep;
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 namespace detail

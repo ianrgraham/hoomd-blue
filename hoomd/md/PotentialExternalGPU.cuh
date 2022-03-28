@@ -1,8 +1,9 @@
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
+
 #include "hip/hip_runtime.h"
 // Copyright (c) 2009-2021 The Regents of the University of Michigan
 // This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: jglaser
 
 #include "hoomd/HOOMDMath.h"
 #include "hoomd/ParticleData.cuh"
@@ -41,7 +42,7 @@ struct external_potential_args_t
     Scalar4* d_force;              //!< Force to write out
     Scalar* d_virial;              //!< Virial to write out
     const size_t virial_pitch;     //!< The pitch of the 2D array of virial matrix elements
-    const BoxDim& box;             //!< Simulation box in GPU format
+    const BoxDim box;              //!< Simulation box in GPU format
     const unsigned int N;          //!< Number of particles
     const Scalar4* d_pos;          //!< Device array of particle positions
     const Scalar* d_diameter;      //!< particle diameters

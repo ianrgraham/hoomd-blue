@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*!
  * \file mpcd/ATCollisionMethod.h
@@ -45,8 +43,6 @@ void mpcd::ATCollisionMethod::rule(uint64_t timestep)
     {
     m_thermo->compute(timestep);
 
-    if (m_prof)
-        m_prof->push("MPCD collide");
     // compute the cell average of the random velocities
     m_pdata->swapVelocities();
     m_mpcd_pdata->swapVelocities();
@@ -54,15 +50,8 @@ void mpcd::ATCollisionMethod::rule(uint64_t timestep)
     m_pdata->swapVelocities();
     m_mpcd_pdata->swapVelocities();
 
-    if (m_prof)
-        m_prof->push(m_exec_conf, "apply");
     // apply random velocities
     applyVelocities();
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 /*!

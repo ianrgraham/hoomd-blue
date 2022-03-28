@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 // Include the defined classes that are to be exported to python
 #include "ComputeFreeVolume.h"
@@ -13,11 +13,10 @@
 #include "ExternalCallback.h"
 #include "ExternalField.h"
 #include "ExternalFieldComposite.h"
-#include "ExternalFieldLattice.h"
+#include "ExternalFieldHarmonic.h"
 #include "ExternalFieldWall.h"
 
 #include "UpdaterClusters.h"
-#include "UpdaterExternalFieldWall.h"
 #include "UpdaterMuVT.h"
 
 #ifdef ENABLE_HIP
@@ -42,11 +41,9 @@ void export_convex_polygon(pybind11::module& m)
     export_UpdaterClusters<ShapeConvexPolygon>(m, "UpdaterClustersConvexPolygon");
 
     export_ExternalFieldInterface<ShapeConvexPolygon>(m, "ExternalFieldConvexPolygon");
-    export_LatticeField<ShapeConvexPolygon>(m, "ExternalFieldLatticeConvexPolygon");
+    export_HarmonicField<ShapeConvexPolygon>(m, "ExternalFieldHarmonicConvexPolygon");
     export_ExternalFieldComposite<ShapeConvexPolygon>(m, "ExternalFieldCompositeConvexPolygon");
-    // export_ExternalFieldWall<ShapeConvexPolygon>(m, "WallConvexPolygon");
-    // export_UpdaterExternalFieldWall<ShapeConvexPolygon>(m,
-    // "UpdaterExternalFieldWallConvexPolygon");
+    export_ExternalFieldWall<ShapeConvexPolygon>(m, "WallConvexPolygon");
     export_ExternalCallback<ShapeConvexPolygon>(m, "ExternalCallbackConvexPolygon");
 
 #ifdef ENABLE_HIP
