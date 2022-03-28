@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "hip/hip_runtime.h"
 #include "hoomd/HOOMDMath.h"
@@ -57,7 +55,7 @@ struct bond_args_t
     const Scalar4* d_pos;                   //!< particle positions
     const Scalar* d_charge;                 //!< particle charges
     const Scalar* d_diameter;               //!< particle diameters
-    const BoxDim& box;                      //!< Simulation box in GPU format
+    const BoxDim box;                       //!< Simulation box in GPU format
     const group_storage<2>* d_gpu_bondlist; //!< List of bonds stored on the GPU
     const Index2D& gpu_table_indexer;       //!< Indexer of 2D bond list
     const unsigned int* d_gpu_n_bonds;      //!< List of number of bonds stored on the GPU

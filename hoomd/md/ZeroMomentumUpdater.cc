@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file ZeroMomentumUpdater.cc
     \brief Defines the ZeroMomentumUpdater class
@@ -21,7 +19,9 @@ namespace md
     {
 /*! \param sysdef System to zero the momentum of
  */
-ZeroMomentumUpdater::ZeroMomentumUpdater(std::shared_ptr<SystemDefinition> sysdef) : Updater(sysdef)
+ZeroMomentumUpdater::ZeroMomentumUpdater(std::shared_ptr<SystemDefinition> sysdef,
+                                         std::shared_ptr<Trigger> trigger)
+    : Updater(sysdef, trigger)
     {
     m_exec_conf->msg->notice(5) << "Constructing ZeroMomentumUpdater" << endl;
     assert(m_pdata);
@@ -38,8 +38,6 @@ ZeroMomentumUpdater::~ZeroMomentumUpdater()
 void ZeroMomentumUpdater::update(uint64_t timestep)
     {
     Updater::update(timestep);
-    if (m_prof)
-        m_prof->push("ZeroMomentum");
 
     // calculate the average momentum
     assert(m_pdata);
@@ -118,9 +116,6 @@ void ZeroMomentumUpdater::update(uint64_t timestep)
                 }
             }
         } // end GPUArray scope
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 namespace detail
@@ -130,7 +125,7 @@ void export_ZeroMomentumUpdater(pybind11::module& m)
     pybind11::class_<ZeroMomentumUpdater, Updater, std::shared_ptr<ZeroMomentumUpdater>>(
         m,
         "ZeroMomentumUpdater")
-        .def(pybind11::init<std::shared_ptr<SystemDefinition>>());
+        .def(pybind11::init<std::shared_ptr<SystemDefinition>, std::shared_ptr<Trigger>>());
     }
     } // end namespace detail
     } // end namespace md

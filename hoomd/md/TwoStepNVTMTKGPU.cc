@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: jglaser
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "TwoStepNVTMTKGPU.h"
 #include "TwoStepNPTMTKGPU.cuh"
@@ -39,8 +37,7 @@ TwoStepNVTMTKGPU::TwoStepNVTMTKGPU(std::shared_ptr<SystemDefinition> sysdef,
     // only one GPU is supported
     if (!m_exec_conf->isCUDAEnabled())
         {
-        m_exec_conf->msg->error() << "Creating a TwoStepNVTMTKGPU when CUDA is disabled" << endl;
-        throw std::runtime_error("Error initializing TwoStepNVTMTKGPU");
+        throw std::runtime_error("Cannot create TwoStepNVTMTKGPU on a CPU device.");
         }
 
     // initialize autotuner
@@ -67,17 +64,10 @@ void TwoStepNVTMTKGPU::integrateStepOne(uint64_t timestep)
     {
     if (m_group->getNumMembersGlobal() == 0)
         {
-        m_exec_conf->msg->error() << "integrate.nvt(): Integration group empty." << std::endl;
-        throw std::runtime_error("Error during NVT integration.");
+        throw std::runtime_error("Empty integration group.");
         }
 
     unsigned int group_size = m_group->getNumMembers();
-
-    // profile this step
-    if (m_prof)
-        {
-        m_prof->push(m_exec_conf, "NVT MTK step 1");
-        }
 
         {
         // access all the needed data
@@ -141,9 +131,7 @@ void TwoStepNVTMTKGPU::integrateStepOne(uint64_t timestep)
                                                 access_location::device,
                                                 access_mode::read);
 
-        IntegratorVariables v = getIntegratorVariables();
-        Scalar xi_rot = v.variable[2];
-        Scalar exp_fac = exp(-m_deltaT / Scalar(2.0) * xi_rot);
+        const Scalar exp_fac = exp(-m_deltaT / Scalar(2.0) * m_thermostat.xi_rot);
 
         m_exec_conf->beginMultiGPU();
         m_tuner_angular_one->begin();
@@ -165,10 +153,6 @@ void TwoStepNVTMTKGPU::integrateStepOne(uint64_t timestep)
 
     // advance thermostat
     advanceThermostat(timestep, false);
-
-    // done profiling
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 /*! \param timestep Current time step
@@ -179,10 +163,6 @@ void TwoStepNVTMTKGPU::integrateStepTwo(uint64_t timestep)
     unsigned int group_size = m_group->getNumMembers();
 
     const GlobalArray<Scalar4>& net_force = m_pdata->getNetForce();
-
-    // profile this step
-    if (m_prof)
-        m_prof->push(m_exec_conf, "NVT MTK step 2");
 
     ArrayHandle<unsigned int> d_index_array(m_group->getIndexArray(),
                                             access_location::device,
@@ -234,9 +214,7 @@ void TwoStepNVTMTKGPU::integrateStepTwo(uint64_t timestep)
                                        access_location::device,
                                        access_mode::read);
 
-        IntegratorVariables v = getIntegratorVariables();
-        Scalar xi_rot = v.variable[2];
-        Scalar exp_fac = exp(-m_deltaT / Scalar(2.0) * xi_rot);
+        Scalar exp_fac = exp(-m_deltaT / Scalar(2.0) * m_thermostat.xi_rot);
 
         m_exec_conf->beginMultiGPU();
         m_tuner_angular_two->begin();
@@ -255,10 +233,6 @@ void TwoStepNVTMTKGPU::integrateStepTwo(uint64_t timestep)
         m_tuner_angular_two->end();
         m_exec_conf->endMultiGPU();
         }
-
-    // done profiling
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 namespace detail

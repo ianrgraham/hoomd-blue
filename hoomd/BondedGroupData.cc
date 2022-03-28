@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: jglaser
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file BondedGroupData.h
     \brief Defines implementation of BondedGroupData
@@ -219,9 +217,9 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::initializeFromS
     // check that all fields in the snapshot have correct length
     if (m_exec_conf->getRank() == 0 && !snapshot.validate())
         {
-        m_exec_conf->msg->error() << "init.*: invalid " << name << " data snapshot." << std::endl
-                                  << std::endl;
-        throw std::runtime_error(std::string("Error initializing ") + name + std::string(" data."));
+        std::ostringstream s;
+        s << "Error initializing from " << name << " data snapshot.";
+        throw std::runtime_error(s.str());
         }
 
     // re-initialize data structures
@@ -433,10 +431,10 @@ unsigned int BondedGroupData<group_size, Group, name, has_type_mapping>::getNthT
     {
     if (n >= getNGlobal())
         {
-        m_exec_conf->msg->error() << name << ".*: " << name << " index " << n << " out of bounds!"
-                                  << "The number of " << name << "s is " << getNGlobal()
-                                  << std::endl;
-        throw std::runtime_error(std::string("Error getting ") + name);
+        std::ostringstream s;
+        s << name << " index " << n << " out of bounds!"
+          << "The number of " << name << "s is " << getNGlobal();
+        throw std::runtime_error(s.str());
         }
 
     assert(m_tag_set.size() == getNGlobal());
@@ -490,9 +488,10 @@ BondedGroupData<group_size, Group, name, has_type_mapping>::getGroupByTag(unsign
         {
         if (group_idx == GROUP_NOT_LOCAL)
             {
-            m_exec_conf->msg->error() << "Trying to get type or constraint value of " << name << " "
-                                      << tag << " which does not exist!" << endl;
-            throw runtime_error(std::string("Error getting ") + name);
+            std::ostringstream s;
+            s << "Trying to get type or constraint value of " << name << " " << tag
+              << " which does not exist!";
+            throw runtime_error(s.str());
             }
 
         typeval = m_group_typeval[group_idx];
@@ -506,9 +505,10 @@ BondedGroupData<group_size, Group, name, has_type_mapping>::getGroupByTag(unsign
 
         if (!m_pdata->isTagActive(ptag))
             {
-            m_exec_conf->msg->error() << name << ".*: member tag " << ptag << " of " << name << " "
-                                      << tag << " does not exist!" << endl;
-            throw runtime_error(std::string("Error getting ") + name);
+            std::ostringstream s;
+            s << "Member tag " << ptag << " of " << name << " " << tag << " does not exist!"
+              << endl;
+            throw runtime_error(s.str());
             }
         }
 
@@ -562,9 +562,9 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::removeBondedGro
     // sanity check
     if (tag >= m_group_rtag.size())
         {
-        m_exec_conf->msg->error() << "Trying to remove " << name << " " << tag
-                                  << " which does not exist!" << endl;
-        throw runtime_error(std::string("Error removing ") + name);
+        std::ostringstream s;
+        s << "Trying to remove " << name << " " << tag << " which does not exist!";
+        throw runtime_error(s.str());
         }
 
     // Find position of bonded group in list
@@ -590,9 +590,9 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::removeBondedGro
 
     if (!is_available)
         {
-        m_exec_conf->msg->error() << "Trying to remove " << name << " " << tag
-                                  << " which has been previously removed!" << endl;
-        throw runtime_error(std::string("Error removing ") + name);
+        std::ostringstream s;
+        s << "Trying to remove " << name << " " << tag << " which has been previously removed!";
+        throw runtime_error(s.str());
         }
 
     // delete from map
@@ -653,8 +653,9 @@ unsigned int BondedGroupData<group_size, Group, name, has_type_mapping>::getType
             return i;
         }
 
-    m_exec_conf->msg->error() << name << " type " << type_name << " not found!" << endl;
-    throw runtime_error("Error mapping type name");
+    std::ostringstream s;
+    s << name << " type " << type_name << " not found!" << endl;
+    throw runtime_error(s.str());
 
     // silence compiler warning
     return 0;
@@ -667,8 +668,9 @@ BondedGroupData<group_size, Group, name, has_type_mapping>::getNameByType(unsign
     // check for an invalid request
     if (type >= m_type_mapping.size())
         {
-        m_exec_conf->msg->error() << "Requesting type name for non-existent type " << type << endl;
-        throw runtime_error("Error mapping type name");
+        std::ostringstream s;
+        s << "Requesting type name for non-existent type " << type << endl;
+        throw runtime_error(s.str());
         }
 
     // return the name
@@ -683,8 +685,9 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::setTypeName(
     // check for an invalid request
     if (type >= this->m_type_mapping.size())
         {
-        m_exec_conf->msg->error() << "Setting type name for non-existent type " << type << endl;
-        throw runtime_error("Error mapping type name");
+        std::ostringstream s;
+        s << "Setting type name for non-existent type " << type;
+        throw runtime_error(s.str());
         }
 
     m_type_mapping[type] = new_name;
@@ -726,9 +729,6 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::rebuildGPUTable
     else
 #endif
         {
-        if (m_prof)
-            m_prof->push("update " + std::string(name) + " table");
-
         ArrayHandle<unsigned int> h_rtag(m_pdata->getRTags(),
                                          access_location::host,
                                          access_mode::read);
@@ -763,12 +763,11 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::rebuildGPUTable
                         {
                         // incomplete group
                         std::ostringstream oss;
-                        oss << name << ".*: " << name << " ";
+                        oss << name << " ";
                         for (unsigned int k = 0; k < group_size; ++k)
                             oss << g.tag[k] << ((k != group_size - 1) ? ", " : " ");
-                        oss << "incomplete!" << std::endl;
-                        m_exec_conf->msg->error() << oss.str();
-                        throw std::runtime_error("Error building GPU group table.");
+                        oss << "incomplete!";
+                        throw std::runtime_error(oss.str());
                         }
 
                     h_n_groups.data[idx]++;
@@ -847,9 +846,6 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::rebuildGPUTable
                     }
                 }
             }
-
-        if (m_prof)
-            m_prof->pop();
         }
     }
 
@@ -857,9 +853,6 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::rebuildGPUTable
 template<unsigned int group_size, typename Group, const char* name, bool has_type_mapping>
 void BondedGroupData<group_size, Group, name, has_type_mapping>::rebuildGPUTableGPU()
     {
-    if (m_prof)
-        m_prof->push(m_exec_conf, "update " + std::string(name) + " table");
-
     // resize groups counter
     m_gpu_n_groups.resize(m_pdata->getN() + m_pdata->getNGhosts());
 
@@ -933,12 +926,11 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::rebuildGPUTable
             members_t g = m_groups[group_idx];
 
             std::ostringstream oss;
-            oss << name << ".*: " << name << " ";
+            oss << name << " ";
             for (unsigned int k = 0; k < group_size; ++k)
                 oss << g.tag[k] << ((k != group_size - 1) ? ", " : " ");
-            oss << "incomplete!" << std::endl;
-            m_exec_conf->msg->error() << oss.str();
-            throw std::runtime_error("Error building GPU group table.");
+            oss << "incomplete!";
+            throw std::runtime_error(oss.str());
             }
 
         if (flag == m_next_flag)
@@ -953,9 +945,6 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::rebuildGPUTable
         else
             done = true;
         }
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 #endif
 
@@ -1042,11 +1031,9 @@ BondedGroupData<group_size, Group, name, has_type_mapping>::takeSnapshot(Snapsho
                 rank_rtag_it = rank_rtag_map.find(group_tag);
                 if (rank_rtag_it == rank_rtag_map.end())
                     {
-                    m_exec_conf->msg->error() << endl
-                                              << "Could not find " << name << " " << group_tag
-                                              << " on any processor. " << endl
-                                              << endl;
-                    throw std::runtime_error("Error gathering " + std::string(name) + "s");
+                    std::ostringstream s;
+                    s << "Could not find " << name << " " << group_tag << " on any processor.";
+                    throw std::runtime_error(s.str());
                     }
 
                 // store tag in index
@@ -1089,11 +1076,9 @@ BondedGroupData<group_size, Group, name, has_type_mapping>::takeSnapshot(Snapsho
             rtag_it = rtag_map.find(group_tag);
             if (rtag_it == rtag_map.end())
                 {
-                m_exec_conf->msg->error() << endl
-                                          << "Could not find " << name << " " << group_tag
-                                          << ". Possible internal error?" << endl
-                                          << endl;
-                throw std::runtime_error("Error gathering " + std::string(name) + "s");
+                std::ostringstream s;
+                s << "Could not find " << name << " " << group_tag;
+                throw std::runtime_error(s.str());
                 }
 
             // store tag in index
@@ -1318,7 +1303,6 @@ void export_BondedGroupData(pybind11::module& m,
         .def("getNameByType", &T::getNameByType)
         .def("addBondedGroup", &T::addBondedGroup)
         .def("removeBondedGroup", &T::removeBondedGroup)
-        .def("setProfiler", &T::setProfiler)
         .def("getTypes", &T::getTypesPy);
 
     if (T::typemap_val)

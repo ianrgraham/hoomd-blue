@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file NeighborListBinned.cc
     \brief Defines NeighborListBinned
@@ -53,9 +51,6 @@ void NeighborListBinned::buildNlist(uint64_t timestep)
     uint3 dim = m_cl->getDim();
     Scalar3 ghost_width = m_cl->getGhostWidth();
 
-    if (m_prof)
-        m_prof->push(m_exec_conf, "compute");
-
     // acquire the particle data and box dimension
     ArrayHandle<Scalar4> h_pos(m_pdata->getPositions(), access_location::host, access_mode::read);
     ArrayHandle<unsigned int> h_body(m_pdata->getBodies(),
@@ -83,7 +78,7 @@ void NeighborListBinned::buildNlist(uint64_t timestep)
                                          access_mode::read);
 
     // access the neighbor list data
-    ArrayHandle<unsigned int> h_head_list(m_head_list, access_location::host, access_mode::read);
+    ArrayHandle<size_t> h_head_list(m_head_list, access_location::host, access_mode::read);
     ArrayHandle<unsigned int> h_Nmax(m_Nmax, access_location::host, access_mode::read);
     ArrayHandle<unsigned int> h_conditions(m_conditions,
                                            access_location::host,
@@ -112,7 +107,7 @@ void NeighborListBinned::buildNlist(uint64_t timestep)
         const Scalar diam_i = h_diameter.data[i];
 
         const unsigned int Nmax_i = h_Nmax.data[type_i];
-        const unsigned int head_idx_i = h_head_list.data[i];
+        const size_t head_idx_i = h_head_list.data[i];
 
         // find the bin each particle belongs in
         Scalar3 f = box.makeFraction(my_pos, ghost_width);
@@ -197,9 +192,6 @@ void NeighborListBinned::buildNlist(uint64_t timestep)
 
         h_n_neigh.data[i] = cur_n_neigh;
         }
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 namespace detail

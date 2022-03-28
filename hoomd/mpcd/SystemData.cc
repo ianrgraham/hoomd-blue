@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*!
  * \file mpcd/SystemData.cc
@@ -22,7 +20,7 @@ namespace hoomd
 mpcd::SystemData::SystemData(std::shared_ptr<hoomd::SystemDefinition> sysdef,
                              std::shared_ptr<mpcd::ParticleData> particles)
     : m_sysdef(sysdef), m_particles(particles),
-      m_global_box(m_sysdef->getParticleData()->getGlobalBox())
+      m_global_box(std::make_shared<const BoxDim>(m_sysdef->getParticleData()->getGlobalBox()))
     {
 // Generate one companion cell list for the system
 /*
@@ -53,8 +51,9 @@ mpcd::SystemData::SystemData(std::shared_ptr<hoomd::SystemDefinition> sysdef,
  * \param snapshot MPCD system snapshot to initialize from
  */
 mpcd::SystemData::SystemData(std::shared_ptr<mpcd::SystemDataSnapshot> snapshot)
-    : m_sysdef(snapshot->getSystemDefinition()), m_global_box(snapshot->getGlobalBox())
+    : m_sysdef(snapshot->getSystemDefinition())
     {
+    m_global_box = std::make_shared<const BoxDim>(snapshot->getGlobalBox());
     m_particles = std::shared_ptr<mpcd::ParticleData>(
         new mpcd::ParticleData(snapshot->particles,
                                m_global_box,

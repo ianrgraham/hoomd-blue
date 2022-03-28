@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "IntegrationMethodTwoStep.h"
 
@@ -31,9 +29,7 @@ class PYBIND11_EXPORT TwoStepNVE : public IntegrationMethodTwoStep
     {
     public:
     //! Constructs the integration method and associates it with the system
-    TwoStepNVE(std::shared_ptr<SystemDefinition> sysdef,
-               std::shared_ptr<ParticleGroup> group,
-               bool skip_restart = false);
+    TwoStepNVE(std::shared_ptr<SystemDefinition> sysdef, std::shared_ptr<ParticleGroup> group);
     virtual ~TwoStepNVE();
 
     /// Get the movement limit

@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander / Anyone is free to add their own pair potentials here
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #ifndef __ALL_EXTERNAL_POTENTIALS__H__
 #define __ALL_EXTERNAL_POTENTIALS__H__
@@ -34,7 +32,6 @@ typedef PotentialExternal<EvaluatorExternalPeriodic> PotentialExternalPeriodic;
 //! Electric field
 typedef PotentialExternal<EvaluatorExternalElectricField> PotentialExternalElectricField;
 typedef PotentialExternal<EvaluatorWalls<EvaluatorPairLJ>> WallsPotentialLJ;
-typedef PotentialExternal<EvaluatorWalls<EvaluatorPairSLJ>> WallsPotentialSLJ;
 typedef PotentialExternal<EvaluatorWalls<EvaluatorPairExpandedMie>> WallsPotentialExpandedMie;
 typedef PotentialExternal<EvaluatorWalls<EvaluatorPairForceShiftedLJ>> WallsPotentialForceShiftedLJ;
 typedef PotentialExternal<EvaluatorWalls<EvaluatorPairMie>> WallsPotentialMie;
@@ -47,7 +44,6 @@ typedef PotentialExternal<EvaluatorWalls<EvaluatorPairMorse>> WallsPotentialMors
 typedef PotentialExternalGPU<EvaluatorExternalPeriodic> PotentialExternalPeriodicGPU;
 typedef PotentialExternalGPU<EvaluatorExternalElectricField> PotentialExternalElectricFieldGPU;
 typedef PotentialExternalGPU<EvaluatorWalls<EvaluatorPairLJ>> WallsPotentialLJGPU;
-typedef PotentialExternalGPU<EvaluatorWalls<EvaluatorPairSLJ>> WallsPotentialSLJGPU;
 typedef PotentialExternalGPU<EvaluatorWalls<EvaluatorPairExpandedMie>> WallsPotentialExpandedMieGPU;
 typedef PotentialExternalGPU<EvaluatorWalls<EvaluatorPairForceShiftedLJ>>
     WallsPotentialForceShiftedLJGPU;

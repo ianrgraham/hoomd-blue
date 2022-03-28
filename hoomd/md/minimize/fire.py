@@ -1,11 +1,5 @@
-# coding: utf-8
-
-# Copyright (c) 2009-2021 The Regents of the University of Michigan
-# This file is part of the HOOMD-blue project, released under the BSD 3-Clause
-# License.
-
-# Maintainer: joaander / All Developers are free to add commands for new
-# features
+# Copyright (c) 2009-2022 The Regents of the University of Michigan.
+# Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 """Energy minimizer."""
 
@@ -71,15 +65,17 @@ class FIRE(_DynamicIntegrator):
             A minimum number of attempts before convergence criteria are
             considered.
 
-    `minimize.FIRE` is an `md.Integrator` that uses the Fast Inertial Relaxation
+    `FIRE` is a `hoomd.md.Integrator` that uses the Fast Inertial Relaxation
     Engine (FIRE) algorithm to minimize the potential energy for a group of
     particles while keeping all other particles fixed. This method is published
     in `Bitzek, et. al., PRL, 2006
-    <http://dx.doi.org/10.1103/PhysRevLett.97.170201>`_.
+    <http://dx.doi.org/10.1103/PhysRevLett.97.170201>`_. HOOMD-blue's
+    implementation extends the original formulation to include rotational
+    degrees of freedom.
 
     At each time step, :math:`\\delta t`, the algorithm uses the supplied
-    integration methods to generate :math:`x`, :math:`v`, and :math:`F`, and
-    then adjusts :math:`v` according
+    integration methods to generate :math:`\\vec{r}`, :math:`\\vec{v}`, and
+    :math:`\\vec{F}`, and then adjusts :math:`\\vec{v}` according
     to
 
     .. math::
@@ -90,14 +86,14 @@ class FIRE(_DynamicIntegrator):
     quantities.  While a current search has been lowering the energy of system
     for more than :math:`N_{min}` steps, :math:`\\alpha` is decreased by
     :math:`\\alpha \\rightarrow \\alpha \\cdot \\mathrm{fdec}_{\\alpha}` and
-    :math:`\\delta t` is increased by :math:`\\delta t \\rightarrow max(\\delta
-    t \\cdot \\mathrm{finc}_{dt}, \\ \\delta t_{max})`. If the energy of the
-    system increases (or stays the same), the velocity of the particles is set
-    to 0, :math:`\\alpha \\rightarrow \\ \\alpha_{start}` and :math:`\\delta t
-    \\rightarrow \\delta t \\cdot \\mathrm{fdec}_{\\alpha}`. The method
-    converges when the force per particle is below `force_tol`, the angular
-    momentum is below `angmom_tol` and the change in potential energy from one
-    step to the next is below `energy_tol`:
+    :math:`\\delta t` is increased by :math:`\\delta t \\rightarrow
+    \\max(\\delta t \\cdot \\mathrm{finc}_{dt}, \\ \\delta t_{max})`. If the
+    energy of the system increases (or stays the same), the velocity of the
+    particles is set to 0, :math:`\\alpha \\rightarrow \\ \\alpha_{start}` and
+    :math:`\\delta t \\rightarrow \\delta t \\cdot \\mathrm{fdec}_{\\alpha}`.
+    The method converges when the force per particle is below `force_tol`, the
+    angular momentum is below `angmom_tol` and the change in potential energy
+    from one step to the next is below `energy_tol`:
 
     .. math::
 
@@ -116,9 +112,10 @@ class FIRE(_DynamicIntegrator):
 
     Examples::
 
-        fire = md.minimize.FIRE(dt=0.05)
-        fire.force_tol = 1e-2
-        fire.energy_tol = 1e-7
+        fire = md.minimize.FIRE(dt=0.05,
+                                force_tol=1e-2,
+                                angmom_tol=1e-2,
+                                energy_tol=1e-7)
         fire.methods.append(md.methods.NVE(hoomd.filter.All()))
         sim.operations.integrator = fire
         while not(fire.converged):
@@ -132,16 +129,15 @@ class FIRE(_DynamicIntegrator):
            sim.run(100)
 
     Note:
-        The `minimire.FIRE` class should be used as the integrator for
-        simulations, just as the standard `md.Integrator` class is (see
-        examples).
+        To use `FIRE`, set it as the simulation's integrator in place of the
+        typical `hoomd.md.Integrator`.
 
     Note:
         The algorithm requires an integration method to update the particle
-        position and velocities. This should either be either NVE (to minimize
-        energy) or NPH (to minimize energy and relax the box). The quantity
-        minimized is in any case the energy (not the enthalpy or any other
-        quantity).
+        position and velocities. This should either be either
+        `hoomd.md.methods.NVE` (to minimize energy) or `hoomd.md.methods.NPH`
+        (to minimize energy and relax the box). The quantity minimized is in any
+        case the potential energy (not the enthalpy or any other quantity).
 
     Note:
         In practice, the default parameters prevents the simulation from making
@@ -154,6 +150,14 @@ class FIRE(_DynamicIntegrator):
             This is the maximum step size the minimizer is permitted to use
             :math:`[\\mathrm{time}]`. Consider the stability of the system when
             setting.
+        force_tol (float):
+            Force convergence criteria
+            :math:`[\\mathrm{force} / \\mathrm{mass}]`.
+        angmom_tol (float):
+            Angular momentum convergence criteria
+            :math:`[\\mathrm{energy} * \\mathrm{time}]`.
+        energy_tol (float):
+            Energy convergence criteria :math:`[\\mathrm{energy}]`.
         integrate_rotational_dof (bool): When True, integrate rotational degrees
             of freedom.
         forces (Sequence[hoomd.md.force.Force]):
@@ -186,14 +190,6 @@ class FIRE(_DynamicIntegrator):
         fdec_alpha (float):
             Factor to decrease :math:`\\alpha t` by
             :math:`[\\mathrm{dimensionless}]`.
-        force_tol (float):
-            Force convergence criteria
-            :math:`[\\mathrm{force} / \\mathrm{mass}]`.
-        angmom_tol (float):
-            Angular momentum convergence criteria
-            :math:`[\\mathrm{energy} * \\mathrm{time}]`.
-        energy_tol (float):
-            Energy convergence criteria :math:`[\\mathrm{energy}]`.
         min_steps_conv (int):
             A minimum number of attempts before convergence criteria are
             considered.
@@ -203,6 +199,9 @@ class FIRE(_DynamicIntegrator):
 
     def __init__(self,
                  dt,
+                 force_tol,
+                 angmom_tol,
+                 energy_tol,
                  integrate_rotational_dof=False,
                  forces=None,
                  constraints=None,
@@ -213,9 +212,6 @@ class FIRE(_DynamicIntegrator):
                  fdec_dt=0.5,
                  alpha_start=0.1,
                  fdec_alpha=0.99,
-                 force_tol=0.1,
-                 angmom_tol=0.1,
-                 energy_tol=1e-5,
                  min_steps_conv=10):
 
         super().__init__(forces, constraints, methods, rigid)
@@ -270,6 +266,9 @@ class FIRE(_DynamicIntegrator):
     @log(default=False)
     def converged(self):
         """bool: True when the minimizer has converged, else False."""
+        if not self._attached:
+            return False
+
         return self._cpp_obj.converged
 
     def reset(self):

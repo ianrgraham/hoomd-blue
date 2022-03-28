@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: ajs42
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file ComputeThermoHMA.cc
     \brief Contains code for the ComputeThermoHMA class
@@ -105,9 +103,6 @@ void ComputeThermoHMA::computeProperties()
 
     unsigned int group_size = m_group->getNumMembers();
 
-    if (m_prof)
-        m_prof->push("ThermoHMA");
-
     assert(m_pdata);
 
     // access the net force, pe, and virial
@@ -172,9 +167,6 @@ void ComputeThermoHMA::computeProperties()
     // in MPI, reduce extensive quantities only when they're needed
     m_properties_reduced = !m_pdata->getDomainDecomposition();
 #endif // ENABLE_MPI
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 #ifdef ENABLE_MPI

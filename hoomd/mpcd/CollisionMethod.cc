@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*!
  * \file mpcd/CollisionMethod.h
@@ -45,12 +43,8 @@ void mpcd::CollisionMethod::collide(uint64_t timestep)
     if (!shouldCollide(timestep))
         return;
 
-    if (m_prof)
-        m_prof->push("MPCD collide");
     // set random grid shift
     drawGridShift(timestep);
-    if (m_prof)
-        m_prof->pop();
 
     // update cell list
     m_cl->compute(timestep);

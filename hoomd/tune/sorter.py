@@ -1,9 +1,11 @@
+# Copyright (c) 2009-2022 The Regents of the University of Michigan.
+# Part of HOOMD-blue, released under the BSD 3-Clause License.
+
 """Define the ParticleSorter class."""
 
 from hoomd.data.parameterdicts import ParameterDict
 from hoomd.data.typeconverter import OnlyTypes
 from hoomd.operation import Tuner
-from hoomd.trigger import Trigger
 from hoomd import _hoomd
 import hoomd
 from math import log2, ceil
@@ -14,7 +16,7 @@ class ParticleSorter(Tuner):
 
     Args:
         trigger (hoomd.trigger.Trigger): Select the timesteps on which to sort.
-            Defaults to a `hoomd.trigger.Periodic(200)` trigger.
+            Defaults to a ``hoomd.trigger.Periodic(200)`` trigger.
 
         grid (int): Resolution of the grid to use when sorting. The default
             value of `None` sets ``grid=4096`` in 2D simulations and
@@ -40,13 +42,13 @@ class ParticleSorter(Tuner):
     """
 
     def __init__(self, trigger=200, grid=None):
-        self._param_dict = ParameterDict(
-            trigger=Trigger,
+        super().__init__(trigger)
+        sorter_params = ParameterDict(
             grid=OnlyTypes(int,
                            postprocess=ParticleSorter._to_power_of_two,
                            preprocess=ParticleSorter._natural_number,
                            allow_none=True))
-        self.trigger = trigger
+        self._param_dict.update(sorter_params)
         self.grid = grid
 
     @staticmethod

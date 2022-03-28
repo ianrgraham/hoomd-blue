@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*!
  * \file mpcd/CollisionMethod.h
@@ -44,12 +42,6 @@ class PYBIND11_EXPORT CollisionMethod
 
     //! Peek if a collision will occur on this timestep
     virtual bool peekCollide(uint64_t timestep) const;
-
-    //! Sets the profiler for the integration method to use
-    void setProfiler(std::shared_ptr<Profiler> prof)
-        {
-        m_prof = prof;
-        }
 
     //! Set autotuner parameters
     /*!
@@ -103,7 +95,6 @@ class PYBIND11_EXPORT CollisionMethod
     std::shared_ptr<hoomd::ParticleData> m_pdata;              //!< HOOMD particle data
     std::shared_ptr<mpcd::ParticleData> m_mpcd_pdata;          //!< MPCD particle data
     std::shared_ptr<const ExecutionConfiguration> m_exec_conf; //!< Execution configuration
-    std::shared_ptr<Profiler> m_prof;                          //!< System profiler
 
     std::shared_ptr<mpcd::CellList> m_cl;         //!< MPCD cell list
     std::shared_ptr<ParticleGroup> m_embed_group; //!< Embedded particles

@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 // inclusion guard
 #ifndef _INTEGRATOR_HPMC_H_
@@ -93,7 +93,7 @@ struct hpmc_patch_args_t
     const uint64_t timestep;               //!< Current timestep
     const unsigned int select;
     const unsigned int num_types;              //!< Number of particle types
-    const BoxDim& box;                         //!< Current simulation box
+    const BoxDim box;                          //!< Current simulation box
     const unsigned int* d_excell_idx;          //!< Expanded cell list
     const unsigned int* d_excell_size;         //!< Size of expanded cells
     const Index2D& excli;                      //!< Excell indexer

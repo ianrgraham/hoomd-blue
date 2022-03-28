@@ -1,14 +1,11 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file ParticleData.cc
     \brief Contains all code for ParticleData, and SnapshotParticleData.
  */
 
 #include "ParticleData.h"
-#include "Profiler.h"
 
 #ifdef ENABLE_MPI
 #include "HOOMDMPI.h"
@@ -75,7 +72,7 @@ std::string getDefaultTypeName(unsigned int id)
     Type mappings assign particle types "A", "B", "C", ....
 */
 ParticleData::ParticleData(unsigned int N,
-                           const BoxDim& global_box,
+                           const std::shared_ptr<const BoxDim> global_box,
                            unsigned int n_types,
                            std::shared_ptr<ExecutionConfiguration> exec_conf,
                            std::shared_ptr<DomainDecomposition> decomposition)
@@ -119,9 +116,6 @@ ParticleData::ParticleData(unsigned int N,
     // initialize all processors
     initializeFromSnapshot(snap);
 
-    // default constructed shared ptr is null as desired
-    m_prof = std::shared_ptr<Profiler>();
-
     // reset external virial
     for (unsigned int i = 0; i < 6; i++)
         m_external_virial[i] = Scalar(0.0);
@@ -141,7 +135,7 @@ ParticleData::ParticleData(unsigned int N,
  */
 template<class Real>
 ParticleData::ParticleData(const SnapshotParticleData<Real>& snapshot,
-                           const BoxDim& global_box,
+                           const std::shared_ptr<const BoxDim> global_box,
                            std::shared_ptr<ExecutionConfiguration> exec_conf,
                            std::shared_ptr<DomainDecomposition> decomposition)
     : m_exec_conf(exec_conf), m_nparticles(0), m_nghosts(0), m_max_nparticles(0), m_nglobal(0),
@@ -186,9 +180,6 @@ ParticleData::ParticleData(const SnapshotParticleData<Real>& snapshot,
 
     m_external_energy = Scalar(0.0);
 
-    // default constructed shared ptr is null as desired
-    m_prof = std::shared_ptr<Profiler>();
-
     // zero the origin
     m_origin = make_scalar3(0, 0, 0);
     m_o_image = make_int3(0, 0, 0);
@@ -201,9 +192,43 @@ ParticleData::~ParticleData()
 
 /*! \return Simulation box dimensions
  */
-const BoxDim& ParticleData::getBox() const
+const BoxDim ParticleData::getBox() const
     {
-    return m_box;
+    return *m_box;
+    }
+
+/*! \param box New box dimensions to set
+    \note ParticleData does NOT enforce any boundary conditions. When a new box is set,
+        it is the responsibility of the caller to ensure that all particles lie within
+        the new box.
+*/
+void ParticleData::setGlobalBox(const std::shared_ptr<const BoxDim> box)
+    {
+    assert(box->getPeriodic().x);
+    assert(box->getPeriodic().y);
+    assert(box->getPeriodic().z);
+    if (!box)
+        {
+        throw std::runtime_error("Expected non-null shared pointer to a box.");
+        }
+    BoxDim global_box = *box;
+
+#ifdef ENABLE_MPI
+    if (m_decomposition)
+        {
+        bcast(global_box, 0, m_exec_conf->getMPICommunicator());
+        m_global_box = std::make_shared<const BoxDim>(global_box);
+        m_box = std::make_shared<const BoxDim>(m_decomposition->calculateLocalBox(global_box));
+        }
+    else
+#endif
+        {
+        // local box = global box
+        m_global_box = std::make_shared<const BoxDim>(global_box);
+        m_box = m_global_box;
+        }
+
+    m_boxchange_signal.emit();
     }
 
 /*! \param box New box dimensions to set
@@ -216,19 +241,20 @@ void ParticleData::setGlobalBox(const BoxDim& box)
     assert(box.getPeriodic().x);
     assert(box.getPeriodic().y);
     assert(box.getPeriodic().z);
-    m_global_box = box;
-
 #ifdef ENABLE_MPI
     if (m_decomposition)
         {
-        bcast(m_global_box, 0, m_exec_conf->getMPICommunicator());
-        m_box = m_decomposition->calculateLocalBox(m_global_box);
+        auto global_box = box;
+        bcast(global_box, 0, m_exec_conf->getMPICommunicator());
+        m_global_box = std::make_shared<const BoxDim>(box);
+        m_box = std::make_shared<const BoxDim>(m_decomposition->calculateLocalBox(box));
         }
     else
 #endif
         {
         // local box = global box
-        m_box = box;
+        m_global_box = std::make_shared<const BoxDim>(box);
+        m_box = m_global_box;
         }
 
     m_boxchange_signal.emit();
@@ -236,9 +262,13 @@ void ParticleData::setGlobalBox(const BoxDim& box)
 
 /*! \return Global simulation box dimensions
  */
-const BoxDim& ParticleData::getGlobalBox() const
+const BoxDim ParticleData::getGlobalBox() const
     {
-    return m_global_box;
+    if (m_global_box)
+        {
+        return *m_global_box;
+        }
+    return BoxDim();
     }
 
 /*! \b ANY time particles are rearranged in memory, this function must be called.
@@ -285,8 +315,9 @@ unsigned int ParticleData::getTypeByName(const std::string& name) const
             return i;
         }
 
-    m_exec_conf->msg->error() << "Type " << name << " not found!" << endl;
-    throw runtime_error("Error mapping type name");
+    std::ostringstream s;
+    s << "Type " << name << " not found!";
+    throw runtime_error(s.str());
     return 0;
     }
 
@@ -299,8 +330,9 @@ std::string ParticleData::getNameByType(unsigned int type) const
     // check for an invalid request
     if (type >= getNTypes())
         {
-        m_exec_conf->msg->error() << "Requesting type name for non-existent type " << type << endl;
-        throw runtime_error("Error mapping type name");
+        ostringstream s;
+        s << "Requesting type name for non-existent type " << type << ".";
+        throw runtime_error(s.str());
         }
 
     // return the name
@@ -318,8 +350,9 @@ void ParticleData::setTypeName(unsigned int type, const std::string& name)
     // check for an invalid request
     if (type >= getNTypes())
         {
-        m_exec_conf->msg->error() << "Setting name for non-existent type " << type << endl;
-        throw runtime_error("Error mapping type name");
+        ostringstream s;
+        s << "Setting name for non-existent type " << type << ".";
+        throw runtime_error(s.str());
         }
 
     m_type_mapping[type] = name;
@@ -904,14 +937,14 @@ template<class Real> bool ParticleData::inBox(const SnapshotParticleData<Real>& 
     bool in_box = true;
     if (m_exec_conf->getRank() == 0)
         {
-        Scalar3 lo = m_global_box.getLo();
-        Scalar3 hi = m_global_box.getHi();
+        Scalar3 lo = m_global_box->getLo();
+        Scalar3 hi = m_global_box->getHi();
 
         const Scalar tol = Scalar(1e-5);
 
         for (unsigned int i = 0; i < snap.size; i++)
             {
-            Scalar3 f = m_global_box.makeFraction(vec_to_scalar3(snap.pos[i]));
+            Scalar3 f = m_global_box->makeFraction(vec_to_scalar3(snap.pos[i]));
             if (f.x < -tol || f.x > Scalar(1.0) + tol || f.y < -tol || f.y > Scalar(1.0) + tol
                 || f.z < -tol || f.z > Scalar(1.0) + tol)
                 {
@@ -1023,7 +1056,7 @@ void ParticleData::initializeFromSnapshot(const SnapshotParticleData<Real>& snap
             const Index3D& di = m_decomposition->getDomainIndexer();
             unsigned int n_ranks = m_exec_conf->getNRanks();
 
-            BoxDim global_box = m_global_box;
+            BoxDim global_box = *m_global_box;
 
             // loop over particles in snapshot, place them into domains
             for (typename std::vector<vec3<Real>>::const_iterator it = snapshot.pos.begin();
@@ -1041,7 +1074,7 @@ void ParticleData::initializeFromSnapshot(const SnapshotParticleData<Real>& snap
 
                 // determine domain the particle is placed into
                 Scalar3 pos = vec_to_scalar3(*it);
-                Scalar3 f = m_global_box.makeFraction(pos);
+                Scalar3 f = m_global_box->makeFraction(pos);
                 int i = int(f.x * ((Scalar)di.getW()));
                 int j = int(f.y * ((Scalar)di.getH()));
                 int k = int(f.z * ((Scalar)di.getD()));
@@ -1077,26 +1110,24 @@ void ParticleData::initializeFromSnapshot(const SnapshotParticleData<Real>& snap
 
                 // place particle using actual domain fractions, not global box fraction
                 unsigned int rank
-                    = m_decomposition->placeParticle(m_global_box, pos, h_cart_ranks.data);
+                    = m_decomposition->placeParticle(global_box, pos, h_cart_ranks.data);
 
                 if (rank >= n_ranks)
                     {
-                    m_exec_conf->msg->error()
-                        << "init.*: Particle " << snap_idx << " out of bounds." << std::endl;
-                    m_exec_conf->msg->error() << "Cartesian coordinates: " << std::endl;
-                    m_exec_conf->msg->error()
-                        << "x: " << pos.x << " y: " << pos.y << " z: " << pos.z << std::endl;
-                    m_exec_conf->msg->error() << "Fractional coordinates: " << std::endl;
-                    m_exec_conf->msg->error()
-                        << "f.x: " << f.x << " f.y: " << f.y << " f.z: " << f.z << std::endl;
-                    Scalar3 lo = m_global_box.getLo();
-                    Scalar3 hi = m_global_box.getHi();
-                    m_exec_conf->msg->error() << "Global box lo: (" << lo.x << ", " << lo.y << ", "
-                                              << lo.z << ")" << std::endl;
-                    m_exec_conf->msg->error() << "           hi: (" << hi.x << ", " << hi.y << ", "
-                                              << hi.z << ")" << std::endl;
+                    ostringstream s;
+                    s << "init.*: Particle " << snap_idx << " out of bounds." << std::endl;
+                    s << "Cartesian coordinates: " << std::endl;
+                    s << "x: " << pos.x << " y: " << pos.y << " z: " << pos.z << std::endl;
+                    s << "Fractional coordinates: " << std::endl;
+                    s << "f.x: " << f.x << " f.y: " << f.y << " f.z: " << f.z << std::endl;
+                    Scalar3 lo = m_global_box->getLo();
+                    Scalar3 hi = m_global_box->getHi();
+                    s << "Global box lo: (" << lo.x << ", " << lo.y << ", " << lo.z << ")"
+                      << std::endl;
+                    s << "           hi: (" << hi.x << ", " << hi.y << ", " << hi.z << ")"
+                      << std::endl;
 
-                    throw std::runtime_error("Error initializing from snapshot.");
+                    throw std::runtime_error(s.str());
                     }
 
                 // fill up per-processor data structures
@@ -1526,7 +1557,7 @@ ParticleData::takeSnapshot(SnapshotParticleData<Real>& snapshot)
 
                 // make sure the position stored in the snapshot is within the boundaries
                 Scalar3 tmp = vec_to_scalar3(snapshot.pos[snap_id]);
-                m_global_box.wrap(tmp, snapshot.image[snap_id]);
+                m_global_box->wrap(tmp, snapshot.image[snap_id]);
                 snapshot.pos[snap_id] = vec3<Real>(tmp);
 
                 std::advance(tag_set_it, 1);
@@ -1573,7 +1604,7 @@ ParticleData::takeSnapshot(SnapshotParticleData<Real>& snapshot)
 
             // make sure the position stored in the snapshot is within the boundaries
             Scalar3 tmp = vec_to_scalar3(snapshot.pos[snap_id]);
-            m_global_box.wrap(tmp, snapshot.image[snap_id]);
+            m_global_box->wrap(tmp, snapshot.image[snap_id]);
             snapshot.pos[snap_id] = vec3<Real>(tmp);
 
             std::advance(it, 1);
@@ -1631,16 +1662,15 @@ unsigned int ParticleData::getOwnerRank(unsigned int tag) const
 
     if (n_found == 0)
         {
-        m_exec_conf->msg->error() << "Could not find particle " << tag << " on any processor."
-                                  << endl
-                                  << endl;
-        throw std::runtime_error("Error accessing particle data.");
+        ostringstream s;
+        s << "Could not find particle " << tag << " on any processor.";
+        throw std::runtime_error(s.str());
         }
     else if (n_found > 1)
         {
-        m_exec_conf->msg->error() << "Found particle " << tag << " on multiple processors." << endl
-                                  << endl;
-        throw std::runtime_error("Error accessing particle data.");
+        ostringstream s;
+        s << "Found particle " << tag << " on multiple processors.";
+        throw std::runtime_error(s.str());
         }
 
     // Now find the processor that owns it
@@ -1692,7 +1722,7 @@ Scalar3 ParticleData::getPosition(unsigned int tag) const
 #endif
     assert(found);
 
-    m_global_box.wrap(result, img);
+    m_global_box->wrap(result, img);
     return result;
     }
 
@@ -1782,7 +1812,7 @@ int3 ParticleData::getImage(unsigned int tag) const
     result.z -= m_o_image.z;
 
     // wrap into correct image
-    m_global_box.wrap(pos, result);
+    m_global_box->wrap(pos, result);
 
     return result;
     }
@@ -2088,7 +2118,7 @@ void ParticleData::setPosition(unsigned int tag, const Scalar3& pos, bool move)
         }
 
     // wrap into box and update image
-    m_global_box.wrap(tmp_pos, img);
+    m_global_box->wrap(tmp_pos, img);
 
     // store position and image
     if (ptl_local)
@@ -2117,7 +2147,7 @@ void ParticleData::setPosition(unsigned int tag, const Scalar3& pos, bool move)
                                                access_location::host,
                                                access_mode::read);
         unsigned int new_rank
-            = m_decomposition->placeParticle(m_global_box, tmp_pos, h_cart_ranks.data);
+            = m_decomposition->placeParticle(getGlobalBox(), tmp_pos, h_cart_ranks.data);
         bcast(new_rank, 0, m_exec_conf->getMPICommunicator());
 
         // should the particle migrate?
@@ -2150,10 +2180,9 @@ void ParticleData::setPosition(unsigned int tag, const Scalar3& pos, bool move)
                 // check for particle data consistency
                 if (buf.size() != 1)
                     {
-                    m_exec_conf->msg->error() << "More than one (" << buf.size()
-                                              << ") particle marked for sending." << endl
-                                              << endl;
-                    throw std::runtime_error("Error moving particle.");
+                    std::ostringstream s;
+                    s << "More than one (" << buf.size() << ") particle marked for sending.";
+                    throw std::runtime_error(s.str());
                     }
 
                 MPI_Request req;
@@ -2518,9 +2547,7 @@ void ParticleData::removeParticle(unsigned int tag)
     {
     if (getNGlobal() == 0)
         {
-        m_exec_conf->msg->error() << "Trying to remove particle when there are zero particles!"
-                                  << endl;
-        throw runtime_error("Error removing particle");
+        throw runtime_error("Trying to remove particle when there are zero particles!");
         }
 
     // we are changing the local number of particles, so remove ghosts
@@ -2529,9 +2556,9 @@ void ParticleData::removeParticle(unsigned int tag)
     // sanity check
     if (tag >= m_rtag.size())
         {
-        m_exec_conf->msg->error() << "Trying to remove particle " << tag << " which does not exist!"
-                                  << endl;
-        throw runtime_error("Error removing particle");
+        std::ostringstream s;
+        s << "Trying to remove particle " << tag << " which does not exist.";
+        throw runtime_error(s.str());
         }
 
     // Local particle index
@@ -2557,9 +2584,9 @@ void ParticleData::removeParticle(unsigned int tag)
 
     if (!is_available)
         {
-        m_exec_conf->msg->error() << "Trying to remove particle " << tag
-                                  << " which has been previously removed!" << endl;
-        throw runtime_error("Error removing particle");
+        std::ostringstream s;
+        s << "Trying to remove particle " << tag << " which has been previously removed!";
+        throw runtime_error(s.str());
         }
 
     // delete from map
@@ -2648,8 +2675,9 @@ unsigned int ParticleData::getNthTag(unsigned int n)
     {
     if (n >= getNGlobal())
         {
-        m_exec_conf->msg->error() << "Particle id " << n << "does not exist!" << std::endl;
-        throw std::runtime_error("Error fetching particle");
+        std::ostringstream s;
+        s << "Particle id " << n << "does not exist!";
+        throw std::runtime_error(s.str());
         }
 
     assert(m_tag_set.size() == getNGlobal());
@@ -2668,7 +2696,7 @@ void export_BoxDim(pybind11::module& m)
     Scalar3 (BoxDim::*makeFraction_overload)(const Scalar3&, const Scalar3&) const
         = &BoxDim::makeFraction;
 
-    pybind11::class_<BoxDim>(m, "BoxDim")
+    pybind11::class_<BoxDim, std::shared_ptr<BoxDim>>(m, "BoxDim")
         .def(pybind11::init<Scalar>())
         .def(pybind11::init<Scalar, Scalar, Scalar>())
         .def(pybind11::init<Scalar3>())
@@ -2677,9 +2705,9 @@ void export_BoxDim(pybind11::module& m)
         .def(pybind11::self == pybind11::self)
         .def(pybind11::self != pybind11::self)
         .def("getPeriodic",
-             [](const BoxDim& box)
+             [](std::shared_ptr<const BoxDim> box)
              {
-                 auto periodic = box.getPeriodic();
+                 auto periodic = box->getPeriodic();
                  return make_uint3(periodic.x, periodic.y, periodic.z);
              })
         .def("getL", &BoxDim::getL)
@@ -2714,7 +2742,7 @@ string print_ParticleData(ParticleData* pdata)
 
 // instantiate both float and double methods for snapshots
 template ParticleData::ParticleData(const SnapshotParticleData<double>& snapshot,
-                                    const BoxDim& global_box,
+                                    const std::shared_ptr<const BoxDim> global_box,
                                     std::shared_ptr<ExecutionConfiguration> exec_conf,
                                     std::shared_ptr<DomainDecomposition> decomposition);
 template void
@@ -2724,7 +2752,7 @@ template std::map<unsigned int, unsigned int>
 ParticleData::takeSnapshot<double>(SnapshotParticleData<double>& snapshot);
 
 template ParticleData::ParticleData(const SnapshotParticleData<float>& snapshot,
-                                    const BoxDim& global_box,
+                                    const std::shared_ptr<const BoxDim> global_box,
                                     std::shared_ptr<ExecutionConfiguration> exec_conf,
                                     std::shared_ptr<DomainDecomposition> decomposition);
 template void
@@ -2737,9 +2765,11 @@ namespace detail
     {
 void export_ParticleData(pybind11::module& m)
     {
+    void (ParticleData::*setGlobalBox_overload)(const std::shared_ptr<const BoxDim>)
+        = &ParticleData::setGlobalBox;
     pybind11::class_<ParticleData, std::shared_ptr<ParticleData>>(m, "ParticleData")
         .def(pybind11::init<unsigned int,
-                            const BoxDim&,
+                            const std::shared_ptr<const BoxDim>,
                             unsigned int,
                             std::shared_ptr<ExecutionConfiguration>>())
         .def("getGlobalBox",
@@ -2747,7 +2777,7 @@ void export_ParticleData(pybind11::module& m)
              pybind11::return_value_policy::reference_internal)
         .def("getBox", &ParticleData::getBox, pybind11::return_value_policy::reference_internal)
         .def("setGlobalBoxL", &ParticleData::setGlobalBoxL)
-        .def("setGlobalBox", &ParticleData::setGlobalBox)
+        .def("setGlobalBox", setGlobalBox_overload)
         .def("getN", &ParticleData::getN)
         .def("getNGhosts", &ParticleData::getNGhosts)
         .def("getNGlobal", &ParticleData::getNGlobal)
@@ -2756,7 +2786,6 @@ void export_ParticleData(pybind11::module& m)
         .def("getNameByType", &ParticleData::getNameByType)
         .def("getTypeByName", &ParticleData::getTypeByName)
         .def("setTypeName", &ParticleData::setTypeName)
-        .def("setProfiler", &ParticleData::setProfiler)
         .def("getExecConf", &ParticleData::getExecConf)
         .def("__str__", &print_ParticleData)
         .def("getPosition", &ParticleData::getPosition)
@@ -2872,9 +2901,6 @@ struct comm_flag_select : std::unary_function<const unsigned int, bool>
 void ParticleData::removeParticles(std::vector<detail::pdata_element>& out,
                                    std::vector<unsigned int>& comm_flags)
     {
-    if (m_prof)
-        m_prof->push("pack");
-
     unsigned int num_remove_ptls = 0;
 
         {
@@ -3076,9 +3102,6 @@ void ParticleData::removeParticles(std::vector<detail::pdata_element>& out,
             }
         }
 
-    if (m_prof)
-        m_prof->pop();
-
     // notify subscribers that particle data order has been changed
     notifyParticleSort();
     }
@@ -3086,9 +3109,6 @@ void ParticleData::removeParticles(std::vector<detail::pdata_element>& out,
 //! Remove particles from local domain and append new particle data
 void ParticleData::addParticles(const std::vector<detail::pdata_element>& in)
     {
-    if (m_prof)
-        m_prof->push("unpack");
-
     unsigned int num_add_ptls = (unsigned int)in.size();
 
     unsigned int old_nparticles = getN();
@@ -3174,9 +3194,6 @@ void ParticleData::addParticles(const std::vector<detail::pdata_element>& in)
             }
         }
 
-    if (m_prof)
-        m_prof->pop();
-
     // notify subscribers that particle data order has been changed
     notifyParticleSort();
     }
@@ -3190,9 +3207,6 @@ void ParticleData::addParticles(const std::vector<detail::pdata_element>& in)
 void ParticleData::removeParticlesGPU(GlobalVector<detail::pdata_element>& out,
                                       GlobalVector<unsigned int>& comm_flags)
     {
-    if (m_prof)
-        m_prof->push(m_exec_conf, "pack");
-
     // this is the maximum number of elements we can possibly write to out
     unsigned int max_n_out = (unsigned int)out.getNumElements();
     if (comm_flags.getNumElements() < max_n_out)
@@ -3384,17 +3398,11 @@ void ParticleData::removeParticlesGPU(GlobalVector<detail::pdata_element>& out,
 
     // notify subscribers
     notifyParticleSort();
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 //! Add new particle data (GPU version)
 void ParticleData::addParticlesGPU(const GlobalVector<detail::pdata_element>& in)
     {
-    if (m_prof)
-        m_prof->push(m_exec_conf, "unpack");
-
     unsigned int old_nparticles = getN();
     unsigned int num_add_ptls = (unsigned int)in.size();
     unsigned int new_nparticles = old_nparticles + num_add_ptls;
@@ -3476,9 +3484,6 @@ void ParticleData::addParticlesGPU(const GlobalVector<detail::pdata_element>& in
 
     // notify subscribers
     notifyParticleSort();
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 #endif // ENABLE_HIP
@@ -3798,6 +3803,16 @@ void SnapshotParticleData<Real>::replicate(unsigned int nx,
                     j++;
                     }
         }
+    }
+
+template<class Real>
+void SnapshotParticleData<Real>::replicate(unsigned int nx,
+                                           unsigned int ny,
+                                           unsigned int nz,
+                                           std::shared_ptr<const BoxDim> old_box,
+                                           std::shared_ptr<const BoxDim> new_box)
+    {
+    replicate(nx, ny, nz, *old_box, *new_box);
     }
 
 /*! \returns a numpy array that wraps the pos data element.

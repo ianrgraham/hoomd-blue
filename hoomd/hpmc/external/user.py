@@ -1,20 +1,27 @@
-# Copyright (c) 2009-2021 The Regents of the University of Michigan
-# This file is part of the HOOMD-blue project, released under the BSD 3-Clause
-# License.
+# Copyright (c) 2009-2022 The Regents of the University of Michigan.
+# Part of HOOMD-blue, released under the BSD 3-Clause License.
 
-"""User-defined external fields for HPMC simulations."""
+"""User-defined external fields for HPMC simulations.
+
+Set :math:`U_{\\mathrm{external},i}` evaluated in
+`hoomd.hpmc.integrate.HPMCIntegrator` to a user-defined expression.
+
+See Also:
+    :doc:`features` explains the compile time options needed for user defined
+    external potentials.
+"""
 
 import hoomd
 from hoomd import _compile
 from hoomd.hpmc import integrate
+from hoomd.hpmc.external.field import ExternalField
 if hoomd.version.llvm_enabled:
     from hoomd.hpmc import _jit
-from hoomd.operation import _HOOMDBaseObject
 from hoomd.data.parameterdicts import ParameterDict
 from hoomd.logging import log
 
 
-class CPPExternalPotential(_HOOMDBaseObject):
+class CPPExternalPotential(ExternalField):
     """Define an external potential energy field imposed on all particles in \
             the system.
 
@@ -22,7 +29,7 @@ class CPPExternalPotential(_HOOMDBaseObject):
         code (str): C++ function body to compile.
 
     Potentials added using :py:class:`CPPExternalPotential` are added to the
-    total energy calculation in :py:mod:`hpmc <hoomd.hpmc>` integrators.
+    total energy calculation in `hoomd.hpmc.integrate.HPMCIntegrator`.
     :py:class:`CPPExternalPotential` takes C++ code, compiles it at runtime, and
     executes the code natively in the MC loop with full performance. It enables
     researchers to quickly and easily implement custom energetic field
@@ -60,16 +67,16 @@ class CPPExternalPotential(_HOOMDBaseObject):
         Your code *must* return a value.
 
     .. _VectorMath.h: https://github.com/glotzerlab/hoomd-blue/blob/\
-            v3.0.0-beta.10/hoomd/VectorMath.h
+            v3.0.0/hoomd/VectorMath.h
     .. _BoxDim.h: https://github.com/glotzerlab/hoomd-blue/blob/\
-            v3.0.0-beta.10/hoomd/BoxDim.h
+            v3.0.0/hoomd/BoxDim.h
 
     Example:
         .. code-block:: python
 
-            grav_code = "return r_i.z + box.getL().z/2;"
+            gravity_code = "return r_i.z + box.getL().z/2;"
             gravity = hoomd.hpmc.external.user.CPPExternalPotential(
-                code=grav_code)
+                code=gravity_code)
             mc.external_potential = gravity
 
     Note:
@@ -92,7 +99,7 @@ class CPPExternalPotential(_HOOMDBaseObject):
 
     def _getattr_param(self, attr):
         if attr == 'code':
-            return self._param_dict[attr]
+            return self._param_dict._dict[attr]
         return super()._getattr_param(attr)
 
     def _wrap_cpu_code(self, code):
@@ -176,6 +183,11 @@ class CPPExternalPotential(_HOOMDBaseObject):
     @log(requires_run=True)
     def energy(self):
         """float: Total field energy of the system in the current state.
+
+        .. math::
+
+            U = \\sum_{i=0}^\\mathrm{N_particles-1}
+            U_{\\mathrm{external},i}
 
         Returns `None` when the patch object and integrator are not attached.
         """

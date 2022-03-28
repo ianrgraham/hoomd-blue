@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 // **********************
 // This is a simple example code written for no function purpose other then to demonstrate the steps
@@ -38,7 +38,7 @@ class ExampleUpdater : public Updater
     {
     public:
     //! Constructor
-    ExampleUpdater(std::shared_ptr<SystemDefinition> sysdef);
+    ExampleUpdater(std::shared_ptr<SystemDefinition> sysdef, std::shared_ptr<Trigger> trigger);
 
     //! Take one timestep forward
     virtual void update(uint64_t timestep);
@@ -65,7 +65,7 @@ class ExampleUpdaterGPU : public ExampleUpdater
     {
     public:
     //! Constructor
-    ExampleUpdaterGPU(std::shared_ptr<SystemDefinition> sysdef);
+    ExampleUpdaterGPU(std::shared_ptr<SystemDefinition> sysdef, std::shared_ptr<Trigger> trigger);
 
     //! Take one timestep forward
     virtual void update(uint64_t timestep);

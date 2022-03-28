@@ -1,9 +1,6 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
-// Maintainer: joaander
-
-#include "Profiler.h"
 #include "SharedSignal.h"
 #include "SystemDefinition.h"
 
@@ -82,9 +79,6 @@ class PYBIND11_EXPORT Compute
     */
     virtual void resetStats() { }
 
-    //! Sets the profiler for the compute to use
-    virtual void setProfiler(std::shared_ptr<Profiler> prof);
-
     //! Set autotuner parameters
     /*! \param enable Enable/disable autotuning
         \param period period (approximate) in time steps when returning occurs
@@ -129,8 +123,7 @@ class PYBIND11_EXPORT Compute
     const std::shared_ptr<SystemDefinition>
         m_sysdef; //!< The system definition this compute is associated with
     const std::shared_ptr<ParticleData>
-        m_pdata;                      //!< The particle data this compute is associated with
-    std::shared_ptr<Profiler> m_prof; //!< The profiler this compute is to use
+        m_pdata; //!< The particle data this compute is associated with
     std::shared_ptr<const ExecutionConfiguration>
         m_exec_conf; //!< Stored shared ptr to the execution configuration
     std::vector<std::shared_ptr<hoomd::detail::SignalSlot>>

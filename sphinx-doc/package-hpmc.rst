@@ -1,3 +1,6 @@
+.. Copyright (c) 2009-2022 The Regents of the University of Michigan.
+.. Part of HOOMD-blue, released under the BSD 3-Clause License.
+
 hoomd.hpmc
 ==========
 
@@ -14,6 +17,7 @@ hoomd.hpmc
 
     module-hpmc-compute
     module-hpmc-integrate
+    module-hpmc-nec
     module-hpmc-tune
     module-hpmc-update
     module-hpmc-pair

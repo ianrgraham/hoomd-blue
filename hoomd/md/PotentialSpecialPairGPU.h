@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #ifndef __POTENTIAL_SPECIAL_PAIR_GPU_H__
 #define __POTENTIAL_SPECIAL_PAIR_GPU_H__
@@ -110,10 +108,6 @@ template<class evaluator,
                              unsigned int* d_flags)>
 void PotentialSpecialPairGPU<evaluator, gpu_cgbf>::computeForces(uint64_t timestep)
     {
-    // start the profile
-    if (this->m_prof)
-        this->m_prof->push(this->m_exec_conf, this->m_prof_name);
-
     // access the particle data
     ArrayHandle<Scalar4> d_pos(this->m_pdata->getPositions(),
                                access_location::device,
@@ -190,9 +184,6 @@ void PotentialSpecialPairGPU<evaluator, gpu_cgbf>::computeForces(uint64_t timest
             }
         }
     this->m_tuner->end();
-
-    if (this->m_prof)
-        this->m_prof->pop(this->m_exec_conf);
     }
 
 namespace detail

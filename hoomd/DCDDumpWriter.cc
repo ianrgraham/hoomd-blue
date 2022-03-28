@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file DCDDumpWriter.cc
     \brief Defines the DCDDumpWriter class and related helper functions
@@ -65,13 +63,15 @@ static unsigned int read_int(fstream& file)
     if it is called out of sequence.
 */
 DCDDumpWriter::DCDDumpWriter(std::shared_ptr<SystemDefinition> sysdef,
+                             std::shared_ptr<Trigger> trigger,
                              const std::string& fname,
                              unsigned int period,
                              std::shared_ptr<ParticleGroup> group,
                              bool overwrite)
-    : Analyzer(sysdef), m_fname(fname), m_start_timestep(0), m_period(period), m_group(group),
-      m_num_frames_written(0), m_last_written_step(0), m_appending(false), m_unwrap_full(false),
-      m_unwrap_rigid(false), m_angle(false), m_overwrite(overwrite), m_is_initialized(false)
+    : Analyzer(sysdef, trigger), m_fname(fname), m_start_timestep(0), m_period(period),
+      m_group(group), m_num_frames_written(0), m_last_written_step(0), m_appending(false),
+      m_unwrap_full(false), m_unwrap_rigid(false), m_angle(false), m_overwrite(overwrite),
+      m_is_initialized(false)
     {
     m_exec_conf->msg->notice(5) << "Constructing DCDDumpWriter: " << fname << " " << period << " "
                                 << overwrite << endl;
@@ -114,8 +114,7 @@ void DCDDumpWriter::initFileIO(uint64_t timestep)
         // check for errors
         if (!m_file.good())
             {
-            m_exec_conf->msg->error() << "DCD: I/O error while reading DCD header data" << endl;
-            throw runtime_error("Error appending to DCD file");
+            throw runtime_error("DCD: I/O error while reading DCD header data");
             }
 
         m_appending = true;
@@ -150,9 +149,6 @@ DCDDumpWriter::~DCDDumpWriter()
 void DCDDumpWriter::analyze(uint64_t timestep)
     {
     Analyzer::analyze(timestep);
-    if (m_prof)
-        m_prof->push("Dump DCD");
-
     // take particle data snapshot
     SnapshotParticleData<Scalar> snapshot;
 
@@ -162,8 +158,6 @@ void DCDDumpWriter::analyze(uint64_t timestep)
     // if we are not the root processor, do not perform file I/O
     if (m_sysdef->isDomainDecomposed() && !m_exec_conf->isRoot())
         {
-        if (m_prof)
-            m_prof->pop();
         return;
         }
 #endif
@@ -185,9 +179,6 @@ void DCDDumpWriter::analyze(uint64_t timestep)
             << "DCD: not writing output at timestep " << timestep
             << " because the file reports that it already has data up to step "
             << m_last_written_step << endl;
-
-        if (m_prof)
-            m_prof->pop();
         return;
         }
 
@@ -206,9 +197,6 @@ void DCDDumpWriter::analyze(uint64_t timestep)
     // update the header with the number of frames written
     m_num_frames_written++;
     write_updated_header(m_file, timestep);
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 /*! \param file File to write to
@@ -277,8 +265,7 @@ void DCDDumpWriter::write_file_header(std::fstream& file)
     // check for errors
     if (!file.good())
         {
-        m_exec_conf->msg->error() << "DCD: I/O error when writing DCD header" << endl;
-        throw runtime_error("Error writing DCD file");
+        throw runtime_error("DCD: I/O error when writing DCD header.");
         }
     }
 
@@ -317,8 +304,7 @@ void DCDDumpWriter::write_frame_header(std::fstream& file)
     // check for errors
     if (!file.good())
         {
-        m_exec_conf->msg->error() << "DCD: I/O error while writing DCD frame header" << endl;
-        throw runtime_error("Error writing DCD file");
+        throw runtime_error("DCD: I/O error while writing DCD frame header.");
         }
     }
 
@@ -408,8 +394,7 @@ void DCDDumpWriter::write_frame_data(std::fstream& file,
     // check for errors
     if (!file.good())
         {
-        m_exec_conf->msg->error() << "I/O error while writing DCD frame data" << endl;
-        throw runtime_error("Error writing DCD file");
+        throw runtime_error("I/O error while writing DCD frame data.");
         }
     }
 
@@ -437,6 +422,7 @@ void export_DCDDumpWriter(pybind11::module& m)
     {
     pybind11::class_<DCDDumpWriter, Analyzer, std::shared_ptr<DCDDumpWriter>>(m, "DCDDumpWriter")
         .def(pybind11::init<std::shared_ptr<SystemDefinition>,
+                            std::shared_ptr<Trigger>,
                             std::string,
                             unsigned int,
                             std::shared_ptr<ParticleGroup>,

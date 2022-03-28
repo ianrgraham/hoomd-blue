@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file NeighborListGPUTree.cc
     \brief Defines NeighborListGPUTree
@@ -188,18 +186,10 @@ void NeighborListGPUTree::buildNlist(uint64_t timestep)
         }
 
     // build the tree
-    if (m_prof)
-        m_prof->push(m_exec_conf, "build");
     buildTree();
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
 
     // walk with the tree
-    if (m_prof)
-        m_prof->push(m_exec_conf, "traverse");
     traverseTree();
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 /*!
@@ -485,7 +475,7 @@ void NeighborListGPUTree::buildTree()
             if (m_lbvhs[i]->getN() == 0)
                 continue;
             m_traversers[i]->setup(d_sorted_indexes.data + h_type_first.data[i],
-                                   *(*m_lbvhs[i]).get(),
+                                   *(m_lbvhs[i]->get()),
                                    m_streams[i]);
             }
         hipDeviceSynchronize();
@@ -510,7 +500,7 @@ void NeighborListGPUTree::traverseTree()
     ArrayHandle<unsigned int> d_conditions(m_conditions,
                                            access_location::device,
                                            access_mode::readwrite);
-    ArrayHandle<unsigned int> d_head_list(m_head_list, access_location::device, access_mode::read);
+    ArrayHandle<size_t> d_head_list(m_head_list, access_location::device, access_mode::read);
 
     ArrayHandle<unsigned int> h_type_first(m_type_first, access_location::host, access_mode::read);
     ArrayHandle<unsigned int> h_type_last(m_type_last, access_location::host, access_mode::read);
@@ -598,7 +588,7 @@ void NeighborListGPUTree::traverseTree()
             args.max_neigh = h_Nmax.data[i];
 
             m_traversers[j]->traverse(args,
-                                      *(*m_lbvhs[j]).get(),
+                                      *(m_lbvhs[j]->get()),
                                       d_image_list.data,
                                       (unsigned int)m_image_list.getNumElements(),
                                       m_streams[i],

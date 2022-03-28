@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file MuellerPlatheFlowGPU.h
 
@@ -36,6 +36,7 @@ class MuellerPlatheFlowGPU : public MuellerPlatheFlow
     public:
     //! Constructs the compute
     //!
+    //! \param trigger The trigger of the updater
     //! \param direction Indicates the normal direction of the slabs.
     //! \param N_slabs Number of total slabs in the simulation box.
     //! \param min_slabs Index of slabs, where the min velocity is searched.
@@ -43,6 +44,7 @@ class MuellerPlatheFlowGPU : public MuellerPlatheFlow
     //! \note N_slabs should be a multiple of the DomainDecomposition boxes in that direction.
     //! If it is not, the number is rescaled and the user is informed.
     MuellerPlatheFlowGPU(std::shared_ptr<SystemDefinition> sysdef,
+                         std::shared_ptr<Trigger> trigger,
                          std::shared_ptr<ParticleGroup> group,
                          std::shared_ptr<Variant> flow_target,
                          std::string slab_direction_str,

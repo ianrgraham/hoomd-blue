@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #pragma once
 
@@ -889,10 +889,6 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
 
         // update the cell list
         this->m_cl->compute(timestep);
-
-        // start the profile
-        if (this->m_prof)
-            this->m_prof->push(this->m_exec_conf, "HPMC");
 
         // if the cell list is a different size than last time, reinitialize the expanded cell list
         uint3 cur_dim = this->m_cl->getDim();
@@ -2105,9 +2101,6 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
 
     // update the particle data origin
     this->m_pdata->translateOrigin(shift);
-
-    if (this->m_prof)
-        this->m_prof->pop(this->m_exec_conf);
 
     this->communicate(true);
 

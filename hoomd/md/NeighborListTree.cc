@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file NeighborListTree.cc
     \brief Defines NeighborListTree
@@ -102,9 +100,6 @@ void NeighborListTree::setupTree()
  */
 void NeighborListTree::mapParticlesByType()
     {
-    if (this->m_prof)
-        this->m_prof->push("Histogram");
-
     // clear out counters
     unsigned int n_types = m_pdata->getNTypes();
     for (unsigned int i = 0; i < n_types; ++i)
@@ -132,9 +127,6 @@ void NeighborListTree::mapParticlesByType()
         m_type_head[i] = local_head;
         local_head += m_num_per_type[i];
         }
-
-    if (this->m_prof)
-        this->m_prof->pop();
     }
 
 /*!
@@ -206,8 +198,6 @@ void NeighborListTree::updateImageVectors()
  */
 void NeighborListTree::buildTree()
     {
-    if (this->m_prof)
-        this->m_prof->push("Build");
     ArrayHandle<Scalar4> h_postype(m_pdata->getPositions(),
                                    access_location::host,
                                    access_mode::read);
@@ -274,8 +264,6 @@ void NeighborListTree::buildTree()
             m_aabb_trees[i].buildTree(&(h_aabbs.data[0]) + m_type_head[i], m_num_per_type[i]);
             }
         }
-    if (this->m_prof)
-        this->m_prof->pop();
     }
 
 /*!
@@ -286,9 +274,6 @@ void NeighborListTree::buildTree()
  */
 void NeighborListTree::traverseTree()
     {
-    if (this->m_prof)
-        this->m_prof->push("Traverse");
-
     // acquire particle data
     ArrayHandle<Scalar4> h_postype(m_pdata->getPositions(),
                                    access_location::host,
@@ -303,7 +288,7 @@ void NeighborListTree::traverseTree()
     ArrayHandle<Scalar> h_r_cut(m_r_cut, access_location::host, access_mode::read);
 
     // neighborlist data
-    ArrayHandle<unsigned int> h_head_list(m_head_list, access_location::host, access_mode::read);
+    ArrayHandle<size_t> h_head_list(m_head_list, access_location::host, access_mode::read);
     ArrayHandle<unsigned int> h_Nmax(m_Nmax, access_location::host, access_mode::read);
     ArrayHandle<unsigned int> h_conditions(m_conditions,
                                            access_location::host,
@@ -322,7 +307,7 @@ void NeighborListTree::traverseTree()
         const Scalar diam_i = h_diameter.data[i];
 
         const unsigned int Nmax_i = h_Nmax.data[type_i];
-        const unsigned int nlist_head_i = h_head_list.data[i];
+        const size_t nlist_head_i = h_head_list.data[i];
 
         unsigned int n_neigh_i = 0;
         for (unsigned int cur_pair_type = 0; cur_pair_type < m_pdata->getNTypes();
@@ -430,9 +415,6 @@ void NeighborListTree::traverseTree()
             }         // end loop over pair types
         h_n_neigh.data[i] = n_neigh_i;
         } // end loop over particles
-
-    if (this->m_prof)
-        this->m_prof->pop();
     }
 
 namespace detail

@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #ifndef __COMPUTE_SDF__H__
 #define __COMPUTE_SDF__H__
@@ -220,9 +220,6 @@ template<class Shape> void ComputeSDF<Shape>::computeSDF(uint64_t timestep)
     {
     zeroHistogram();
 
-    if (this->m_prof)
-        this->m_prof->push(this->m_exec_conf, "SDF");
-
     countHistogram(timestep);
 
     std::vector<unsigned int> hist_total(m_hist);
@@ -247,9 +244,6 @@ template<class Shape> void ComputeSDF<Shape>::computeSDF(uint64_t timestep)
         {
         m_sdf[i] = hist_total[i] / (m_pdata->getNGlobal() * m_dx);
         }
-
-    if (this->m_prof)
-        this->m_prof->pop();
     }
 
 // \return the sdf histogram

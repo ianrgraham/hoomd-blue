@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "IntegrationMethodTwoStep.h"
 #include "hoomd/Integrator.h"
@@ -43,9 +43,6 @@ class PYBIND11_EXPORT IntegratorTwoStep : public Integrator
 
     /// Destructor
     virtual ~IntegratorTwoStep();
-
-    /// Sets the profiler for the compute to use
-    virtual void setProfiler(std::shared_ptr<Profiler> prof);
 
     /// Take one timestep forward
     virtual void update(uint64_t timestep);
@@ -99,9 +96,6 @@ class PYBIND11_EXPORT IntegratorTwoStep : public Integrator
     /// Set autotuner parameters
     virtual void setAutotunerParams(bool enable, unsigned int period);
 
-    /// (Re-)initialize the integration method
-    void initializeIntegrationMethods();
-
     /// Getter and setter for accessing rigid body objects in Python
     std::shared_ptr<ForceComposite> getRigid()
         {
@@ -114,9 +108,6 @@ class PYBIND11_EXPORT IntegratorTwoStep : public Integrator
         }
 
     protected:
-    /// Helper method to test if all added methods have valid restart information
-    bool isValidRestart();
-
     std::vector<std::shared_ptr<IntegrationMethodTwoStep>>
         m_methods; //!< List of all the integration methods
 
