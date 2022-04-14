@@ -165,7 +165,7 @@ class PYBIND11_EXPORT System
         return m_default_flags[pdata_flag::pressure_tensor];
         }
 
-    private:
+    protected:
     std::vector<std::pair<std::shared_ptr<Analyzer>,
                           std::shared_ptr<Trigger>>>
         m_analyzers; //!< List of analyzers belonging to this System
