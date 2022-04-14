@@ -1,11 +1,13 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 // Include the defined classes that are to be exported to python
 #include "IntegratorHPMC.h"
 #include "IntegratorHPMCMono.h"
+#include "IntegratorHPMCMonoNEC.h"
 
 #include "ComputeSDF.h"
+#include "ExternalFieldWall.h"
 #include "ShapeConvexPolygon.h"
 #include "ShapeConvexPolyhedron.h"
 #include "ShapeEllipsoid.h"
@@ -44,7 +46,8 @@ PYBIND11_MODULE(_hpmc, m)
 
     export_UpdaterBoxMC(m);
     export_UpdaterQuickCompress(m);
-    export_external_fields(m);
+    export_wall_classes(m);
+    export_wall_list(m);
 
     export_sphere(m);
     export_convex_polygon(m);
@@ -108,6 +111,8 @@ PYBIND11_MODULE(_hpmc, m)
 
     export_hpmc_muvt_counters(m);
     export_hpmc_clusters_counters(m);
+
+    export_hpmc_nec_counters(m);
     }
 
 /*! \defgroup hpmc_integrators HPMC integrators

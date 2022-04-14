@@ -1,3 +1,6 @@
+.. Copyright (c) 2009-2022 The Regents of the University of Michigan.
+.. Part of HOOMD-blue, released under the BSD 3-Clause License.
+
 md.pair
 --------------
 
@@ -8,13 +11,13 @@ md.pair
 .. autosummary::
     :nosignatures:
 
-    Pair
     Buckingham
     DLVO
     DPD
     DPDLJ
     DPDConservative
     Ewald
+    ExpandedLJ
     ExpandedMie
     ForceShiftedLJ
     Fourier
@@ -26,8 +29,8 @@ md.pair
     Morse
     Moliere
     OPP
+    Pair
     ReactionField
-    SLJ
     Table
     TWF
     Yukawa
@@ -56,11 +59,12 @@ md.pair
         Moliere,
         OPP,
         ReactionField,
-        SLJ,
+        ExpandedLJ,
         Table,
         TWF,
         Yukawa,
         ZBL
+    :show-inheritance:
 
 .. rubric:: Modules
 

@@ -1,3 +1,6 @@
+.. Copyright (c) 2009-2022 The Regents of the University of Michigan.
+.. Part of HOOMD-blue, released under the BSD 3-Clause License.
+
 Credits
 =======
 
@@ -68,6 +71,7 @@ The following people have contributed to the to HOOMD-blue:
 * Ludwig Schneider, Georg-August Univeristy Goettingen
 * Luis Y. Rivera-Rivera, University of Michigan
 * Malcolm Ramsay
+* Marco Klement, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU)
 * Matthew Spellings, University of Michgan
 * Michael Howard, University of Texas
 * Mike Henry, Boise State University

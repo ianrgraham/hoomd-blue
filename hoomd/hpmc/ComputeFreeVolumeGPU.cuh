@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #ifndef _COMPUTE_FREE_VOLUME_CUH_
 #define _COMPUTE_FREE_VOLUME_CUH_
@@ -91,7 +91,7 @@ struct hpmc_free_volume_args_t
     unsigned int select;                  //!< RNG select value
     const uint64_t timestep;              //!< Current time step
     const unsigned int dim;               //!< Number of dimensions
-    const BoxDim& box;                    //!< Current simulation box
+    const BoxDim box;                     //!< Current simulation box
     unsigned int block_size;              //!< Block size to execute
     unsigned int stride;                  //!< Number of threads per overlap check
     unsigned int group_size;              //!< Size of the group to execute

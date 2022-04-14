@@ -1,5 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #ifdef __HIPCC__
 #error This header cannot be compiled by nvcc
@@ -124,8 +124,8 @@ class PYBIND11_EXPORT Integrator : public Updater
     /// Count the total number of degrees of freedom removed by all constraint forces
     Scalar getNDOFRemoved(std::shared_ptr<ParticleGroup> query);
 
-    /// helper function to compute total momentum
-    virtual Scalar computeTotalMomentum(uint64_t timestep);
+    /// Compute the linear momentum of the system
+    virtual vec3<double> computeLinearMomentum();
 
     /// Prepare for the run
     virtual void prepRun(uint64_t timestep);

@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "TwoStepBerendsen.h"
 #ifdef ENABLE_HIP
@@ -58,10 +56,6 @@ void TwoStepBerendsen::integrateStepOne(uint64_t timestep)
         m_warned_aniso = true;
         }
 
-    // profile this step
-    if (m_prof)
-        m_prof->push("Berendsen step 1");
-
     // compute the current thermodynamic properties and get the temperature
     m_thermo->compute(timestep);
     Scalar curr_T = m_thermo->getTranslationalTemperature();
@@ -111,9 +105,6 @@ void TwoStepBerendsen::integrateStepOne(uint64_t timestep)
         unsigned int j = m_group->getMemberIndex(group_idx);
         box.wrap(h_pos.data[j], h_image.data[j]);
         }
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 /*! \param timestep Current timestep
@@ -135,10 +126,6 @@ void TwoStepBerendsen::integrateStepTwo(uint64_t timestep)
     // access the force data
     const GlobalArray<Scalar4>& net_force = m_pdata->getNetForce();
     ArrayHandle<Scalar4> h_net_force(net_force, access_location::host, access_mode::read);
-
-    // profile this step
-    if (m_prof)
-        m_prof->push("Berendsen step 2");
 
     // integrate the particle velocities to timestep+1
     for (unsigned int group_idx = 0; group_idx < group_size; group_idx++)

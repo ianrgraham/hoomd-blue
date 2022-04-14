@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "Trigger.h"
 #include "Updater.h"
@@ -46,21 +44,6 @@ class PYBIND11_EXPORT Tuner : public Updater
     //! Constructs the compute and associates it with the ParticleData
     Tuner(std::shared_ptr<SystemDefinition> sysdef, std::shared_ptr<Trigger> trigger);
     virtual ~Tuner() {};
-
-    /// Get the trigger associated with the tuner
-    std::shared_ptr<Trigger> getTrigger()
-        {
-        return m_trigger;
-        }
-
-    /// Set the trigger associated with the tuner
-    void setTrigger(std::shared_ptr<Trigger> trigger)
-        {
-        m_trigger = trigger;
-        }
-
-    private:
-    std::shared_ptr<Trigger> m_trigger;
     };
 
 namespace detail

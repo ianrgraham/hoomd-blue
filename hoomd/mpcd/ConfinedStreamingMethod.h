@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*!
  * \file mpcd/ConfinedStreamingMethod.h
@@ -105,10 +103,7 @@ template<class Geometry> void ConfinedStreamingMethod<Geometry>::stream(uint64_t
         m_validate_geom = false;
         }
 
-    if (m_prof)
-        m_prof->push("MPCD stream");
-
-    const BoxDim& box = m_mpcd_sys->getCellList()->getCoverageBox();
+    const BoxDim box = m_mpcd_sys->getCellList()->getCoverageBox();
 
     ArrayHandle<Scalar4> h_pos(m_mpcd_pdata->getPositions(),
                                access_location::host,
@@ -160,14 +155,12 @@ template<class Geometry> void ConfinedStreamingMethod<Geometry>::stream(uint64_t
 
     // particles have moved, so the cell cache is no longer valid
     m_mpcd_pdata->invalidateCellCache();
-    if (m_prof)
-        m_prof->pop();
     }
 
 template<class Geometry> void ConfinedStreamingMethod<Geometry>::validate()
     {
     // ensure that the global box is padded enough for periodic boundaries
-    const BoxDim& box = m_pdata->getGlobalBox();
+    const BoxDim box = m_pdata->getGlobalBox();
     const Scalar cell_width = m_mpcd_sys->getCellList()->getCellSize();
     if (!m_geom->validateBox(box, cell_width))
         {

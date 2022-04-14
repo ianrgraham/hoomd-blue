@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: mphoward
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #ifndef MPCD_CONFINED_STREAMING_METHOD_GPU_CUH_
 #define MPCD_CONFINED_STREAMING_METHOD_GPU_CUH_
@@ -43,7 +41,7 @@ struct stream_args_t
     Scalar4* d_vel;                   //!< Particle velocities
     const Scalar mass;                //!< Particle mass
     const mpcd::ExternalField* field; //!< Applied external field on particles
-    const BoxDim& box;                //!< Simulation box
+    const BoxDim box;                 //!< Simulation box
     const Scalar dt;                  //!< Timestep
     const unsigned int N;             //!< Number of particles
     const unsigned int block_size;    //!< Number of threads per block

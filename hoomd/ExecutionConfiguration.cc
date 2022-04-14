@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: joaander
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "ExecutionConfiguration.h"
 #include "HOOMDVersion.h"
@@ -435,6 +433,26 @@ void ExecutionConfiguration::scanGPUs()
             s_gpu_scan_messages.push_back(s.str());
             continue;
             }
+
+        // exclude a GPU when it doesn't support mapped memory
+#ifdef __HIP_PLATFORM_NVCC__
+        int supports_managed_memory = 0;
+        cudaError_t cuda_error
+            = cudaDeviceGetAttribute(&supports_managed_memory, cudaDevAttrManagedMemory, dev);
+        if (cuda_error != cudaSuccess)
+            {
+            s_gpu_scan_messages.push_back("Failed to get device attribute: "
+                                          + string(cudaGetErrorString(cuda_error)));
+            continue;
+            }
+        if (!supports_managed_memory)
+            {
+            ostringstream s;
+            s << "The device " << prop.name << " does not support managed memory.";
+            s_gpu_scan_messages.push_back(s.str());
+            continue;
+            }
+#endif
 
         s_capable_gpu_descriptions.push_back(describeGPU((int)s_capable_gpu_ids.size(), prop));
         s_capable_gpu_ids.push_back(dev);

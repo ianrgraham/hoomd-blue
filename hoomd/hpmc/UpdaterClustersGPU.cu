@@ -1,11 +1,13 @@
-// Copyright (c) 2009-2020 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "Moves.h"
 #include "UpdaterClustersGPU.cuh"
 #include "hoomd/RNGIdentifiers.h"
 #include "hoomd/RandomNumbers.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
 #include <thrust/binary_search.h>
 #include <thrust/copy.h>
 #include <thrust/device_ptr.h>
@@ -14,6 +16,7 @@
 #include <thrust/iterator/discard_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/unique.h>
+#pragma GCC diagnostic pop
 
 #ifdef __HIP_PLATFORM_NVCC__
 #include <cusparse.h>

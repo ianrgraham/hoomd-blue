@@ -1,8 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: Lin Yang, Alex Travesset
-// Previous Maintainer: Morozov
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file EAMForceComputeGPU.cc
  \brief Defines the EAMForceComputeGPU class
@@ -69,10 +66,6 @@ void EAMForceComputeGPU::computeForces(uint64_t timestep)
     // start by updating the neighborlist
     m_nlist->compute(timestep);
 
-    // start the profile
-    if (m_prof)
-        m_prof->push(m_exec_conf, "EAM pair");
-
     // The GPU implementation CANNOT handle a half neighborlist, error out now
     bool third_law = m_nlist->getStorageMode() == md::NeighborList::half;
     if (third_law)
@@ -89,9 +82,9 @@ void EAMForceComputeGPU::computeForces(uint64_t timestep)
     ArrayHandle<unsigned int> d_nlist(this->m_nlist->getNListArray(),
                                       access_location::device,
                                       access_mode::read);
-    ArrayHandle<unsigned int> d_head_list(this->m_nlist->getHeadList(),
-                                          access_location::device,
-                                          access_mode::read);
+    ArrayHandle<size_t> d_head_list(this->m_nlist->getHeadList(),
+                                    access_location::device,
+                                    access_mode::read);
 
     // access the particle data
     ArrayHandle<Scalar4> d_pos(m_pdata->getPositions(), access_location::device, access_mode::read);
@@ -141,9 +134,6 @@ void EAMForceComputeGPU::computeForces(uint64_t timestep)
     if (m_exec_conf->isCUDAErrorCheckingEnabled())
         CHECK_CUDA_ERROR();
     m_tuner->end();
-
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
     }
 
 namespace detail

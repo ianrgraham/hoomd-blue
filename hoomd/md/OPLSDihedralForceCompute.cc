@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: ksil
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "OPLSDihedralForceCompute.h"
 
@@ -34,8 +32,7 @@ OPLSDihedralForceCompute::OPLSDihedralForceCompute(std::shared_ptr<SystemDefinit
     // check for some silly errors a user could make
     if (m_dihedral_data->getNTypes() == 0)
         {
-        m_exec_conf->msg->error() << "dihedral.opls: No dihedral types specified" << endl;
-        throw runtime_error("Error initializing OPLSDihedralForceCompute");
+        throw runtime_error("No dihedral types in the system.");
         }
 
     // allocate the parameters
@@ -66,8 +63,7 @@ void OPLSDihedralForceCompute::setParams(unsigned int type,
     // make sure the type is valid
     if (type >= m_dihedral_data->getNTypes())
         {
-        m_exec_conf->msg->error() << "dihedral.opls: Invalid dihedral type specified" << endl;
-        throw runtime_error("Error setting parameters in OPLSDihedralForceCompute");
+        throw runtime_error("Invalid dihedral type.");
         }
 
     // set parameters in m_params
@@ -88,8 +84,7 @@ pybind11::dict OPLSDihedralForceCompute::getParams(std::string type)
     // make sure the type is valid
     if (typ >= m_dihedral_data->getNTypes())
         {
-        m_exec_conf->msg->error() << "dihedral.opls: Invalid dihedral type specified" << endl;
-        throw runtime_error("Error setting parameters in OPLSDihedralForceCompute");
+        throw runtime_error("Invalid dihedral type.");
         }
     ArrayHandle<Scalar4> h_params(m_params, access_location::host, access_mode::read);
     auto val = h_params.data[typ];
@@ -107,9 +102,6 @@ pybind11::dict OPLSDihedralForceCompute::getParams(std::string type)
  */
 void OPLSDihedralForceCompute::computeForces(uint64_t timestep)
     {
-    if (m_prof)
-        m_prof->push("OPLS Dihedral");
-
     assert(m_pdata);
     // access the particle data arrays
     ArrayHandle<Scalar4> h_pos(m_pdata->getPositions(), access_location::host, access_mode::read);
@@ -137,7 +129,11 @@ void OPLSDihedralForceCompute::computeForces(uint64_t timestep)
     // From LAMMPS OPLS dihedral implementation
     unsigned int i1, i2, i3, i4, n, dihedral_type;
     Scalar3 vb1, vb2, vb3, vb2m;
-    Scalar4 f1, f2, f3, f4;
+
+    // this volatile is not strictly needed, but it works around a compiler bug on Mac arm64
+    // with Apple clang version 13.0.0 (clang-1300.0.29.30)
+    // without the volatile, the x component of f2 is always computed the same as the y component
+    volatile Scalar4 f1, f2, f3, f4;
     Scalar ax, ay, az, bx, by, bz, rasq, rbsq, rgsq, rg, rginv, ra2inv, rb2inv, rabinv;
     Scalar df, df1, ddf1, fg, hg, fga, hgb, gaa, gbb;
     Scalar dtfx, dtfy, dtfz, dtgx, dtgy, dtgz, dthx, dthy, dthz;
@@ -361,9 +357,6 @@ void OPLSDihedralForceCompute::computeForces(uint64_t timestep)
             h_virial.data[virial_pitch * k + i4] += dihedral_virial[k];
             }
         }
-
-    if (m_prof)
-        m_prof->pop();
     }
 
 namespace detail

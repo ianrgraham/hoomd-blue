@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: askeys
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 #include "FIREEnergyMinimizerGPU.h"
 #include "FIREEnergyMinimizerGPU.cuh"
@@ -26,8 +24,7 @@ FIREEnergyMinimizerGPU::FIREEnergyMinimizerGPU(std::shared_ptr<SystemDefinition>
     // only one GPU is supported
     if (!m_exec_conf->isCUDAEnabled())
         {
-        m_exec_conf->msg->error() << "Creating a FIREEnergyMinimizer with CUDA disabled" << endl;
-        throw std::runtime_error("Error initializing FIREEnergyMinimizer");
+        throw std::runtime_error("FIREEnergyMinimizerGPU requires a GPU device.");
         }
 
     // allocate the sum arrays
@@ -92,10 +89,6 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
 
     // compute the total energy on the GPU
     // CPU version is Scalar energy = computePotentialEnergy(timesteps)/Scalar(group_size);
-
-    if (m_prof)
-        m_prof->push(m_exec_conf, "FIRE compute total energy");
-
     unsigned int total_group_size = 0;
 
     for (auto method = m_methods.begin(); method != m_methods.end(); ++method)
@@ -156,9 +149,6 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
     m_energy_total = energy;
     energy /= (Scalar)total_group_size;
 
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
-
     if (m_was_reset)
         {
         m_was_reset = false;
@@ -166,9 +156,6 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
         }
 
     // sum P, vnorm, fnorm
-
-    if (m_prof)
-        m_prof->push(m_exec_conf, "FIRE P, vnorm, fnorm");
 
 #ifdef ENABLE_MPI
     bool aniso = false;
@@ -331,9 +318,6 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
     wnorm = sqrt(wnorm);
     tnorm = sqrt(tnorm);
 
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
-
     unsigned int ndof = m_sysdef->getNDimensions() * total_group_size;
     m_exec_conf->msg->notice(10) << "FIRE fnorm " << fnorm << " tnorm " << tnorm << " delta_E "
                                  << energy - m_old_energy << std::endl;
@@ -351,18 +335,15 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
 
     // update velocities
 
-    if (m_prof)
-        m_prof->push(m_exec_conf, "FIRE update velocities");
-
     Scalar factor_t;
-    if (fabs(fnorm) > EPSILON)
+    if (fabs(fnorm) > 0)
         factor_t = m_alpha * vnorm / fnorm;
     else
         factor_t = 1.0;
 
     Scalar factor_r = 0.0;
 
-    if (fabs(tnorm) > EPSILON)
+    if (fabs(tnorm) > 0)
         factor_r = m_alpha * wnorm / tnorm;
     else
         factor_r = 1.0;
@@ -422,9 +403,6 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
             }
         }
 
-    if (m_prof)
-        m_prof->pop(m_exec_conf);
-
     Scalar P = Pt + Pr;
 
     if (P > Scalar(0.0))
@@ -441,9 +419,6 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
         IntegratorTwoStep::setDeltaT(m_deltaT * m_fdec);
         m_alpha = m_alpha_start;
         m_n_since_negative = 0;
-        if (m_prof)
-            m_prof->push(m_exec_conf, "FIRE zero velocities");
-
         m_exec_conf->msg->notice(6) << "FIRE zero velocities" << std::endl;
 
         for (auto method = m_methods.begin(); method != m_methods.end(); ++method)
@@ -472,9 +447,6 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
                     CHECK_CUDA_ERROR();
                 }
             }
-
-        if (m_prof)
-            m_prof->pop(m_exec_conf);
         }
 
     m_n_since_start++;

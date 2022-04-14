@@ -1,6 +1,5 @@
-# Copyright (c) 2009-2021 The Regents of the University of Michigan
-# This file is part of the HOOMD-blue project, released under the BSD 3-Clause
-# License.
+# Copyright (c) 2009-2022 The Regents of the University of Michigan.
+# Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 """Test hoomd.hpmc.pair.user.CPPPotential."""
 
@@ -72,7 +71,6 @@ def test_valid_setting_before_attach_cpp_potential(device, attr, value):
     assert getattr(patch, attr) == value
 
 
-@pytest.mark.validate
 @pytest.mark.skipif(llvm_disabled, reason='LLVM not enabled')
 def test_attaching(device, simulation_factory, two_particle_snapshot_factory):
     patch = hoomd.hpmc.pair.user.CPPPotential(r_cut=3,

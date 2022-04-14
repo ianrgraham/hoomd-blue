@@ -1,7 +1,5 @@
-// Copyright (c) 2009-2021 The Regents of the University of Michigan
-// This file is part of the HOOMD-blue project, released under the BSD 3-Clause License.
-
-// Maintainer: jglaser
+// Copyright (c) 2009-2022 The Regents of the University of Michigan.
+// Part of HOOMD-blue, released under the BSD 3-Clause License.
 
 /*! \file BondedGroupData.h
     \brief Declares BondedGroupData
@@ -23,7 +21,6 @@ const unsigned int GROUP_NOT_LOCAL((unsigned int)0xffffffff);
 #include "HOOMDMath.h"
 #include "Index1D.h"
 #include "ParticleData.h"
-#include "Profiler.h"
 
 #ifdef ENABLE_HIP
 #include "BondedGroupData.cuh"
@@ -580,14 +577,6 @@ class BondedGroupData
      */
     void removeBondedGroup(unsigned int group_tag);
 
-    //! Set the profiler
-    /*! \param prof The profiler
-     */
-    void setProfiler(std::shared_ptr<Profiler> prof)
-        {
-        m_prof = prof;
-        }
-
     //! Connects a function to be called every time the global number of bonded groups changes
     Nano::Signal<void()>& getGroupNumChangeSignal()
         {
@@ -662,7 +651,6 @@ class BondedGroupData
     GPUVector<unsigned int>
         m_cached_tag_set;       //!< Cached constant-time lookup table for tags by active index
     bool m_invalid_cached_tags; //!< true if m_cached_tag_set needs to be rebuilt
-    std::shared_ptr<Profiler> m_prof; //!< Profiler
 
     private:
     bool m_groups_dirty; //!< Is it necessary to rebuild the lookup-by-index table?
@@ -1031,7 +1019,8 @@ class LocalGroupData : public LocalDataAccess<Output, GroupData>
         {
         return this->template getBuffer<unsigned int, unsigned int, GPUVector>(m_tags_handle,
                                                                                &GroupData::getTags,
-                                                                               flag);
+                                                                               flag,
+                                                                               true);
         }
 
     Output getRTags()
@@ -1046,7 +1035,7 @@ class LocalGroupData : public LocalDataAccess<Output, GroupData>
         return this->template getBuffer<
             typeval_t,
             typename std::conditional<GroupData::typemap_val, unsigned int, Scalar>::type,
-            GPUVector>(m_typeval_handle, &GroupData::getTypeValArray, flag);
+            GPUVector>(m_typeval_handle, &GroupData::getTypeValArray, flag, true);
         }
 
     Output getMembers(GhostDataFlag flag)
@@ -1055,6 +1044,7 @@ class LocalGroupData : public LocalDataAccess<Output, GroupData>
             m_members_handle,
             &GroupData::getMembersArray,
             flag,
+            true,
             GroupData::size);
         }
 
