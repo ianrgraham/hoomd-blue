@@ -127,7 +127,7 @@ class PYBIND11_EXPORT IntegrationMethodTwoStep
     virtual void setAutotunerParams(bool enable, unsigned int period) { }
 
     //! Change the timestep
-    void setDeltaT(Scalar deltaT);
+    virtual void setDeltaT(Scalar deltaT);
 
     //! Access the group
     std::shared_ptr<ParticleGroup> getGroup()
@@ -189,12 +189,6 @@ class PYBIND11_EXPORT IntegrationMethodTwoStep
     Scalar m_deltaT; //!< The time step
     };
 
-namespace detail
-    {
-//! Exports the IntegrationMethodTwoStep class to python
-void export_IntegrationMethodTwoStep(pybind11::module& m);
-
-    } // end namespace detail
     } // end namespace md
     } // end namespace hoomd
 

@@ -19,6 +19,7 @@ See Also:
     Tutorial: :doc:`tutorial/01-Introducing-Molecular-Dynamics/00-index`
 """
 
+from hoomd.md import alchemy
 from hoomd.md import angle
 from hoomd.md import bond
 from hoomd.md import compute
@@ -37,4 +38,5 @@ from hoomd.md import pair
 from hoomd.md import update
 from hoomd.md import special_pair
 from hoomd.md import methods
+from hoomd.md import mesh
 from hoomd.md import many_body

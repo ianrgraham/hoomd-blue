@@ -7,6 +7,48 @@ Change Log
 v3.x
 ----
 
+v3.1.0 (2022-04-27)
+^^^^^^^^^^^^^^^^^^^
+
+*Added*
+
+* Support LLVM 13 when ``ENABLE_LLVM=on``.
+* ``hoomd.md.pair.LJGauss`` - Lennard-Jones-Gaussian pair potential.
+* ``hoomd.md.alchemy.methods.NVT`` - Alchemical molecular dynamics integration method.
+* ``hoomd.md.alchemy.pair.LJGauss`` - Lennard-Jones-Gaussian pair potential with alchemical degrees
+  of freedom.
+* ``hoomd.hpmc.update.Shape`` - Alchemical hard particle Monte Carlo through shape change moves.
+* ``hoomd.hpmc.shape_move.Elastic`` - Shape move with elastic potential energy penalty.
+* ``hoomd.hpmc.shape_move.ShapeSpace`` - Moves in a user defined shape space.
+* ``hoomd.hpmc.shape_move.Vertex`` - Translate shape vertices.
+
+*Changed*
+
+* HPMC fugacity is now a per-type quantity.
+* Improved documentation.
+* [developers] Reduced the time needed for incremental builds.
+* [developers] Reduced memory needed to compile HOOMD.
+
+*Fixed*
+
+* ALJ unit test passes in Debug builds.
+* Add quotes to conda-forge gpu package installation example.
+* ``hoomd.md.force.Custom`` zeroes forces, torques, energies, and virials before calling
+  ``set_forces``.
+* Point tarball download link to https://github.com/glotzerlab/hoomd-blue/releases.
+
+v3.0.1 (2022-04-08)
+^^^^^^^^^^^^^^^^^^^
+
+*Fixed*
+
+* Display status of ``trunk-patch`` branch in the GitHub actions badge.
+* Add ``EvaluatorPairTable.h`` to installation directory.
+* Add ``hoomd.filter.Rigid`` to the documentation.
+* Prevent ``TypeError: 'bool' object is not iterable`` errors when comparing ``Tag`` filters with
+  different lengths arrays.
+* ``Simulation.tps`` and ``Simulation.walltime`` update every step of the run.
+
 v3.0.0 (2022-03-22)
 ^^^^^^^^^^^^^^^^^^^
 

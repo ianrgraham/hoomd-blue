@@ -3,6 +3,7 @@ set(files __init__.py
     aniso_forces_and_energies.json
     test_active.py
     test_active_rotational_diffusion.py
+    test_alchemostat.py
     test_alj.py
     test_angle.py
     test_aniso_pair.py
@@ -22,6 +23,7 @@ set(files __init__.py
     test_manifolds.py
     test_meta_wall_list.py
     test_methods.py
+    test_meshbond.py
     test_minimize_fire.py
     test_reverse_perturbation_flow.py
     test_table_pressure.py

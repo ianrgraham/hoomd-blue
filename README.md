@@ -3,7 +3,7 @@
 [![Citing HOOMD](https://img.shields.io/badge/cite-hoomd-blue.svg)](https://hoomd-blue.readthedocs.io/en/latest/citing.html)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/hoomd.svg?style=flat)](https://anaconda.org/conda-forge/hoomd)
 [![conda-forge Downloads](https://img.shields.io/conda/dn/conda-forge/hoomd.svg?style=flat)](https://anaconda.org/conda-forge/hoomd)
-[![GitHub Actions](https://github.com/glotzerlab/hoomd-blue/actions/workflows/test.yml/badge.svg)](https://github.com/glotzerlab/hoomd-blue/actions/workflows/test.yml)
+[![GitHub Actions](https://github.com/glotzerlab/hoomd-blue/actions/workflows/test.yml/badge.svg?branch=trunk-patch)](https://github.com/glotzerlab/hoomd-blue/actions/workflows/test.yml)
 [![Read the Docs](https://img.shields.io/readthedocs/hoomd-blue/latest.svg)](https://hoomd-blue.readthedocs.io/en/latest/?badge=latest)
 [![Contributors](https://img.shields.io/github/contributors-anon/glotzerlab/hoomd-blue.svg?style=flat)](https://hoomd-blue.readthedocs.io/en/latest/credits.html)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](LICENSE)
@@ -59,7 +59,7 @@ mc.shape['octahedron'] = dict(vertices=[
 cpu = hoomd.device.CPU()
 sim = hoomd.Simulation(device=cpu, seed=20)
 sim.operations.integrator = mc
-# See HOOMD tutorial for how to construct an initial configuration 'init.gsd'
+# The tutorial describes how to construct an initial configuration 'init.gsd'.
 sim.create_state_from_gsd(filename='init.gsd')
 
 sim.run(1e5)
@@ -82,7 +82,7 @@ integrator.methods.append(nvt)
 gpu = hoomd.device.GPU()
 sim = hoomd.Simulation(device=gpu)
 sim.operations.integrator = integrator
-# See HOOMD tutorial for how to construct an initial configuration 'init.gsd'
+# The tutorial describes how to construct an initial configuration 'init.gsd'.
 sim.create_state_from_gsd(filename='init.gsd')
 sim.state.thermalize_particle_momenta(filter=hoomd.filter.All(), kT=1.5)
 

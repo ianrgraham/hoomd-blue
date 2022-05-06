@@ -21,7 +21,7 @@ HOOMD-blue
         :target: https://anaconda.org/conda-forge/hoomd
     .. |conda-forge-Downloads| image:: https://img.shields.io/conda/dn/conda-forge/hoomd.svg?style=flat
         :target: https://anaconda.org/conda-forge/hoomd
-    .. |GitHub Actions| image:: https://github.com/glotzerlab/hoomd-blue/actions/workflows/test.yml/badge.svg
+    .. |GitHub Actions| image:: https://github.com/glotzerlab/hoomd-blue/actions/workflows/test.yml/badge.svg?branch=trunk-patch
         :target: https://github.com/glotzerlab/hoomd-blue/actions/workflows/test.yml
     .. |Contributors| image:: https://img.shields.io/github/contributors-anon/glotzerlab/hoomd-blue.svg?style=flat
         :target: https://hoomd-blue.readthedocs.io/en/latest/credits.html
@@ -92,7 +92,7 @@ Hard particle Monte Carlo:
     cpu = hoomd.device.CPU()
     sim = hoomd.Simulation(device=cpu, seed=20)
     sim.operations.integrator = mc
-    # See HOOMD tutorial for how to construct an initial configuration 'init.gsd'
+    # The tutorial describes how to construct an initial configuration 'init.gsd'.
     sim.create_state_from_gsd(filename='init.gsd')
 
     sim.run(1e5)
@@ -116,7 +116,7 @@ Molecular dynamics:
     gpu = hoomd.device.GPU()
     sim = hoomd.Simulation(device=gpu)
     sim.operations.integrator = integrator
-    # See HOOMD tutorial for how to construct an initial configuration 'init.gsd'
+    # The tutorial describes how to construct an initial configuration 'init.gsd'.
     sim.create_state_from_gsd(filename='init.gsd')
     sim.state.thermalize_particle_momenta(filter=hoomd.filter.All(), kT=1.5)
 
