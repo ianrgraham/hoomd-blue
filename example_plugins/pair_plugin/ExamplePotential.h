@@ -25,7 +25,7 @@ typedef PotentialPair<EvaluatorPairExample> PotentialPairExample;
 
 #ifdef ENABLE_HIP
 //! Pair potential force compute for example forces on the GPU
-typedef PotentialPairGPU<EvaluatorPairExample, kernel::gpu_compute_example_forces>
+typedef PotentialPairGPU<EvaluatorPairExample>
     PotentialPairExampleGPU;
 #endif
 

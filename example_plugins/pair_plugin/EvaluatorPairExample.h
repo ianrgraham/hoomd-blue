@@ -10,7 +10,7 @@
 #include <string>
 #endif
 
-#include "hoomd/md/EvaluatorPairLJ.h"
+// #include "hoomd/md/EvaluatorPairLJ.h"
 #include "hoomd/HOOMDMath.h"
 
 /*! \file EvaluatorPairExample.h
@@ -270,7 +270,7 @@ class EvaluatorPairExample
      */
     static std::string getName()
         {
-        return std::string("lj");
+        return std::string("mlj");
         }
 
     std::string getShapeSpec() const
