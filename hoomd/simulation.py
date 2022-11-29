@@ -392,7 +392,7 @@ class Simulation(metaclass=Loggable):
             if value:
                 self._state._cpp_sys_def.getParticleData().setPressureFlag()
 
-    def run(self, steps, write_at_start=False):
+    def run(self, steps, write_at_start=False, release_gil=False):
         """Advance the simulation a number of steps.
 
         Args:
@@ -459,7 +459,7 @@ class Simulation(metaclass=Loggable):
             raise ValueError(f"steps must be in the range [0, "
                              f"{TIMESTEP_MAX-1}]")
 
-        self._cpp_sys.run(steps_int, write_at_start)
+        self._cpp_sys.run(steps_int, write_at_start, release_gil)
 
 
 def _match_class_path(obj, *matches):

@@ -77,7 +77,7 @@ void System::setCommunicator(std::shared_ptr<Communicator> comm)
 
 // -------------- Methods for running the simulation
 
-void System::run(uint64_t nsteps, bool write_at_start)
+void System::run(uint64_t nsteps, bool write_at_start, bool release_gil)
     {
     m_start_tstep = m_cur_tstep;
     m_end_tstep = m_cur_tstep + nsteps;
@@ -130,6 +130,7 @@ void System::run(uint64_t nsteps, bool write_at_start)
     // run the steps
     for (uint64_t count = 0; count < nsteps; count++)
         {
+
         for (auto& tuner : m_tuners)
             {
             if ((*tuner->getTrigger())(m_cur_tstep))
@@ -159,9 +160,44 @@ void System::run(uint64_t nsteps, bool write_at_start)
 
         // execute the integrator
         if (m_integrator)
-            m_integrator->update(m_cur_tstep);
+            {
+            if (release_gil)
+                {
+                pybind11::gil_scoped_release release;
+                // if (PyGILState_Check())
+                //     {
+                //     std::cout << "Integrating: I have the GIL!" << std::endl;
+                //     }
+                // else
+                //     {
+                //     std::cout << "Integrating: No GIL for me!" << std::endl;
+                //     }
+                m_integrator->update(m_cur_tstep);
+                }
+            else
+                {
+                m_integrator->update(m_cur_tstep);
+                }
+
+            // if (PyGILState_Check()) {
+            //     std::cout << "Post: I have the GIL!" << std::endl;
+            // }
+            // else
+            // {
+            //     std::cout << "Post: No GIL for me!" << std::endl;
+            // }
+            }
 
         m_cur_tstep++;
+
+        // std::cout << "Pre Check!" << std::endl;
+        // if (PyGILState_Check()) {
+        //     std::cout << "Pre Check: I have the GIL!" << std::endl;
+        // }
+        // else
+        // {
+        //     std::cout << "Pre Check: No GIL for me!" << std::endl;
+        // }
 
         // execute analyzers after incrementing the step counter
         for (auto& analyzer : m_analyzers)
@@ -178,6 +214,14 @@ void System::run(uint64_t nsteps, bool write_at_start)
             throw pybind11::error_already_set();
             }
         }
+    // std::cout << "Post Loop!" << std::endl;
+    // if (PyGILState_Check()) {
+    //     std::cout << "Post Loop: I have the GIL!" << std::endl;
+    // }
+    // else
+    // {
+    //     std::cout << "Post Loop: No GIL for me!" << std::endl;
+    // }
     }
 
 void System::updateTPS()
