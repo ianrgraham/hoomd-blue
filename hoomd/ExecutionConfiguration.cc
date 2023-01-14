@@ -123,6 +123,7 @@ ExecutionConfiguration::ExecutionConfiguration(executionMode mode,
             for (auto it = gpu_id.begin(); it != gpu_id.end(); ++it)
                 initializeGPU(*it);
             }
+        hipStreamCreate(&m_stream);
         }
 #else
     if (exec_mode == GPU)

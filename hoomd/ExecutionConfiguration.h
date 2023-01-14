@@ -398,6 +398,9 @@ class PYBIND11_EXPORT ExecutionConfiguration
 
     mutable bool m_in_multigpu_block; //!< Tracks whether we are in a multi-GPU block
 
+    /// Concurrent stream used for GPU kernel launches
+    hipStream_t m_stream;
+
 #if defined(ENABLE_HIP)
     std::unique_ptr<CachedAllocator> m_cached_alloc; //!< Cached allocator for temporary allocations
     std::unique_ptr<CachedAllocator>
