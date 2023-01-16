@@ -20,7 +20,7 @@
 namespace hoomd
     {
 //! Kernel driver for gpu_compute_cell_list_kernel()
-void gpu_compute_cell_list(unsigned int* d_cell_size,
+void gpu_compute_cell_list(const hipStream_t& stream, unsigned int* d_cell_size,
                            Scalar4* d_xyzf,
                            Scalar4* d_tdb,
                            Scalar4* d_cell_orientation,
@@ -44,7 +44,7 @@ void gpu_compute_cell_list(unsigned int* d_cell_size,
                            const GPUPartition& gpu_partition);
 
 //! Driver function to combine the cell lists from different GPUs into one
-hipError_t gpu_combine_cell_lists(const unsigned int* d_cell_size_scratch,
+hipError_t gpu_combine_cell_lists(const hipStream_t& stream, const unsigned int* d_cell_size_scratch,
                                   unsigned int* d_cell_size,
                                   const unsigned int* d_idx_scratch,
                                   unsigned int* d_idx,
@@ -61,7 +61,7 @@ hipError_t gpu_combine_cell_lists(const unsigned int* d_cell_size_scratch,
                                   uint3* d_conditions,
                                   const GPUPartition& gpu_partition);
 
-hipError_t gpu_sort_cell_list(unsigned int* d_cell_size,
+hipError_t gpu_sort_cell_list(const hipStream_t& stream, unsigned int* d_cell_size,
                               Scalar4* d_xyzf,
                               Scalar4* d_xyzf_new,
                               Scalar4* d_tdb,

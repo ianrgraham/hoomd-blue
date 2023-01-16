@@ -222,7 +222,7 @@ void NeighborListGPUTree::buildTree()
                                        access_mode::read);
 
             m_mark_tuner->begin();
-            kernel::gpu_nlist_mark_types(d_types.data,
+            kernel::gpu_nlist_mark_types(m_exec_conf->getStream(), d_types.data,
                                          d_indexes.data,
                                          m_lbvh_errors.getDeviceFlags(),
                                          d_last_pos.data,
@@ -280,7 +280,7 @@ void NeighborListGPUTree::buildTree()
 
             void* d_tmp = NULL;
             size_t tmp_bytes = 0;
-            kernel::gpu_nlist_sort_types(d_tmp,
+            kernel::gpu_nlist_sort_types(m_exec_conf->getStream(), d_tmp,
                                          tmp_bytes,
                                          d_types.data,
                                          d_sorted_types.data,
@@ -295,7 +295,7 @@ void NeighborListGPUTree::buildTree()
             d_tmp = (void*)d_alloc();
 
             // perform the sort
-            swap = kernel::gpu_nlist_sort_types(d_tmp,
+            swap = kernel::gpu_nlist_sort_types(m_exec_conf->getStream(), d_tmp,
                                                 tmp_bytes,
                                                 d_types.data,
                                                 d_sorted_types.data,
@@ -328,7 +328,7 @@ void NeighborListGPUTree::buildTree()
                                                  access_mode::read);
 
         m_count_tuner->begin();
-        kernel::gpu_nlist_count_types(d_type_first.data,
+        kernel::gpu_nlist_count_types(m_exec_conf->getStream(), d_type_first.data,
                                       d_type_last.data,
                                       d_sorted_types.data,
                                       m_pdata->getNTypes(),
@@ -434,7 +434,7 @@ void NeighborListGPUTree::buildTree()
                 const unsigned int first = h_type_first.data[i];
                 auto d_primitives = m_lbvhs[i]->getPrimitives();
                 m_copy_tuner->begin();
-                kernel::gpu_nlist_copy_primitives(d_traverse_order.data + first,
+                kernel::gpu_nlist_copy_primitives(m_exec_conf->getStream(), d_traverse_order.data + first,
                                                   d_sorted_indexes.data + first,
                                                   d_primitives,
                                                   Ni,

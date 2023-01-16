@@ -92,7 +92,7 @@ void TwoStepNVEGPU::integrateStepOne(uint64_t timestep)
     m_exec_conf->beginMultiGPU();
     m_tuner_one->begin();
     auto limit_params = this->getKernelLimitValues(timestep);
-    kernel::gpu_nve_step_one(d_pos.data,
+    kernel::gpu_nve_step_one(m_exec_conf->getStream(), d_pos.data,
                              d_vel.data,
                              d_accel.data,
                              d_image.data,
@@ -130,7 +130,7 @@ void TwoStepNVEGPU::integrateStepOne(uint64_t timestep)
         m_exec_conf->beginMultiGPU();
         m_tuner_angular_one->begin();
 
-        kernel::gpu_nve_angular_step_one(d_orientation.data,
+        kernel::gpu_nve_angular_step_one(m_exec_conf->getStream(), d_orientation.data,
                                          d_angmom.data,
                                          d_inertia.data,
                                          d_net_torque.data,
@@ -172,7 +172,7 @@ void TwoStepNVEGPU::integrateStepTwo(uint64_t timestep)
     m_tuner_two->begin();
 
     auto limit_params = this->getKernelLimitValues(timestep);
-    kernel::gpu_nve_step_two(d_vel.data,
+    kernel::gpu_nve_step_two(m_exec_conf->getStream(), d_vel.data,
                              d_accel.data,
                              d_index_array.data,
                              m_group->getGPUPartition(),
@@ -208,7 +208,7 @@ void TwoStepNVEGPU::integrateStepTwo(uint64_t timestep)
         m_exec_conf->beginMultiGPU();
         m_tuner_angular_two->begin();
 
-        kernel::gpu_nve_angular_step_two(d_orientation.data,
+        kernel::gpu_nve_angular_step_two(m_exec_conf->getStream(), d_orientation.data,
                                          d_angmom.data,
                                          d_inertia.data,
                                          d_net_torque.data,

@@ -164,7 +164,7 @@ __global__ void hpmc_depletants_accept(const uint16_t seed,
 
     } // end namespace kernel
 
-void generate_num_depletants(const uint16_t seed,
+void generate_num_depletants(const hipStream_t& stream, const uint16_t seed,
                              const uint64_t timestep,
                              const unsigned int select,
                              const unsigned int rank,
@@ -209,7 +209,7 @@ void generate_num_depletants(const uint16_t seed,
         }
     }
 
-void generate_num_depletants_ntrial(const Scalar4* d_vel,
+void generate_num_depletants_ntrial(const hipStream_t& stream, const Scalar4* d_vel,
                                     const Scalar4* d_trial_vel,
                                     const unsigned int ntrial,
                                     const unsigned int depletant_type_a,
@@ -268,7 +268,7 @@ void generate_num_depletants_ntrial(const Scalar4* d_vel,
         }
     }
 
-void get_max_num_depletants(unsigned int* d_n_depletants,
+void get_max_num_depletants(const hipStream_t& stream, unsigned int* d_n_depletants,
                             unsigned int* max_n_depletants,
                             const hipStream_t* streams,
                             const GPUPartition& gpu_partition,
@@ -293,7 +293,7 @@ void get_max_num_depletants(unsigned int* d_n_depletants,
     }
 
 //! Compute the max # of depletants per particle, trial insertion, and configuration
-void get_max_num_depletants_ntrial(const unsigned int ntrial,
+void get_max_num_depletants_ntrial(const hipStream_t& stream, const unsigned int ntrial,
                                    unsigned int* d_n_depletants,
                                    unsigned int* max_n_depletants,
                                    const bool add_ghosts,
@@ -326,7 +326,7 @@ void get_max_num_depletants_ntrial(const unsigned int ntrial,
         }
     }
 
-void reduce_counters(const unsigned int ngpu,
+void reduce_counters(const hipStream_t& stream, const unsigned int ngpu,
                      const unsigned int pitch,
                      const hpmc_counters_t* d_per_device_counters,
                      hpmc_counters_t* d_counters,
@@ -350,7 +350,7 @@ void reduce_counters(const unsigned int ngpu,
                        ntypes);
     }
 
-void hpmc_depletants_accept(const uint16_t seed,
+void hpmc_depletants_accept(const hipStream_t& stream, const uint16_t seed,
                             const uint64_t timestep,
                             const unsigned int select,
                             const unsigned int rank,

@@ -14,7 +14,7 @@ namespace md
     {
 namespace kernel
     {
-hipError_t gpu_rigid_force(Scalar4* d_force,
+hipError_t gpu_rigid_force(const hipStream_t& stream, Scalar4* d_force,
                            Scalar4* d_torque,
                            const unsigned int* d_molecule_len,
                            const unsigned int* d_molecule_list,
@@ -40,7 +40,7 @@ hipError_t gpu_rigid_force(Scalar4* d_force,
                            bool zero_force,
                            const GPUPartition& gpu_partition);
 
-hipError_t gpu_rigid_virial(Scalar* d_virial,
+hipError_t gpu_rigid_virial(const hipStream_t& stream, Scalar* d_virial,
                             const unsigned int* d_molecule_len,
                             const unsigned int* d_molecule_list,
                             const unsigned int* d_molecule_idx,
@@ -64,7 +64,7 @@ hipError_t gpu_rigid_virial(Scalar* d_virial,
                             const hipDeviceProp_t& dev_prop,
                             const GPUPartition& gpu_partition);
 
-void gpu_update_composite(unsigned int N,
+void gpu_update_composite(const hipStream_t& stream, unsigned int N,
                           unsigned int n_ghost,
                           Scalar4* d_postype,
                           Scalar4* d_orientation,
@@ -83,7 +83,7 @@ void gpu_update_composite(unsigned int N,
                           uint2* d_flag,
                           const GPUPartition& gpu_partition);
 
-hipError_t gpu_find_rigid_centers(const unsigned int* d_body,
+hipError_t gpu_find_rigid_centers(const hipStream_t& stream, const unsigned int* d_body,
                                   const unsigned int* d_tag,
                                   const unsigned int* d_rtag,
                                   const unsigned int N,

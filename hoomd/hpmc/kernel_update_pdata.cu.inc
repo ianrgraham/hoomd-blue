@@ -32,7 +32,7 @@ namespace hpmc
 namespace gpu
     {
 //! Driver for kernel::hpmc_update_pdata()
-template void hpmc_update_pdata<SHAPE_CLASS(SHAPE)>(const hpmc_update_args_t& args,
+template void hpmc_update_pdata<SHAPE_CLASS(SHAPE)>(const hipStream_t& stream, const hpmc_update_args_t& args,
                                                     const SHAPE_CLASS(SHAPE)::param_type* params);
     } // namespace gpu
 

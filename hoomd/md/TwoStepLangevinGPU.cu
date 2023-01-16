@@ -420,7 +420,7 @@ __global__ void gpu_langevin_angular_step_two_kernel(const Scalar4* d_pos,
     This is just a driver for gpu_langevin_angular_step_two_kernel(), see it for details.
 
 */
-hipError_t gpu_langevin_angular_step_two(const Scalar4* d_pos,
+hipError_t gpu_langevin_angular_step_two(const hipStream_t& stream, const Scalar4* d_pos,
                                          Scalar4* d_orientation,
                                          Scalar4* d_angmom,
                                          const Scalar3* d_inertia,
@@ -492,7 +492,7 @@ hipError_t gpu_langevin_angular_step_two(const Scalar4* d_pos,
 
     This is just a driver for gpu_langevin_step_two_kernel(), see it for details.
 */
-hipError_t gpu_langevin_step_two(const Scalar4* d_pos,
+hipError_t gpu_langevin_step_two(const hipStream_t& stream, const Scalar4* d_pos,
                                  Scalar4* d_vel,
                                  Scalar3* d_accel,
                                  const Scalar* d_diameter,

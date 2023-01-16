@@ -86,7 +86,7 @@ void MuellerPlatheFlowGPU::searchMinMaxVelocity(void)
     const BoxDim& gl_box = m_pdata->getGlobalBox();
 
     m_tuner->begin();
-    kernel::gpu_search_min_max_velocity(group_size,
+    kernel::gpu_search_min_max_velocity(m_exec_conf->getStream(), group_size,
                                         d_vel.data,
                                         d_pos.data,
                                         d_tag.data,
@@ -118,7 +118,7 @@ void MuellerPlatheFlowGPU::updateMinMaxVelocity(void)
                                access_mode::readwrite);
     const unsigned int Ntotal = m_pdata->getN() + m_pdata->getNGhosts();
 
-    kernel::gpu_update_min_max_velocity(d_rtag.data,
+    kernel::gpu_update_min_max_velocity(m_exec_conf->getStream(), d_rtag.data,
                                         d_vel.data,
                                         Ntotal,
                                         m_last_max_vel,

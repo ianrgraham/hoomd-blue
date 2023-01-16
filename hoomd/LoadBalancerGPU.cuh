@@ -15,7 +15,7 @@ namespace hoomd
 namespace kernel
     {
 //! Kernel drive to mark the current rank of each particle
-void gpu_load_balance_mark_rank(unsigned int* d_ranks,
+void gpu_load_balance_mark_rank(const hipStream_t& stream, unsigned int* d_ranks,
                                 const Scalar4* d_pos,
                                 const unsigned int* d_cart_ranks,
                                 const uint3 rank_pos,
@@ -25,7 +25,7 @@ void gpu_load_balance_mark_rank(unsigned int* d_ranks,
                                 const unsigned int block_size);
 
 //! thrust driver to select the particles that are off rank
-unsigned int gpu_load_balance_select_off_rank(unsigned int* d_off_rank,
+unsigned int gpu_load_balance_select_off_rank(const hipStream_t& stream, unsigned int* d_off_rank,
                                               unsigned int* d_ranks,
                                               const unsigned int N,
                                               const unsigned int cur_rank);

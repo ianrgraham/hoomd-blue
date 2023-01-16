@@ -55,7 +55,7 @@ __global__ void gpu_compute_constant_force_set_forces_kernel(const unsigned int 
     d_torque[idx] = vec_to_scalar4(ti, 0);
     }
 
-hipError_t gpu_compute_constant_force_set_forces(const unsigned int group_size,
+hipError_t gpu_compute_constant_force_set_forces(const hipStream_t& stream, const unsigned int group_size,
                                                  unsigned int* d_index_array,
                                                  Scalar4* d_force,
                                                  Scalar4* d_torque,

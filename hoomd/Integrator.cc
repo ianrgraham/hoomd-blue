@@ -544,7 +544,7 @@ void Integrator::computeNetForceGPU(uint64_t timestep)
 
             m_exec_conf->beginMultiGPU();
 
-            gpu_integrator_sum_net_force(d_net_force.data,
+            gpu_integrator_sum_net_force(m_exec_conf->getStream(), d_net_force.data,
                                          d_net_virial.data,
                                          net_virial_pitch,
                                          d_net_torque.data,
@@ -758,7 +758,7 @@ void Integrator::computeNetForceGPU(uint64_t timestep)
 
             m_exec_conf->beginMultiGPU();
 
-            gpu_integrator_sum_net_force(d_net_force.data,
+            gpu_integrator_sum_net_force(m_exec_conf->getStream(), d_net_force.data,
                                          d_net_virial.data,
                                          net_virial.getPitch(),
                                          d_net_torque.data,

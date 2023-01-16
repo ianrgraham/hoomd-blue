@@ -67,7 +67,7 @@ void ConstantForceComputeGPU::setForces()
     // compute the forces on the GPU
     m_tuner->begin();
 
-    kernel::gpu_compute_constant_force_set_forces(group_size,
+    kernel::gpu_compute_constant_force_set_forces(m_exec_conf->getStream(), group_size,
                                                   d_index_array.data,
                                                   d_force.data,
                                                   d_torque.data,

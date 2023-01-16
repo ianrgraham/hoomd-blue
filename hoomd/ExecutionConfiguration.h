@@ -294,6 +294,11 @@ class PYBIND11_EXPORT ExecutionConfiguration
         {
         return *m_cached_alloc_managed;
         }
+
+    const hipStream_t& getStream() const
+        {
+        return m_stream;
+        }
 #endif
 
     //! Set up memory tracing
@@ -398,10 +403,10 @@ class PYBIND11_EXPORT ExecutionConfiguration
 
     mutable bool m_in_multigpu_block; //!< Tracks whether we are in a multi-GPU block
 
+#if defined(ENABLE_HIP)
     /// Concurrent stream used for GPU kernel launches
     hipStream_t m_stream;
-
-#if defined(ENABLE_HIP)
+    
     std::unique_ptr<CachedAllocator> m_cached_alloc; //!< Cached allocator for temporary allocations
     std::unique_ptr<CachedAllocator>
         m_cached_alloc_managed; //!< Cached allocator for temporary allocations in managed memory

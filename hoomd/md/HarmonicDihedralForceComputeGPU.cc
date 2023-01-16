@@ -92,7 +92,7 @@ void HarmonicDihedralForceComputeGPU::computeForces(uint64_t timestep)
 
     // run the kernel in parallel on all GPUs
     this->m_tuner->begin();
-    kernel::gpu_compute_harmonic_dihedral_forces(d_force.data,
+    kernel::gpu_compute_harmonic_dihedral_forces(m_exec_conf->getStream(), d_force.data,
                                                  d_virial.data,
                                                  m_virial.getPitch(),
                                                  m_pdata->getN(),

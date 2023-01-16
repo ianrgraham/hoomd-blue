@@ -95,7 +95,7 @@ __global__ void gpu_rattle_bdtally_reduce_partial_sum_kernel(Scalar* d_sum,
                                                              unsigned int num_blocks);
 
 template<class Manifold>
-hipError_t gpu_rattle_langevin_step_two(const Scalar4* d_pos,
+hipError_t gpu_rattle_langevin_step_two(const hipStream_t& stream, const Scalar4* d_pos,
                                         Scalar4* d_vel,
                                         Scalar3* d_accel,
                                         const Scalar* d_diameter,
@@ -371,7 +371,7 @@ __global__ void gpu_rattle_langevin_step_two_kernel(const Scalar4* d_pos,
     This is just a driver for gpu_rattle_langevin_step_two_kernel(), see it for details.
 */
 template<class Manifold>
-hipError_t gpu_rattle_langevin_step_two(const Scalar4* d_pos,
+hipError_t gpu_rattle_langevin_step_two(const hipStream_t& stream, const Scalar4* d_pos,
                                         Scalar4* d_vel,
                                         Scalar3* d_accel,
                                         const Scalar* d_diameter,

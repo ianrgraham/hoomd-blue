@@ -24,7 +24,7 @@ namespace md
     {
 namespace kernel
     {
-void gpu_assign_particles(const uint3 mesh_dim,
+void gpu_assign_particles(const hipStream_t& stream, const uint3 mesh_dim,
                           const uint3 n_ghost_bins,
                           const uint3 grid_dim,
                           unsigned int group_size,
@@ -41,13 +41,13 @@ void gpu_assign_particles(const uint3 mesh_dim,
                           const hipDeviceProp_t& dev_prop,
                           const GPUPartition& gpu_partition);
 
-void gpu_reduce_meshes(const unsigned int mesh_elements,
+void gpu_reduce_meshes(const hipStream_t& stream, const unsigned int mesh_elements,
                        const hipfftComplex* d_mesh_scratch,
                        hipfftComplex* d_mesh,
                        const unsigned int ngpu,
                        const unsigned int block_size);
 
-void gpu_compute_mesh_virial(const unsigned int n_wave_vectors,
+void gpu_compute_mesh_virial(const hipStream_t& stream, const unsigned int n_wave_vectors,
                              hipfftComplex* d_fourier_mesh,
                              Scalar* d_inf_f,
                              Scalar* d_virial_mesh,
@@ -55,7 +55,7 @@ void gpu_compute_mesh_virial(const unsigned int n_wave_vectors,
                              const bool exclude_dc,
                              Scalar kappa);
 
-void gpu_update_meshes(const unsigned int n_wave_vectors,
+void gpu_update_meshes(const hipStream_t& stream, const unsigned int n_wave_vectors,
                        hipfftComplex* d_fourier_mesh,
                        hipfftComplex* d_fourier_mesh_G_x,
                        hipfftComplex* d_fourier_mesh_G_y,
@@ -65,7 +65,7 @@ void gpu_update_meshes(const unsigned int n_wave_vectors,
                        unsigned int NNN,
                        unsigned int block_size);
 
-void gpu_compute_forces(const unsigned int N,
+void gpu_compute_forces(const hipStream_t& stream, const unsigned int N,
                         const Scalar4* d_postype,
                         Scalar4* d_force,
                         const hipfftComplex* d_inv_fourier_mesh_x,
@@ -84,7 +84,7 @@ void gpu_compute_forces(const unsigned int N,
                         bool local_fft,
                         unsigned int inv_mesh_elements);
 
-void gpu_compute_pe(unsigned int n_wave_vectors,
+void gpu_compute_pe(const hipStream_t& stream, unsigned int n_wave_vectors,
                     Scalar* d_sum_partial,
                     Scalar* d_sum,
                     const hipfftComplex* d_fourier_mesh,
@@ -93,13 +93,13 @@ void gpu_compute_pe(unsigned int n_wave_vectors,
                     const uint3 mesh_dim,
                     const bool exclude_dc);
 
-void gpu_compute_virial(unsigned int n_wave_vectors,
+void gpu_compute_virial(const hipStream_t& stream, unsigned int n_wave_vectors,
                         Scalar* d_sum_virial_partial,
                         Scalar* d_sum_virial,
                         const Scalar* d_mesh_virial,
                         const unsigned int block_size);
 
-void gpu_compute_influence_function(const uint3 mesh_dim,
+void gpu_compute_influence_function(const hipStream_t& stream, const uint3 mesh_dim,
                                     const uint3 global_dim,
                                     Scalar* d_inf_f,
                                     Scalar3* d_k,
@@ -114,7 +114,7 @@ void gpu_compute_influence_function(const uint3 mesh_dim,
                                     int order,
                                     unsigned int block_size);
 
-hipError_t gpu_fix_exclusions(Scalar4* d_force,
+hipError_t gpu_fix_exclusions(const hipStream_t& stream, Scalar4* d_force,
                               Scalar* d_virial,
                               const size_t virial_pitch,
                               const unsigned int N,
@@ -130,7 +130,7 @@ hipError_t gpu_fix_exclusions(Scalar4* d_force,
                               unsigned int group_size,
                               int block_size);
 
-void gpu_initialize_coeff(Scalar* CPU_rho_coeff, int order, const GPUPartition& gpu_partition);
+void gpu_initialize_coeff(const hipStream_t& stream, Scalar* CPU_rho_coeff, int order, const GPUPartition& gpu_partition);
 
     } // end namespace kernel
     } // end namespace md

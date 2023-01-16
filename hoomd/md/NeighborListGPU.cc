@@ -55,7 +55,7 @@ bool NeighborListGPU::distanceCheck(uint64_t timestep)
 
         m_exec_conf->beginMultiGPU();
 
-        kernel::gpu_nlist_needs_update_check_new(d_flags.data,
+        kernel::gpu_nlist_needs_update_check_new(m_exec_conf->getStream(), d_flags.data,
                                                  d_last_pos.data,
                                                  d_pos.data,
                                                  m_pdata->getN(),
@@ -115,7 +115,7 @@ void NeighborListGPU::filterNlist()
     ArrayHandle<size_t> d_head_list(m_head_list, access_location::device, access_mode::read);
 
     m_tuner_filter->begin();
-    kernel::gpu_nlist_filter(d_n_neigh.data,
+    kernel::gpu_nlist_filter(m_exec_conf->getStream(), d_n_neigh.data,
                              d_nlist.data,
                              d_head_list.data,
                              d_n_ex_idx.data,
@@ -149,7 +149,7 @@ void NeighborListGPU::updateExListIdx()
                                             access_location::device,
                                             access_mode::overwrite);
 
-    kernel::gpu_update_exclusion_list(d_tag.data,
+    kernel::gpu_update_exclusion_list(m_exec_conf->getStream(), d_tag.data,
                                       d_rtag.data,
                                       d_n_ex_tag.data,
                                       d_ex_list_tag.data,
@@ -194,7 +194,7 @@ void NeighborListGPU::buildHeadList()
 
         // Hard code block size of 128. This kerenel is rarely called and performance varies little
         // with block size.
-        kernel::gpu_nlist_build_head_list(d_head_list.data,
+        kernel::gpu_nlist_build_head_list(m_exec_conf->getStream(), d_head_list.data,
                                           d_req_size_nlist.data,
                                           d_Nmax.data,
                                           d_pos.data,

@@ -182,7 +182,7 @@ void ComputeThermoGPU::computeProperties()
         args.external_energy = m_pdata->getExternalEnergy();
 
         // perform the computation on the GPU(s)
-        gpu_compute_thermo_partial(d_properties.data,
+        gpu_compute_thermo_partial(m_exec_conf->getStream(), d_properties.data,
                                    d_vel.data,
                                    d_body.data,
                                    d_tag.data,
@@ -201,7 +201,7 @@ void ComputeThermoGPU::computeProperties()
         m_exec_conf->endMultiGPU();
 
         // perform the computation on GPU 0
-        gpu_compute_thermo_final(d_properties.data,
+        gpu_compute_thermo_final(m_exec_conf->getStream(), d_properties.data,
                                  d_vel.data,
                                  d_body.data,
                                  d_tag.data,

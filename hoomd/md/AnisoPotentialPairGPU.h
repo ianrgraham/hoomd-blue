@@ -149,6 +149,7 @@ template<class evaluator> void AnisoPotentialPairGPU<evaluator>::computeForces(u
     bool first = true;
 
     kernel::gpu_compute_pair_aniso_forces<evaluator>(
+        this->m_exec_conf->getStream(),
         kernel::a_pair_args_t(d_force.data,
                               d_torque.data,
                               d_virial.data,

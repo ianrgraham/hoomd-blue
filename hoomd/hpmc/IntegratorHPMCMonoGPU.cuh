@@ -522,7 +522,7 @@ void narrow_phase_launcher(const hpmc_args_t& args,
 
 //! Kernel driver for kernel::hpmc_narrow_phase
 template<class Shape>
-void hpmc_narrow_phase(const hpmc_args_t& args, const typename Shape::param_type* params)
+void hpmc_narrow_phase(const hipStream_t& stream, const hpmc_args_t& args, const typename Shape::param_type* params)
     {
     assert(args.d_postype);
     assert(args.d_orientation);

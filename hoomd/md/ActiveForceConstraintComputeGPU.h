@@ -156,7 +156,7 @@ template<class Manifold> void ActiveForceConstraintComputeGPU<Manifold>::setForc
 
     // compute the forces on the GPU
     this->m_tuner_force->begin();
-    kernel::gpu_compute_active_force_set_forces(group_size,
+    kernel::gpu_compute_active_force_set_forces(this->m_exec_conf->getStream(), group_size,
                                                 d_index_array.data,
                                                 d_force.data,
                                                 d_torque.data,
@@ -206,7 +206,7 @@ void ActiveForceConstraintComputeGPU<Manifold>::rotationalDiffusion(Scalar rotat
     this->m_tuner_diffusion->begin();
 
     kernel::gpu_compute_active_force_constraint_rotational_diffusion<Manifold>(
-        group_size,
+        this->m_exec_conf->getStream(), group_size,
         d_tag.data,
         d_index_array.data,
         d_pos.data,
@@ -250,7 +250,7 @@ template<class Manifold> void ActiveForceConstraintComputeGPU<Manifold>::setCons
     this->m_tuner_constraint->begin();
 
     kernel::gpu_compute_active_force_set_constraints<Manifold>(
-        group_size,
+        this->m_exec_conf->getStream(), group_size,
         d_index_array.data,
         d_pos.data,
         d_orientation.data,

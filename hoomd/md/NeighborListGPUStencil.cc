@@ -107,7 +107,7 @@ void NeighborListGPUStencil::sortTypes()
     ScopedAllocation<unsigned int> d_types_alt(m_exec_conf->getCachedAllocator(), m_pdata->getN());
 
     ArrayHandle<Scalar4> d_pos(m_pdata->getPositions(), access_location::device, access_mode::read);
-    kernel::gpu_compute_nlist_stencil_fill_types(d_pids.data,
+    kernel::gpu_compute_nlist_stencil_fill_types(m_exec_conf->getStream(), d_pids.data,
                                                  d_types(),
                                                  d_pos.data,
                                                  m_pdata->getN());
@@ -119,7 +119,7 @@ void NeighborListGPUStencil::sortTypes()
         void* d_tmp_storage = NULL;
         size_t tmp_storage_bytes = 0;
         bool swap = false;
-        kernel::gpu_compute_nlist_stencil_sort_types(d_pids.data,
+        kernel::gpu_compute_nlist_stencil_sort_types(m_exec_conf->getStream(), d_pids.data,
                                                      d_pids_alt(),
                                                      d_types(),
                                                      d_types_alt(),
@@ -133,7 +133,7 @@ void NeighborListGPUStencil::sortTypes()
         ScopedAllocation<unsigned char> d_alloc(m_exec_conf->getCachedAllocator(), alloc_size);
         d_tmp_storage = (void*)d_alloc();
 
-        kernel::gpu_compute_nlist_stencil_sort_types(d_pids.data,
+        kernel::gpu_compute_nlist_stencil_sort_types(m_exec_conf->getStream(), d_pids.data,
                                                      d_pids_alt(),
                                                      d_types(),
                                                      d_types_alt(),
@@ -274,7 +274,7 @@ void NeighborListGPUStencil::buildNlist(uint64_t timestep)
     unsigned int threads_per_particle = param[1];
 
     // launch neighbor list kernel
-    kernel::gpu_compute_nlist_stencil(d_nlist.data,
+    kernel::gpu_compute_nlist_stencil(m_exec_conf->getStream(), d_nlist.data,
                                       d_n_neigh.data,
                                       d_last_pos.data,
                                       d_conditions.data,

@@ -61,7 +61,7 @@ struct external_potential_args_t
  * \tparam Evaluator functor
  */
 template<class evaluator>
-hipError_t __attribute__((visibility("default"))) gpu_compute_potential_external_forces(
+hipError_t __attribute__((visibility("default"))) gpu_compute_potential_external_forces(const hipStream_t& stream, 
     const kernel::external_potential_args_t& external_potential_args,
     const typename evaluator::param_type* d_params,
     const typename evaluator::field_type* d_field);
@@ -167,7 +167,7 @@ __global__ void gpu_compute_external_forces_kernel(Scalar4* d_force,
  * instantiated per potential in a cu file.
  */
 template<class evaluator>
-hipError_t gpu_compute_potential_external_forces(
+hipError_t gpu_compute_potential_external_forces(const hipStream_t& stream, 
     const kernel::external_potential_args_t& external_potential_args,
     const typename evaluator::param_type* d_params,
     const typename evaluator::field_type* d_field)

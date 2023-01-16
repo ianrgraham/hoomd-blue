@@ -104,7 +104,7 @@ struct hpmc_free_volume_args_t
     };
 
 template<class Shape>
-hipError_t gpu_hpmc_free_volume(const hpmc_free_volume_args_t& args,
+hipError_t gpu_hpmc_free_volume(const hipStream_t& stream, const hpmc_free_volume_args_t& args,
                                 const typename Shape::param_type* d_params);
 
 #ifdef __HIPCC__
@@ -364,7 +364,7 @@ __global__ void gpu_hpmc_free_volume_kernel(unsigned int n_sample,
     \ingroup hpmc_kernels
 */
 template<class Shape>
-hipError_t gpu_hpmc_free_volume(const hpmc_free_volume_args_t& args,
+hipError_t gpu_hpmc_free_volume(const hipStream_t& stream, const hpmc_free_volume_args_t& args,
                                 const typename Shape::param_type* d_params)
     {
     assert(args.d_postype);

@@ -53,11 +53,11 @@ struct hpmc_implicit_args_t
 
 //! Driver for kernel::hpmc_insert_depletants()
 template<class Shape>
-void hpmc_insert_depletants(const hpmc_args_t& args,
+void hpmc_insert_depletants(const hipStream_t& stream, const hpmc_args_t& args,
                             const hpmc_implicit_args_t& implicit_args,
                             const typename Shape::param_type* params);
 
-void generate_num_depletants(const uint16_t seed,
+void generate_num_depletants(const hipStream_t& stream, const uint16_t seed,
                              const uint64_t timestep,
                              const unsigned int select,
                              const unsigned int rank,

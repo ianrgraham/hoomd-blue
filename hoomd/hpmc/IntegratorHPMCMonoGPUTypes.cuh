@@ -166,18 +166,18 @@ struct hpmc_update_args_t
 
 //! Driver for kernel::hpmc_narrow_phase()
 template<class Shape>
-void hpmc_narrow_phase(const hpmc_args_t& args, const typename Shape::param_type* params);
+void hpmc_narrow_phase(const hipStream_t& stream, const hpmc_args_t& args, const typename Shape::param_type* params);
 
 //! Driver for kernel::hpmc_gen_moves()
 template<class Shape>
-void hpmc_gen_moves(const hpmc_args_t& args, const typename Shape::param_type* params);
+void hpmc_gen_moves(const hipStream_t& stream, const hpmc_args_t& args, const typename Shape::param_type* params);
 
 //! Driver for kernel::hpmc_update_pdata()
 template<class Shape>
-void hpmc_update_pdata(const hpmc_update_args_t& args, const typename Shape::param_type* params);
+void hpmc_update_pdata(const hipStream_t& stream, const hpmc_update_args_t& args, const typename Shape::param_type* params);
 
 //! Driver for kernel::hpmc_excell()
-void hpmc_excell(unsigned int* d_excell_idx,
+void hpmc_excell(const hipStream_t& stream, unsigned int* d_excell_idx,
                  unsigned int* d_excell_size,
                  const Index2D& excli,
                  const unsigned int* d_cell_idx,
@@ -190,7 +190,7 @@ void hpmc_excell(unsigned int* d_excell_idx,
                  const unsigned int block_size);
 
 //! Kernel driver for kernel::hpmc_shift()
-void hpmc_shift(Scalar4* d_postype,
+void hpmc_shift(const hipStream_t& stream, Scalar4* d_postype,
                 int3* d_image,
                 const unsigned int N,
                 const BoxDim& box,
@@ -198,7 +198,7 @@ void hpmc_shift(Scalar4* d_postype,
                 const unsigned int block_size);
 
 //! Kernel to evaluate convergence
-void hpmc_check_convergence(const unsigned int* d_trial_move_type,
+void hpmc_check_convergence(const hipStream_t& stream, const unsigned int* d_trial_move_type,
                             const unsigned int* d_reject_out_of_cell,
                             unsigned int* d_reject_in,
                             unsigned int* d_reject_out,

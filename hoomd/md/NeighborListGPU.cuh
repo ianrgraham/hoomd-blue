@@ -22,7 +22,7 @@ namespace md
 namespace kernel
     {
 //! Kernel driver for gpu_nlist_needs_update_check_new_kernel()
-hipError_t gpu_nlist_needs_update_check_new(unsigned int* d_result,
+hipError_t gpu_nlist_needs_update_check_new(const hipStream_t& stream, unsigned int* d_result,
                                             const Scalar4* d_last_pos,
                                             const Scalar4* d_pos,
                                             const unsigned int N,
@@ -36,7 +36,7 @@ hipError_t gpu_nlist_needs_update_check_new(unsigned int* d_result,
                                             const GPUPartition& gpu_partition);
 
 //! Kernel driver for gpu_nlist_filter_kernel()
-hipError_t gpu_nlist_filter(unsigned int* d_n_neigh,
+hipError_t gpu_nlist_filter(const hipStream_t& stream, unsigned int* d_n_neigh,
                             unsigned int* d_nlist,
                             const size_t* d_head_list,
                             const unsigned int* d_n_ex,
@@ -46,7 +46,7 @@ hipError_t gpu_nlist_filter(unsigned int* d_n_neigh,
                             const unsigned int block_size);
 
 //! Kernel driver to build head list on gpu
-hipError_t gpu_nlist_build_head_list(size_t* d_head_list,
+hipError_t gpu_nlist_build_head_list(const hipStream_t& stream, size_t* d_head_list,
                                      size_t* d_req_size_nlist,
                                      const unsigned int* d_Nmax,
                                      const Scalar4* d_pos,
@@ -55,7 +55,7 @@ hipError_t gpu_nlist_build_head_list(size_t* d_head_list,
                                      const unsigned int block_size);
 
 //! GPU function to update the exclusion list on the device
-hipError_t gpu_update_exclusion_list(const unsigned int* d_tag,
+hipError_t gpu_update_exclusion_list(const hipStream_t& stream, const unsigned int* d_tag,
                                      const unsigned int* d_rtag,
                                      const unsigned int* d_n_ex_tag,
                                      const unsigned int* d_ex_list_tag,

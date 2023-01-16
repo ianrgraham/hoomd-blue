@@ -590,7 +590,7 @@ inline void stencil_launcher<min_threads_per_particle / 2>(unsigned int* d_nlist
     {
     }
 
-hipError_t gpu_compute_nlist_stencil(unsigned int* d_nlist,
+hipError_t gpu_compute_nlist_stencil(const hipStream_t& stream, unsigned int* d_nlist,
                                      unsigned int* d_n_neigh,
                                      Scalar4* d_last_updated_pos,
                                      unsigned int* d_conditions,
@@ -682,7 +682,7 @@ __global__ void gpu_compute_nlist_stencil_fill_types_kernel(unsigned int* d_pids
  * \param d_pos Particle position array
  * \param N Number of particles
  */
-hipError_t gpu_compute_nlist_stencil_fill_types(unsigned int* d_pids,
+hipError_t gpu_compute_nlist_stencil_fill_types(const hipStream_t& stream, unsigned int* d_pids,
                                                 unsigned int* d_types,
                                                 const Scalar4* d_pos,
                                                 const unsigned int N)
@@ -717,7 +717,7 @@ hipError_t gpu_compute_nlist_stencil_fill_types(unsigned int* d_pids,
  * tmp_storage_bytes. This space must then be allocated into \a d_tmp_storage, and on the second
  * call, the sorting is performed.
  */
-void gpu_compute_nlist_stencil_sort_types(unsigned int* d_pids,
+void gpu_compute_nlist_stencil_sort_types(const hipStream_t& stream, unsigned int* d_pids,
                                           unsigned int* d_pids_alt,
                                           unsigned int* d_types,
                                           unsigned int* d_types_alt,

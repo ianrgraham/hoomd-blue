@@ -315,7 +315,7 @@ __global__ void gpu_reduce_meshes(const unsigned int mesh_elements,
     d_mesh[idx] = res;
     }
 
-void gpu_assign_particles(const uint3 mesh_dim,
+void gpu_assign_particles(const hipStream_t& stream, const uint3 mesh_dim,
                           const uint3 n_ghost_bins,
                           const uint3 grid_dim,
                           unsigned int group_size,
@@ -386,7 +386,7 @@ void gpu_assign_particles(const uint3 mesh_dim,
     }
 
 //! Reduce temporary arrays for every GPU
-void gpu_reduce_meshes(const unsigned int mesh_elements,
+void gpu_reduce_meshes(const hipStream_t& stream, const unsigned int mesh_elements,
                        const hipfftComplex* d_mesh_scratch,
                        hipfftComplex* d_mesh,
                        const unsigned int ngpu,
@@ -447,7 +447,7 @@ __global__ void gpu_compute_mesh_virial_kernel(const unsigned int n_wave_vectors
         }
     }
 
-void gpu_compute_mesh_virial(const unsigned int n_wave_vectors,
+void gpu_compute_mesh_virial(const hipStream_t& stream, const unsigned int n_wave_vectors,
                              hipfftComplex* d_fourier_mesh,
                              Scalar* d_inf_f,
                              Scalar* d_virial_mesh,
@@ -515,7 +515,7 @@ __global__ void gpu_update_meshes_kernel(const unsigned int n_wave_vectors,
     d_fourier_mesh_G_z[k] = fourier_G_z;
     }
 
-void gpu_update_meshes(const unsigned int n_wave_vectors,
+void gpu_update_meshes(const hipStream_t& stream, const unsigned int n_wave_vectors,
                        hipfftComplex* d_fourier_mesh,
                        hipfftComplex* d_fourier_mesh_G_x,
                        hipfftComplex* d_fourier_mesh_G_y,
@@ -691,7 +691,7 @@ __global__ void gpu_compute_forces_kernel(const unsigned int work_size,
     d_force[idx] = make_scalar4(force.x, force.y, force.z, 0.0);
     }
 
-void gpu_compute_forces(const unsigned int N,
+void gpu_compute_forces(const hipStream_t& stream, const unsigned int N,
                         const Scalar4* d_postype,
                         Scalar4* d_force,
                         const hipfftComplex* d_inv_fourier_mesh_x,
@@ -839,7 +839,7 @@ __global__ void kernel_final_reduce_pe(Scalar* sum_partial, unsigned int nblocks
         }
     }
 
-void gpu_compute_pe(unsigned int n_wave_vectors,
+void gpu_compute_pe(const hipStream_t& stream, unsigned int n_wave_vectors,
                     Scalar* d_sum_partial,
                     Scalar* d_sum,
                     const hipfftComplex* d_fourier_mesh,
@@ -1019,7 +1019,7 @@ kernel_final_reduce_virial(Scalar* sum_virial_partial, unsigned int nblocks, Sca
         }
     }
 
-void gpu_compute_virial(unsigned int n_wave_vectors,
+void gpu_compute_virial(const hipStream_t& stream, unsigned int n_wave_vectors,
                         Scalar* d_sum_virial_partial,
                         Scalar* d_sum_virial,
                         const Scalar* d_mesh_virial,
@@ -1208,7 +1208,7 @@ __global__ void gpu_compute_influence_function_kernel(const uint3 mesh_dim,
     d_k[kidx] = kval;
     }
 
-void gpu_compute_influence_function(const uint3 mesh_dim,
+void gpu_compute_influence_function(const hipStream_t& stream, const uint3 mesh_dim,
                                     const uint3 global_dim,
                                     Scalar* d_inf_f,
                                     Scalar3* d_k,
@@ -1438,7 +1438,7 @@ __global__ void gpu_fix_exclusions_kernel(Scalar4* d_force,
     }
 
 //! The developer has chosen not to document this function
-hipError_t gpu_fix_exclusions(Scalar4* d_force,
+hipError_t gpu_fix_exclusions(const hipStream_t& stream, Scalar4* d_force,
                               Scalar* d_virial,
                               const size_t virial_pitch,
                               const unsigned int Nmax,

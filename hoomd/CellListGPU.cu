@@ -172,7 +172,7 @@ __global__ void gpu_compute_cell_list_kernel(unsigned int* d_cell_size,
         }
     }
 
-void gpu_compute_cell_list(unsigned int* d_cell_size,
+void gpu_compute_cell_list(const hipStream_t& stream, unsigned int* d_cell_size,
                            Scalar4* d_xyzf,
                            Scalar4* d_tdb,
                            Scalar4* d_cell_orientation,
@@ -388,7 +388,7 @@ __global__ void gpu_combine_cell_lists_kernel(const unsigned int* d_cell_size_sc
    \param block_size GPU block size
    \param gpu_partition multi-GPU partition
  */
-hipError_t gpu_combine_cell_lists(const unsigned int* d_cell_size_scratch,
+hipError_t gpu_combine_cell_lists(const hipStream_t& stream, const unsigned int* d_cell_size_scratch,
                                   unsigned int* d_cell_size,
                                   const unsigned int* d_idx_scratch,
                                   unsigned int* d_idx,
@@ -477,7 +477,7 @@ __global__ void gpu_apply_sorted_cell_list_order(unsigned int cl_size,
    \param ci Cell indexer
    \param cli Cell list indexer
  */
-hipError_t gpu_sort_cell_list(unsigned int* d_cell_size,
+hipError_t gpu_sort_cell_list(const hipStream_t& stream, unsigned int* d_cell_size,
                               Scalar4* d_xyzf,
                               Scalar4* d_xyzf_new,
                               Scalar4* d_tdb,

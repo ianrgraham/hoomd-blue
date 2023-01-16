@@ -419,7 +419,7 @@ __global__ void gpu_pdata_add_particles_kernel(unsigned int old_nparticles,
     \param d_in Device array of packed input particle data
     \param d_comm_flags Device array of communication flags (pdata)
 */
-void gpu_pdata_add_particles(const unsigned int old_nparticles,
+void gpu_pdata_add_particles(const hipStream_t& stream, const unsigned int old_nparticles,
                              const unsigned int num_add_ptls,
                              Scalar4* d_pos,
                              Scalar4* d_vel,

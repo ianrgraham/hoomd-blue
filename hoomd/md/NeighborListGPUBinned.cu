@@ -780,7 +780,7 @@ inline void launcher<min_threads_per_particle / 2>(unsigned int* d_nlist,
     {
     }
 
-hipError_t gpu_compute_nlist_binned(unsigned int* d_nlist,
+hipError_t gpu_compute_nlist_binned(const hipStream_t& stream, unsigned int* d_nlist,
                                     unsigned int* d_n_neigh,
                                     Scalar4* d_last_updated_pos,
                                     unsigned int* d_conditions,

@@ -78,6 +78,7 @@ template<class evaluator> void PotentialExternalGPU<evaluator>::computeForces(ui
 
     m_tuner->begin();
     kernel::gpu_compute_potential_external_forces<evaluator>(
+        this->m_exec_conf->getStream(), 
         kernel::external_potential_args_t(d_force.data,
                                           d_virial.data,
                                           this->m_virial.getPitch(),

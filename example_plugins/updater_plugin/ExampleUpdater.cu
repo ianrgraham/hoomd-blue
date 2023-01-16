@@ -40,7 +40,7 @@ __global__ void gpu_zero_velocities_kernel(Scalar4* d_vel, unsigned int N)
     \param N Number of particles
     This is just a driver for gpu_zero_velocities_kernel(), see it for the details
 */
-hipError_t gpu_zero_velocities(Scalar4* d_vel, unsigned int N)
+hipError_t gpu_zero_velocities(const hipStream_t& stream, Scalar4* d_vel, unsigned int N)
     {
     // setup the grid to run the kernel
     int block_size = 256;

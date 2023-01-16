@@ -76,7 +76,7 @@ __global__ void gpu_fire_zero_angmom_kernel(Scalar4* d_angmom,
 This function is just the driver for gpu_fire_zero_v_kernel(), see that function
 for details.
 */
-hipError_t gpu_fire_zero_v(Scalar4* d_vel, unsigned int* d_group_members, unsigned int group_size)
+hipError_t gpu_fire_zero_v(const hipStream_t& stream, Scalar4* d_vel, unsigned int* d_group_members, unsigned int group_size)
     {
     // setup the grid to run the kernel
     int block_size = 256;
@@ -97,7 +97,7 @@ hipError_t gpu_fire_zero_v(Scalar4* d_vel, unsigned int* d_group_members, unsign
     }
 
 hipError_t
-gpu_fire_zero_angmom(Scalar4* d_angmom, unsigned int* d_group_members, unsigned int group_size)
+gpu_fire_zero_angmom(const hipStream_t& stream, Scalar4* d_angmom, unsigned int* d_group_members, unsigned int group_size)
     {
     // setup the grid to run the kernel
     int block_size = 256;
@@ -217,7 +217,7 @@ gpu_fire_reduce_partial_sum_kernel(Scalar* d_sum, Scalar* d_partial_sum, unsigne
     This is a driver for gpu_fire_reduce_pe_partial_kernel() and
     gpu_fire_reduce_partial_sum_kernel(), see them for details
 */
-hipError_t gpu_fire_compute_sum_pe(unsigned int* d_group_members,
+hipError_t gpu_fire_compute_sum_pe(const hipStream_t& stream, unsigned int* d_group_members,
                                    unsigned int group_size,
                                    Scalar4* d_net_force,
                                    Scalar* d_sum_pe,
@@ -573,7 +573,7 @@ __global__ void gpu_fire_reduce_tsq_partial_kernel(const Scalar4* d_net_torque,
     This is a driver for gpu_fire_reduce_{X}_partial_kernel() (where X = P, vsq, asq)
     and gpu_fire_reduce_partial_sum_kernel(), see them for details
 */
-hipError_t gpu_fire_compute_sum_all(const unsigned int N,
+hipError_t gpu_fire_compute_sum_all(const hipStream_t& stream, const unsigned int N,
                                     const Scalar4* d_vel,
                                     const Scalar3* d_accel,
                                     unsigned int* d_group_members,
@@ -653,7 +653,7 @@ hipError_t gpu_fire_compute_sum_all(const unsigned int N,
     return hipSuccess;
     }
 
-hipError_t gpu_fire_compute_sum_all_angular(const unsigned int N,
+hipError_t gpu_fire_compute_sum_all_angular(const hipStream_t& stream, const unsigned int N,
                                             const Scalar4* d_orientation,
                                             const Scalar3* d_inertia,
                                             const Scalar4* d_angmom,
@@ -784,7 +784,7 @@ __global__ void gpu_fire_update_v_kernel(Scalar4* d_vel,
 
     This function is a driver for gpu_fire_update_v_kernel(), see it for details.
 */
-hipError_t gpu_fire_update_v(Scalar4* d_vel,
+hipError_t gpu_fire_update_v(const hipStream_t& stream, Scalar4* d_vel,
                              const Scalar3* d_accel,
                              unsigned int* d_group_members,
                              unsigned int group_size,
@@ -855,7 +855,7 @@ __global__ void gpu_fire_update_angmom_kernel(const Scalar4* d_net_torque,
         }
     }
 
-hipError_t gpu_fire_update_angmom(const Scalar4* d_net_torque,
+hipError_t gpu_fire_update_angmom(const hipStream_t& stream, const Scalar4* d_net_torque,
                                   const Scalar4* d_orientation,
                                   const Scalar3* d_inertia,
                                   Scalar4* d_angmom,

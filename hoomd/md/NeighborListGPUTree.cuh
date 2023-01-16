@@ -31,7 +31,7 @@ namespace kernel
 const unsigned int NeighborListTypeSentinel = 0xffffffff;
 
 //! Kernel driver to generate morton code-type keys for particles and reorder by type
-hipError_t gpu_nlist_mark_types(unsigned int* d_types,
+hipError_t gpu_nlist_mark_types(const hipStream_t& stream, unsigned int* d_types,
                                 unsigned int* d_indexes,
                                 unsigned int* d_lbvh_errors,
                                 Scalar4* d_last_pos,
@@ -43,7 +43,7 @@ hipError_t gpu_nlist_mark_types(unsigned int* d_types,
                                 const unsigned int block_size);
 
 //! Kernel driver to sort particles by type
-uchar2 gpu_nlist_sort_types(void* d_tmp,
+uchar2 gpu_nlist_sort_types(const hipStream_t& stream, void* d_tmp,
                             size_t& tmp_bytes,
                             unsigned int* d_types,
                             unsigned int* d_sorted_types,
@@ -53,7 +53,7 @@ uchar2 gpu_nlist_sort_types(void* d_tmp,
                             const unsigned int num_bits);
 
 //! Kernel driver to count particles by type
-hipError_t gpu_nlist_count_types(unsigned int* d_first,
+hipError_t gpu_nlist_count_types(const hipStream_t& stream, unsigned int* d_first,
                                  unsigned int* d_last,
                                  const unsigned int* d_types,
                                  const unsigned int ntypes,
@@ -61,7 +61,7 @@ hipError_t gpu_nlist_count_types(unsigned int* d_first,
                                  const unsigned int block_size);
 
 //! Kernel driver to rearrange primitives for faster traversal
-hipError_t gpu_nlist_copy_primitives(unsigned int* d_traverse_order,
+hipError_t gpu_nlist_copy_primitives(const hipStream_t& stream, unsigned int* d_traverse_order,
                                      const unsigned int* d_indexes,
                                      const unsigned int* d_primitives,
                                      const unsigned int N,

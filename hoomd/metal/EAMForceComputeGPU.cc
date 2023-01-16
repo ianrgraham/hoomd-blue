@@ -111,7 +111,7 @@ void EAMForceComputeGPU::computeForces(uint64_t timestep)
 
     // Compute energy and forces in GPU
     m_tuner->begin();
-    kernel::gpu_compute_eam_tex_inter_forces(d_force.data,
+    kernel::gpu_compute_eam_tex_inter_forces(m_exec_conf->getStream(), d_force.data,
                                              d_virial.data,
                                              m_virial.getPitch(),
                                              m_pdata->getN(),

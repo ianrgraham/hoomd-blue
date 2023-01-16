@@ -103,7 +103,7 @@ void ActiveForceComputeGPU::setForces()
     // compute the forces on the GPU
     m_tuner_force->begin();
 
-    kernel::gpu_compute_active_force_set_forces(group_size,
+    kernel::gpu_compute_active_force_set_forces(m_exec_conf->getStream(), group_size,
                                                 d_index_array.data,
                                                 d_force.data,
                                                 d_torque.data,
@@ -148,7 +148,7 @@ void ActiveForceComputeGPU::rotationalDiffusion(Scalar rotational_diffusion, uin
     // perform the update on the GPU
     m_tuner_diffusion->begin();
 
-    kernel::gpu_compute_active_force_rotational_diffusion(group_size,
+    kernel::gpu_compute_active_force_rotational_diffusion(m_exec_conf->getStream(), group_size,
                                                           d_tag.data,
                                                           d_index_array.data,
                                                           d_pos.data,

@@ -3334,7 +3334,7 @@ void ParticleData::removeParticlesGPU(GlobalVector<detail::pdata_element>& out,
 
             m_exec_conf->beginMultiGPU();
 
-            n_out = kernel::gpu_pdata_remove(getN(),
+            n_out = kernel::gpu_pdata_remove(m_exec_conf->getStream(), getN(),
                                              d_pos.data,
                                              d_vel.data,
                                              d_accel.data,
@@ -3472,7 +3472,7 @@ void ParticleData::addParticlesGPU(const GlobalVector<detail::pdata_element>& in
         ArrayHandle<detail::pdata_element> d_in(in, access_location::device, access_mode::read);
 
         // add new particles on GPU
-        kernel::gpu_pdata_add_particles(old_nparticles,
+        kernel::gpu_pdata_add_particles(m_exec_conf->getStream(), old_nparticles,
                                         num_add_ptls,
                                         d_pos.data,
                                         d_vel.data,

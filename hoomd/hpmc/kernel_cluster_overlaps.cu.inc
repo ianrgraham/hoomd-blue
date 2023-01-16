@@ -33,7 +33,7 @@ namespace gpu
     {
 //! Kernel driver for kernel::cluster_overlaps
 template void
-hpmc_cluster_overlaps<SHAPE_CLASS(SHAPE)>(const cluster_args_t& args,
+hpmc_cluster_overlaps<SHAPE_CLASS(SHAPE)>(const hipStream_t& stream, const cluster_args_t& args,
                                           const SHAPE_CLASS(SHAPE)::param_type* params);
     } // namespace gpu
 

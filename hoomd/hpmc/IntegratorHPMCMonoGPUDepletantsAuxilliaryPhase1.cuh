@@ -791,7 +791,7 @@ void depletants_launcher_phase1(const hpmc_args_t& args,
     \ingroup hpmc_kernels
 */
 template<class Shape>
-void hpmc_depletants_auxilliary_phase1(const hpmc_args_t& args,
+void hpmc_depletants_auxilliary_phase1(const hipStream_t& stream, const hpmc_args_t& args,
                                        const hpmc_implicit_args_t& implicit_args,
                                        const hpmc_auxilliary_args_t& auxilliary_args,
                                        const typename Shape::param_type* params)

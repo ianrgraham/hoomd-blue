@@ -929,7 +929,7 @@ void BondedGroupData<group_size, Group, name, has_type_mapping>::rebuildGPUTable
             ScopedAllocation<unsigned int> d_offsets(alloc, tmp_size);
 
             // fill group table on GPU
-            gpu_update_group_table<group_size, members_t>(getN() + getNGhosts(),
+            gpu_update_group_table<group_size, members_t>(m_exec_conf->getStream(), getN() + getNGhosts(),
                                                           nptl,
                                                           d_groups.data,
                                                           d_group_typeval.data,

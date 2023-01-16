@@ -20,6 +20,7 @@ namespace kernel
     {
 template __attribute__((visibility("default"))) hipError_t
 gpu_compute_potential_external_forces<EVALUATOR_CLASS>(
+    const hipStream_t& stream,
     const external_potential_args_t& external_potential_args,
     const typename EVALUATOR_CLASS::param_type* d_params,
     const typename EVALUATOR_CLASS::field_type* d_field);

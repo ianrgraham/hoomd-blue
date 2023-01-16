@@ -32,7 +32,7 @@ namespace hpmc
 namespace gpu
     {
 //! Driver for kernel::transform_particles
-template void transform_particles<SHAPE_CLASS(SHAPE)>(const clusters_transform_args_t& args,
+template void transform_particles<SHAPE_CLASS(SHAPE)>(const hipStream_t& stream, const clusters_transform_args_t& args,
                                                       const SHAPE_CLASS(SHAPE)::param_type* params);
     } // namespace gpu
 

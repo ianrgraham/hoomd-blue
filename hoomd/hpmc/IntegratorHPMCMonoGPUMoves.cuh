@@ -275,7 +275,7 @@ __global__ void hpmc_update_pdata(Scalar4* d_postype,
 
 //! Kernel driver for kernel::hpmc_gen_moves
 template<class Shape>
-void hpmc_gen_moves(const hpmc_args_t& args, const typename Shape::param_type* params)
+void hpmc_gen_moves(const hipStream_t& stream, const hpmc_args_t& args, const typename Shape::param_type* params)
     {
     assert(args.d_postype);
     assert(args.d_orientation);
@@ -392,7 +392,7 @@ void hpmc_gen_moves(const hpmc_args_t& args, const typename Shape::param_type* p
 
 //! Driver for kernel::hpmc_update_pdata()
 template<class Shape>
-void hpmc_update_pdata(const hpmc_update_args_t& args, const typename Shape::param_type* params)
+void hpmc_update_pdata(const hipStream_t& stream, const hpmc_update_args_t& args, const typename Shape::param_type* params)
     {
     // determine the maximum block size and clamp the input block size down
     int max_block_size;

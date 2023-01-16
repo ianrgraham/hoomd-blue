@@ -538,7 +538,7 @@ struct AnisoPairForceComputeKernel<evaluator, shift_mode, compute_virial, 0>
     This is just a driver function for gpu_compute_pair_aniso_forces_kernel(), see it for details.
 */
 template<class evaluator>
-hipError_t gpu_compute_pair_aniso_forces(const a_pair_args_t& pair_args,
+hipError_t gpu_compute_pair_aniso_forces(const hipStream_t& stream, const a_pair_args_t& pair_args,
                                          const typename evaluator::param_type* d_params,
                                          const typename evaluator::shape_type* d_shape_params)
     {
@@ -613,7 +613,7 @@ hipError_t gpu_compute_pair_aniso_forces(const a_pair_args_t& pair_args,
     }
 #else
 template<class evaluator>
-hipError_t gpu_compute_pair_aniso_forces(const a_pair_args_t& pair_args,
+hipError_t gpu_compute_pair_aniso_forces(const hipStream_t& stream, const a_pair_args_t& pair_args,
                                          const typename evaluator::param_type* d_params,
                                          const typename evaluator::shape_type* d_shape_params);
 #endif

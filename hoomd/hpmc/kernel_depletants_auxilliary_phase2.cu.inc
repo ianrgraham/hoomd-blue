@@ -33,7 +33,7 @@ namespace gpu
     {
 //! Driver for kernel::hpmc_insert_depletants_phase2()
 template void
-hpmc_depletants_auxilliary_phase2<SHAPE_CLASS(SHAPE)>(const hpmc_args_t& args,
+hpmc_depletants_auxilliary_phase2<SHAPE_CLASS(SHAPE)>(const hipStream_t& stream, const hpmc_args_t& args,
                                                       const hpmc_implicit_args_t& implicit_args,
                                                       const hpmc_auxilliary_args_t& auxilliary_args,
                                                       const SHAPE_CLASS(SHAPE)::param_type* params);

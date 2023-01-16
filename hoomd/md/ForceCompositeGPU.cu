@@ -447,7 +447,7 @@ __global__ void gpu_rigid_virial_sliding_kernel(Scalar* d_virial,
 
 /*!
  */
-hipError_t gpu_rigid_force(Scalar4* d_force,
+hipError_t gpu_rigid_force(const hipStream_t& stream, Scalar4* d_force,
                            Scalar4* d_torque,
                            const unsigned int* d_molecule_len,
                            const unsigned int* d_molecule_list,
@@ -549,7 +549,7 @@ hipError_t gpu_rigid_force(Scalar4* d_force,
     return hipSuccess;
     }
 
-hipError_t gpu_rigid_virial(Scalar* d_virial,
+hipError_t gpu_rigid_virial(const hipStream_t& stream, Scalar* d_virial,
                             const unsigned int* d_molecule_len,
                             const unsigned int* d_molecule_list,
                             const unsigned int* d_molecule_idx,
@@ -742,7 +742,7 @@ __global__ void gpu_update_composite_kernel(unsigned int N,
     d_image[idx] = img + imgi;
     }
 
-void gpu_update_composite(unsigned int N,
+void gpu_update_composite(const hipStream_t& stream, unsigned int N,
                           unsigned int n_ghost,
                           Scalar4* d_postype,
                           Scalar4* d_orientation,
@@ -832,7 +832,7 @@ struct lookup_op : thrust::unary_function<unsigned int, unsigned int>
     const unsigned int* d_rtag;
     };
 
-hipError_t gpu_find_rigid_centers(const unsigned int* d_body,
+hipError_t gpu_find_rigid_centers(const hipStream_t& stream, const unsigned int* d_body,
                                   const unsigned int* d_tag,
                                   const unsigned int* d_rtag,
                                   const unsigned int N,

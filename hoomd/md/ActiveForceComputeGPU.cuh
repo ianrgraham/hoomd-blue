@@ -19,7 +19,7 @@ namespace md
     {
 namespace kernel
     {
-hipError_t gpu_compute_active_force_set_forces(const unsigned int group_size,
+hipError_t gpu_compute_active_force_set_forces(const hipStream_t& stream, const unsigned int group_size,
                                                unsigned int* d_index_array,
                                                Scalar4* d_force,
                                                Scalar4* d_torque,
@@ -30,7 +30,7 @@ hipError_t gpu_compute_active_force_set_forces(const unsigned int group_size,
                                                const unsigned int N,
                                                unsigned int block_size);
 
-hipError_t gpu_compute_active_force_rotational_diffusion(const unsigned int group_size,
+hipError_t gpu_compute_active_force_rotational_diffusion(const hipStream_t& stream, const unsigned int group_size,
                                                          unsigned int* d_tag,
                                                          unsigned int* d_index_array,
                                                          const Scalar4* d_pos,

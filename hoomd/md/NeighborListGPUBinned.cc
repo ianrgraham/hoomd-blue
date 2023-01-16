@@ -147,7 +147,7 @@ void NeighborListGPUBinned::buildNlist(uint64_t timestep)
     unsigned int block_size = param[0];
     unsigned int threads_per_particle = param[1];
 
-    kernel::gpu_compute_nlist_binned(
+    kernel::gpu_compute_nlist_binned(m_exec_conf->getStream(), 
         d_nlist.data,
         d_n_neigh.data,
         d_last_pos.data,

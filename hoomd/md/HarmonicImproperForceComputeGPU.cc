@@ -84,7 +84,7 @@ void HarmonicImproperForceComputeGPU::computeForces(uint64_t timestep)
 
     // run the kernel in parallel on all GPUs
     m_tuner->begin();
-    kernel::gpu_compute_harmonic_improper_forces(d_force.data,
+    kernel::gpu_compute_harmonic_improper_forces(m_exec_conf->getStream(), d_force.data,
                                                  d_virial.data,
                                                  m_virial.getPitch(),
                                                  m_pdata->getN(),

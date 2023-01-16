@@ -215,7 +215,7 @@ __global__ void gpu_compute_cosinesq_angle_forces_kernel(Scalar4* d_force,
     \a d_params should include one Scalar2 element per angle type. The x component contains K the
    spring constant and the y component contains t_0 the equilibrium angle.
 */
-hipError_t gpu_compute_cosinesq_angle_forces(Scalar4* d_force,
+hipError_t gpu_compute_cosinesq_angle_forces(const hipStream_t& stream, Scalar4* d_force,
                                              Scalar* d_virial,
                                              const size_t virial_pitch,
                                              const unsigned int N,

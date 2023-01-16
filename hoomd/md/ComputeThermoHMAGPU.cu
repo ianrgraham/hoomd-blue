@@ -258,7 +258,7 @@ __global__ void gpu_compute_thermo_hma_final_sums(Scalar* d_properties,
    for details.
 */
 
-hipError_t gpu_compute_thermo_hma_partial(Scalar4* d_pos,
+hipError_t gpu_compute_thermo_hma_partial(const hipStream_t& stream, Scalar4* d_pos,
                                           Scalar3* d_lattice_site,
                                           int3* d_image,
                                           unsigned int* d_body,
@@ -326,7 +326,7 @@ hipError_t gpu_compute_thermo_hma_partial(Scalar4* d_pos,
    for details.
 */
 
-hipError_t gpu_compute_thermo_hma_final(Scalar* d_properties,
+hipError_t gpu_compute_thermo_hma_final(const hipStream_t& stream, Scalar* d_properties,
                                         unsigned int* d_body,
                                         unsigned int* d_tag,
                                         unsigned int* d_group_members,

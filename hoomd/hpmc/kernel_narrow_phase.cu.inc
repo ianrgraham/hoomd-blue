@@ -32,7 +32,7 @@ namespace hpmc
 namespace gpu
     {
 //! Driver for kernel::hpmc_narrow_phase()
-template void hpmc_narrow_phase<SHAPE_CLASS(SHAPE)>(const hpmc_args_t& args,
+template void hpmc_narrow_phase<SHAPE_CLASS(SHAPE)>(const hipStream_t& stream, const hpmc_args_t& args,
                                                     const SHAPE_CLASS(SHAPE)::param_type* params);
     } // namespace gpu
 

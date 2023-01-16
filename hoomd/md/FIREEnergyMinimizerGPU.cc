@@ -112,7 +112,7 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
             ArrayHandle<Scalar> d_sumE(m_sum, access_location::device, access_mode::overwrite);
 
             unsigned int num_blocks = group_size / m_block_size + 1;
-            kernel::gpu_fire_compute_sum_pe(d_index_array.data,
+            kernel::gpu_fire_compute_sum_pe(m_exec_conf->getStream(), d_index_array.data,
                                             group_size,
                                             d_net_force.data,
                                             d_sumE.data,
@@ -190,7 +190,7 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
 
             unsigned int num_blocks = group_size / m_block_size + 1;
 
-            kernel::gpu_fire_compute_sum_all(m_pdata->getN(),
+            kernel::gpu_fire_compute_sum_all(m_exec_conf->getStream(), m_pdata->getN(),
                                              d_vel.data,
                                              d_accel.data,
                                              d_index_array.data,
@@ -243,7 +243,7 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
 
                 unsigned int num_blocks = group_size / m_block_size + 1;
 
-                kernel::gpu_fire_compute_sum_all_angular(m_pdata->getN(),
+                kernel::gpu_fire_compute_sum_all_angular(m_exec_conf->getStream(), m_pdata->getN(),
                                                          d_orientation.data,
                                                          d_inertia.data,
                                                          d_angmom.data,
@@ -364,7 +364,7 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
                                      access_location::device,
                                      access_mode::read);
 
-        kernel::gpu_fire_update_v(d_vel.data,
+        kernel::gpu_fire_update_v(m_exec_conf->getStream(), d_vel.data,
                                   d_accel.data,
                                   d_index_array.data,
                                   group_size,
@@ -389,7 +389,7 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
                                            access_location::device,
                                            access_mode::read);
 
-            kernel::gpu_fire_update_angmom(d_net_torque.data,
+            kernel::gpu_fire_update_angmom(m_exec_conf->getStream(), d_net_torque.data,
                                            d_orientation.data,
                                            d_inertia.data,
                                            d_angmom.data,
@@ -433,7 +433,7 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
                                        access_location::device,
                                        access_mode::readwrite);
 
-            kernel::gpu_fire_zero_v(d_vel.data, d_index_array.data, group_size);
+            kernel::gpu_fire_zero_v(m_exec_conf->getStream(), d_vel.data, d_index_array.data, group_size);
             if (m_exec_conf->isCUDAErrorCheckingEnabled())
                 CHECK_CUDA_ERROR();
 
@@ -442,7 +442,7 @@ void FIREEnergyMinimizerGPU::update(uint64_t timestep)
                 ArrayHandle<Scalar4> d_angmom(m_pdata->getAngularMomentumArray(),
                                               access_location::device,
                                               access_mode::readwrite);
-                kernel::gpu_fire_zero_angmom(d_angmom.data, d_index_array.data, group_size);
+                kernel::gpu_fire_zero_angmom(m_exec_conf->getStream(), d_angmom.data, d_index_array.data, group_size);
                 if (m_exec_conf->isCUDAErrorCheckingEnabled())
                     CHECK_CUDA_ERROR();
                 }

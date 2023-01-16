@@ -169,7 +169,7 @@ void ForceDistanceConstraintGPU::fillMatrixVector(uint64_t timestep)
 
         // launch GPU kernel
         m_tuner_fill->begin();
-        kernel::gpu_fill_matrix_vector(n_constraint,
+        kernel::gpu_fill_matrix_vector(m_exec_conf->getStream(), n_constraint,
                                        m_pdata->getN() + m_pdata->getNGhosts(),
                                        d_cmatrix.data,
                                        d_cvec.data,
@@ -313,7 +313,7 @@ void ForceDistanceConstraintGPU::solveConstraints(uint64_t timestep)
             m_nnz_tot = 0;
 
             // count non zeros
-            kernel::gpu_count_nnz(n_constraint,
+            kernel::gpu_count_nnz(m_exec_conf->getStream(), n_constraint,
                                   d_cmatrix.data,
                                   d_nnz.data,
                                   m_nnz_tot,
@@ -343,7 +343,7 @@ void ForceDistanceConstraintGPU::solveConstraints(uint64_t timestep)
                                              access_mode::overwrite);
 
             // count zeros and convert matrix
-            kernel::gpu_dense2sparse(n_constraint,
+            kernel::gpu_dense2sparse(m_exec_conf->getStream(), n_constraint,
                                      d_cmatrix.data,
                                      d_nnz.data,
                                      m_cusparse_handle,
@@ -749,7 +749,7 @@ void ForceDistanceConstraintGPU::computeConstraintForces(uint64_t timestep)
 
     // compute constraint forces by solving linear system of equations
     m_tuner_force->begin();
-    kernel::gpu_compute_constraint_forces(d_pos.data,
+    kernel::gpu_compute_constraint_forces(m_exec_conf->getStream(), d_pos.data,
                                           d_gpu_clist.data,
                                           gpu_table_indexer,
                                           d_gpu_n_constraints.data,

@@ -116,6 +116,7 @@ void CellListGPU::computeCellList()
 
         // compute cell list, and write to temporary arrays with multi-GPU
         gpu_compute_cell_list(
+            m_exec_conf->getStream(),
             (ngpu == 1 && !m_per_device) ? d_cell_size.data : d_cell_size_scratch.data,
             (ngpu == 1 && !m_per_device) ? d_xyzf.data : d_xyzf_scratch.data,
             (ngpu == 1 && !m_per_device) ? d_tdb.data : d_tdb_scratch.data,
@@ -194,6 +195,7 @@ void CellListGPU::computeCellList()
                                                 m_tdb.getNumElements());
 
             gpu_sort_cell_list(
+                m_exec_conf->getStream(),
                 (ngpu == 1 && !m_per_device)
                     ? d_cell_size.data
                     : d_cell_size_scratch.data + i * m_cell_indexer.getNumElements(),
@@ -266,7 +268,8 @@ void CellListGPU::combineCellLists()
     // autotune block sizes
     m_tuner_combine->begin();
 
-    gpu_combine_cell_lists(d_cell_size_scratch.data,
+    gpu_combine_cell_lists(m_exec_conf->getStream(),
+                           d_cell_size_scratch.data,
                            d_cell_size.data,
                            d_cell_idx_scratch.data,
                            d_cell_idx.data,

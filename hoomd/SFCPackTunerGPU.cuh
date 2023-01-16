@@ -18,7 +18,7 @@ namespace hoomd
 namespace kernel
     {
 //! Generate sorted order on GPU
-void gpu_generate_sorted_order(unsigned int N,
+void gpu_generate_sorted_order(const hipStream_t& stream, unsigned int N,
                                const Scalar4* d_pos,
                                unsigned int* d_particle_bins,
                                unsigned int* d_traversal_order,
@@ -29,7 +29,7 @@ void gpu_generate_sorted_order(unsigned int N,
                                CachedAllocator& alloc);
 
 //! Reorder particle data (GPU driver function)
-void gpu_apply_sorted_order(unsigned int N,
+void gpu_apply_sorted_order(const hipStream_t& stream, unsigned int N,
                             unsigned int n_ghost,
                             const unsigned int* d_sorted_order,
                             const Scalar4* d_pos,

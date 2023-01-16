@@ -75,7 +75,7 @@ __global__ void gpu_gridcomm_scatter_add_recv_cells_kernel(unsigned int n_unique
     }
 
 template<typename T>
-void gpu_gridcomm_scatter_send_cells(unsigned int n_send_cells,
+void gpu_gridcomm_scatter_send_cells(const hipStream_t& stream, unsigned int n_send_cells,
                                      unsigned int* d_send_idx,
                                      const T* d_grid,
                                      T* d_send_buf)
@@ -95,7 +95,7 @@ void gpu_gridcomm_scatter_send_cells(unsigned int n_send_cells,
     }
 
 template<typename T>
-void gpu_gridcomm_scatter_add_recv_cells(unsigned int n_unique_recv_cells,
+void gpu_gridcomm_scatter_add_recv_cells(const hipStream_t& stream, unsigned int n_unique_recv_cells,
                                          const T* d_recv_buf,
                                          T* d_grid,
                                          const unsigned int* d_cell_recv,
@@ -140,13 +140,13 @@ void gpu_gridcomm_scatter_add_recv_cells(unsigned int n_unique_recv_cells,
     }
 
 //! Template instantiation for hipfftComplex
-template void gpu_gridcomm_scatter_send_cells<hipfftComplex>(unsigned int n_send_cells,
+template void gpu_gridcomm_scatter_send_cells<hipfftComplex>(const hipStream_t& stream, unsigned int n_send_cells,
                                                              unsigned int* d_send_idx,
                                                              const hipfftComplex* d_grid,
                                                              hipfftComplex* d_send_buf);
 
 template void
-gpu_gridcomm_scatter_add_recv_cells<hipfftComplex>(unsigned int n_unique_recv_cells,
+gpu_gridcomm_scatter_add_recv_cells<hipfftComplex>(const hipStream_t& stream, unsigned int n_unique_recv_cells,
                                                    const hipfftComplex* d_recv_buf,
                                                    hipfftComplex* d_grid,
                                                    const unsigned int* d_cell_recv,
@@ -156,12 +156,12 @@ gpu_gridcomm_scatter_add_recv_cells<hipfftComplex>(unsigned int n_unique_recv_ce
                                                    bool add_outer);
 
 //! Template instantiation for Scalar
-template void gpu_gridcomm_scatter_send_cells<Scalar>(unsigned int n_send_cells,
+template void gpu_gridcomm_scatter_send_cells<Scalar>(const hipStream_t& stream, unsigned int n_send_cells,
                                                       unsigned int* d_send_idx,
                                                       const Scalar* d_grid,
                                                       Scalar* d_send_buf);
 
-template void gpu_gridcomm_scatter_add_recv_cells<Scalar>(unsigned int n_unique_recv_cells,
+template void gpu_gridcomm_scatter_add_recv_cells<Scalar>(const hipStream_t& stream, unsigned int n_unique_recv_cells,
                                                           const Scalar* d_recv_buf,
                                                           Scalar* d_grid,
                                                           const unsigned int* d_cell_recv,
@@ -171,13 +171,13 @@ template void gpu_gridcomm_scatter_add_recv_cells<Scalar>(unsigned int n_unique_
                                                           bool add_outer);
 
 //! Template instantiation for unsigned int
-template void gpu_gridcomm_scatter_send_cells<unsigned int>(unsigned int n_send_cells,
+template void gpu_gridcomm_scatter_send_cells<unsigned int>(const hipStream_t& stream, unsigned int n_send_cells,
                                                             unsigned int* d_send_idx,
                                                             const unsigned int* d_grid,
                                                             unsigned int* d_send_buf);
 
 template void
-gpu_gridcomm_scatter_add_recv_cells<unsigned int>(unsigned int n_unique_recv_cells,
+gpu_gridcomm_scatter_add_recv_cells<unsigned int>(const hipStream_t& stream, unsigned int n_unique_recv_cells,
                                                   const unsigned int* d_recv_buf,
                                                   unsigned int* d_grid,
                                                   const unsigned int* d_cell_recv,

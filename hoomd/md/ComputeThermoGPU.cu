@@ -532,7 +532,7 @@ __global__ void gpu_compute_pressure_tensor_final_sums(Scalar* d_properties,
    for details.
 */
 
-hipError_t gpu_compute_thermo_partial(Scalar* d_properties,
+hipError_t gpu_compute_thermo_partial(const hipStream_t& stream, Scalar* d_properties,
                                       Scalar4* d_vel,
                                       unsigned int* d_body,
                                       unsigned int* d_tag,
@@ -657,7 +657,7 @@ hipError_t gpu_compute_thermo_partial(Scalar* d_properties,
    for details.
 */
 
-hipError_t gpu_compute_thermo_final(Scalar* d_properties,
+hipError_t gpu_compute_thermo_final(const hipStream_t& stream, Scalar* d_properties,
                                     Scalar4* d_vel,
                                     unsigned int* d_body,
                                     unsigned int* d_tag,

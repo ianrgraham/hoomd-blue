@@ -15,7 +15,7 @@
 namespace hoomd
     {
 template<unsigned int group_size, typename group_t>
-void gpu_update_mesh_table(const unsigned int n_groups,
+void gpu_update_mesh_table(const hipStream_t& stream, const unsigned int n_groups,
                            const unsigned int N,
                            const group_t* d_group_table,
                            const typeval_union* d_group_typeval,

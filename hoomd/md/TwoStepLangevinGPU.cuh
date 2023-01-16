@@ -62,7 +62,7 @@ struct langevin_step_two_args
     };
 
 //! Kernel driver for the second part of the Langevin update called by TwoStepLangevinGPU
-hipError_t gpu_langevin_step_two(const Scalar4* d_pos,
+hipError_t gpu_langevin_step_two(const hipStream_t& stream, const Scalar4* d_pos,
                                  Scalar4* d_vel,
                                  Scalar3* d_accel,
                                  const Scalar* d_diameter,
@@ -76,7 +76,7 @@ hipError_t gpu_langevin_step_two(const Scalar4* d_pos,
 
 //! Kernel driver for the second part of the angular Langevin update (NO_SQUISH) by
 //! TwoStepLangevinGPU
-hipError_t gpu_langevin_angular_step_two(const Scalar4* d_pos,
+hipError_t gpu_langevin_angular_step_two(const hipStream_t& stream, const Scalar4* d_pos,
                                          Scalar4* d_orientation,
                                          Scalar4* d_angmom,
                                          const Scalar3* d_inertia,

@@ -57,7 +57,7 @@ namespace md
 namespace kernel
     {
 //! Sort local molecules and assign local molecule indices to particles
-hipError_t gpu_sort_by_molecule(unsigned int nptl,
+hipError_t gpu_sort_by_molecule(const hipStream_t& stream, unsigned int nptl,
                                 const unsigned int* d_tag,
                                 const unsigned int* d_molecule_tag,
                                 unsigned int* d_local_molecule_tags,
@@ -393,7 +393,7 @@ __global__ void gpu_fill_molecule_table_kernel(unsigned int nptl,
         d_molecule_list[molecule_idx(d_molecule_order[idx], molidx)] = idx;
     }
 
-hipError_t gpu_fill_molecule_table(unsigned int nptl,
+hipError_t gpu_fill_molecule_table(const hipStream_t& stream, unsigned int nptl,
                                    unsigned int n_local_ptls_in_molecules,
                                    Index2D molecule_idx,
                                    const unsigned int* d_molecule_idx,

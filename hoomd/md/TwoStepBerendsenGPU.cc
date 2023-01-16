@@ -72,7 +72,7 @@ void TwoStepBerendsenGPU::integrateStepOne(uint64_t timestep)
                                             access_mode::read);
 
     // perform the integration on the GPU
-    kernel::gpu_berendsen_step_one(d_pos.data,
+    kernel::gpu_berendsen_step_one(m_exec_conf->getStream(), d_pos.data,
                                    d_vel.data,
                                    d_accel.data,
                                    d_image.data,
@@ -108,7 +108,7 @@ void TwoStepBerendsenGPU::integrateStepTwo(uint64_t timestep)
                                             access_mode::read);
 
     // perform the second step of the integration on the GPU
-    kernel::gpu_berendsen_step_two(d_vel.data,
+    kernel::gpu_berendsen_step_two(m_exec_conf->getStream(), d_vel.data,
                                    d_accel.data,
                                    d_index_array.data,
                                    group_size,

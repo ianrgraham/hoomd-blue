@@ -285,7 +285,7 @@ __global__ void gpu_compute_harmonic_improper_forces_kernel(Scalar4* d_force,
     \a d_params should include one Scalar4 element per improper type. The x component contains K the
    spring constant and the y component contains sign, and the z component the multiplicity.
 */
-hipError_t gpu_compute_harmonic_improper_forces(Scalar4* d_force,
+hipError_t gpu_compute_harmonic_improper_forces(const hipStream_t& stream, Scalar4* d_force,
                                                 Scalar* d_virial,
                                                 const size_t virial_pitch,
                                                 const unsigned int N,

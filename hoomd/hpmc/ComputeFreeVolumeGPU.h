@@ -198,7 +198,7 @@ template<class Shape> void ComputeFreeVolumeGPU<Shape>::computeFreeVolume(uint64
 
     // update the expanded cells
     this->m_tuner_excell_block_size->begin();
-    gpu::hpmc_excell(d_excell_idx.data,
+    gpu::hpmc_excell(this->m_exec_conf->getStream(), d_excell_idx.data,
                      d_excell_size.data,
                      m_excell_list_indexer,
                      this->m_cl->getPerDevice() ? d_cell_idx_per_device.data : d_cell_idx.data,
@@ -278,7 +278,7 @@ template<class Shape> void ComputeFreeVolumeGPU<Shape>::computeFreeVolume(uint64
                                                          this->m_exec_conf->dev_prop);
 
         // invoke kernel for counting total overlap volume
-        detail::gpu_hpmc_free_volume<Shape>(free_volume_args, params.data());
+        detail::gpu_hpmc_free_volume<Shape>(this->m_exec_conf->getStream(), free_volume_args, params.data());
 
         if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
             CHECK_CUDA_ERROR();

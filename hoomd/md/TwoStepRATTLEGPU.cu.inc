@@ -21,7 +21,7 @@ namespace md
 namespace kernel
     {
 template hipError_t
-gpu_rattle_brownian_step_one<MANIFOLD_CLASS>(Scalar4* d_pos,
+gpu_rattle_brownian_step_one<MANIFOLD_CLASS>(const hipStream_t& stream, Scalar4* d_pos,
                                              int3* d_image,
                                              Scalar4* d_vel,
                                              const BoxDim& box,
@@ -45,7 +45,7 @@ gpu_rattle_brownian_step_one<MANIFOLD_CLASS>(Scalar4* d_pos,
                                              const GPUPartition& gpu_partition);
 
 template hipError_t
-gpu_include_rattle_force_bd<MANIFOLD_CLASS>(const Scalar4* d_pos,
+gpu_include_rattle_force_bd<MANIFOLD_CLASS>(const hipStream_t& stream, const Scalar4* d_pos,
                                             Scalar4* d_net_force,
                                             Scalar* d_net_virial,
                                             const Scalar* d_diameter,
@@ -59,7 +59,7 @@ gpu_include_rattle_force_bd<MANIFOLD_CLASS>(const Scalar4* d_pos,
                                             const bool d_noiseless_t,
                                             const GPUPartition& gpu_partition);
 
-template hipError_t gpu_rattle_langevin_step_two<MANIFOLD_CLASS>(
+template hipError_t gpu_rattle_langevin_step_two<MANIFOLD_CLASS>(const hipStream_t& stream, 
     const Scalar4* d_pos,
     Scalar4* d_vel,
     Scalar3* d_accel,
@@ -73,7 +73,7 @@ template hipError_t gpu_rattle_langevin_step_two<MANIFOLD_CLASS>(
     Scalar deltaT,
     unsigned int D);
 
-template hipError_t gpu_rattle_nve_step_two<MANIFOLD_CLASS>(Scalar4* d_pos,
+template hipError_t gpu_rattle_nve_step_two<MANIFOLD_CLASS>(const hipStream_t& stream, Scalar4* d_pos,
                                                             Scalar4* d_vel,
                                                             Scalar3* d_accel,
                                                             unsigned int* d_group_members,
@@ -87,7 +87,7 @@ template hipError_t gpu_rattle_nve_step_two<MANIFOLD_CLASS>(Scalar4* d_pos,
                                                             bool zero_force,
                                                             unsigned int block_size);
 
-template hipError_t gpu_include_rattle_force_nve<MANIFOLD_CLASS>(const Scalar4* d_pos,
+template hipError_t gpu_include_rattle_force_nve<MANIFOLD_CLASS>(const hipStream_t& stream, const Scalar4* d_pos,
                                                                  const Scalar4* d_vel,
                                                                  Scalar3* d_accel,
                                                                  Scalar4* d_net_force,

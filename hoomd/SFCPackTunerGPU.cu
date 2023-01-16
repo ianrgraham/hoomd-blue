@@ -88,7 +88,7 @@ __global__ void gpu_sfc_bin_particles_kernel(unsigned int N,
     \param box Box dimensions
     \param twod If true, bin particles in two dimensions
     */
-void gpu_generate_sorted_order(unsigned int N,
+void gpu_generate_sorted_order(const hipStream_t& stream, unsigned int N,
                                const Scalar4* d_pos,
                                unsigned int* d_particle_bins,
                                unsigned int* d_traversal_order,
@@ -217,7 +217,7 @@ __global__ void gpu_apply_sorted_order_kernel(unsigned int N,
         }
     }
 
-void gpu_apply_sorted_order(unsigned int N,
+void gpu_apply_sorted_order(const hipStream_t& stream, unsigned int N,
                             unsigned int n_ghost,
                             const unsigned int* d_sorted_order,
                             const Scalar4* d_pos,

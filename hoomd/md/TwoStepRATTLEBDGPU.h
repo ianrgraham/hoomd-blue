@@ -165,7 +165,7 @@ template<class Manifold> void TwoStepRATTLEBDGPU<Manifold>::integrateStepOne(uin
     this->m_exec_conf->beginMultiGPU();
 
     // perform the update on the GPU
-    kernel::gpu_rattle_brownian_step_one(d_pos.data,
+    kernel::gpu_rattle_brownian_step_one(this->m_exec_conf->getStream(), d_pos.data,
                                          d_image.data,
                                          d_vel.data,
                                          this->m_pdata->getBox(),
@@ -251,7 +251,7 @@ template<class Manifold> void TwoStepRATTLEBDGPU<Manifold>::includeRATTLEForce(u
     this->m_exec_conf->beginMultiGPU();
 
     // perform the update on the GPU
-    kernel::gpu_include_rattle_force_bd<Manifold>(d_pos.data,
+    kernel::gpu_include_rattle_force_bd<Manifold>(this->m_exec_conf->getStream(), d_pos.data,
                                                   d_net_force.data,
                                                   d_net_virial.data,
                                                   d_diameter.data,

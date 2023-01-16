@@ -120,7 +120,7 @@ void MolecularForceCompute::initMoleculesGPU()
             m_exec_conf->getCachedAllocator(),
             m_molecule_tag.getNumElements());
 
-        kernel::gpu_sort_by_molecule(nptl_local,
+        kernel::gpu_sort_by_molecule(m_exec_conf->getStream(), nptl_local,
                                      d_tag.data,
                                      d_molecule_tag.data,
                                      d_local_molecule_tags.data,
@@ -173,7 +173,7 @@ void MolecularForceCompute::initMoleculesGPU()
         m_tuner_fill->begin();
         unsigned int block_size = m_tuner_fill->getParam()[0];
 
-        kernel::gpu_fill_molecule_table(nptl_local,
+        kernel::gpu_fill_molecule_table(m_exec_conf->getStream(), nptl_local,
                                         n_local_ptls_in_molecules,
                                         m_molecule_indexer,
                                         d_molecule_idx.data,

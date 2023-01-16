@@ -562,6 +562,7 @@ void MeshGroupData<group_size, Group, name, snap, bond>::rebuildGPUTableGPU()
             gpu_update_mesh_table<
                 group_size,
                 typename BondedGroupData<group_size, Group, name, true>::members_t>(
+                this->m_exec_conf->getStream(),
                 this->getN() + this->getNGhosts(),
                 nptl,
                 d_groups.data,

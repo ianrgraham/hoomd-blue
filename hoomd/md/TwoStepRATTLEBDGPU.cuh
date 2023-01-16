@@ -63,7 +63,7 @@ struct rattle_bd_step_one_args
     };
 
 template<class Manifold>
-hipError_t gpu_rattle_brownian_step_one(Scalar4* d_pos,
+hipError_t gpu_rattle_brownian_step_one(const hipStream_t& stream, Scalar4* d_pos,
                                         int3* d_image,
                                         Scalar4* d_vel,
                                         const BoxDim& box,
@@ -87,7 +87,7 @@ hipError_t gpu_rattle_brownian_step_one(Scalar4* d_pos,
                                         const GPUPartition& gpu_partition);
 
 template<class Manifold>
-hipError_t gpu_include_rattle_force_bd(const Scalar4* d_pos,
+hipError_t gpu_include_rattle_force_bd(const hipStream_t& stream, const Scalar4* d_pos,
                                        Scalar4* d_net_force,
                                        Scalar* d_net_virial,
                                        const Scalar* d_diameter,
@@ -365,7 +365,7 @@ __global__ void gpu_rattle_brownian_step_one_kernel(Scalar4* d_pos,
     }
 
 template<class Manifold>
-hipError_t gpu_rattle_brownian_step_one(Scalar4* d_pos,
+hipError_t gpu_rattle_brownian_step_one(const hipStream_t& stream, Scalar4* d_pos,
                                         int3* d_image,
                                         Scalar4* d_vel,
                                         const BoxDim& box,
@@ -636,7 +636,7 @@ __global__ void gpu_include_rattle_force_bd_kernel(const Scalar4* d_pos,
     }
 
 template<class Manifold>
-hipError_t gpu_include_rattle_force_bd(const Scalar4* d_pos,
+hipError_t gpu_include_rattle_force_bd(const hipStream_t& stream, const Scalar4* d_pos,
                                        Scalar4* d_net_force,
                                        Scalar* d_net_virial,
                                        const Scalar* d_diameter,

@@ -100,7 +100,7 @@ __global__ void gpu_load_balance_mark_rank_kernel(unsigned int* d_ranks,
  *
  * This simply a kernel driver, see gpu_load_balance_mark_rank_kernel for details.
  */
-void gpu_load_balance_mark_rank(unsigned int* d_ranks,
+void gpu_load_balance_mark_rank(const hipStream_t& stream, unsigned int* d_ranks,
                                 const Scalar4* d_pos,
                                 const unsigned int* d_cart_ranks,
                                 const uint3 rank_pos,
@@ -161,7 +161,7 @@ struct NotEqual
  * This function previously used cub::DeviceSelect::If to perform this operation. But, I ran into
  * issues with that in mpcd/SorterGPU.cu. As a precaution, I am also replacing this method here.
  */
-unsigned int gpu_load_balance_select_off_rank(unsigned int* d_off_rank,
+unsigned int gpu_load_balance_select_off_rank(const hipStream_t& stream, unsigned int* d_off_rank,
                                               unsigned int* d_ranks,
                                               const unsigned int N,
                                               const unsigned int cur_rank)

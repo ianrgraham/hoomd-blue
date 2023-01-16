@@ -58,7 +58,7 @@ __global__ void gpu_scatter_member_indices(unsigned int N,
     \param d_tag Array of tags
     \param num_local_members Number of members on the local processor (return value)
 */
-hipError_t gpu_rebuild_index_list(unsigned int N,
+hipError_t gpu_rebuild_index_list(const hipStream_t& stream, unsigned int N,
                                   unsigned int* d_is_member_tag,
                                   unsigned int* d_is_member,
                                   unsigned int* d_tag)
@@ -90,7 +90,7 @@ hipError_t gpu_rebuild_index_list(unsigned int N,
     \param d_tag Array of tags
     \param num_local_members Number of members on the local processor (return value)
 */
-hipError_t gpu_compact_index_list(unsigned int N,
+hipError_t gpu_compact_index_list(const hipStream_t& stream, unsigned int N,
                                   unsigned int* d_is_member,
                                   unsigned int* d_member_idx,
                                   unsigned int& num_local_members,

@@ -21,7 +21,7 @@ namespace md
 namespace kernel
     {
 hipError_t __attribute__((visibility("default")))
-gpu_sort_by_molecule(unsigned int nptl,
+gpu_sort_by_molecule(const hipStream_t& stream, unsigned int nptl,
                      const unsigned int* d_tag,
                      const unsigned int* d_molecule_tag,
                      unsigned int* d_local_molecule_tags,
@@ -43,7 +43,7 @@ gpu_sort_by_molecule(unsigned int nptl,
                      bool check_cuda);
 
 hipError_t __attribute__((visibility("default")))
-gpu_fill_molecule_table(unsigned int nptl,
+gpu_fill_molecule_table(const hipStream_t& stream, unsigned int nptl,
                         unsigned int n_local_ptls_in_molecules,
                         Index2D molecule_idx,
                         const unsigned int* d_molecule_idx,

@@ -315,7 +315,7 @@ void PPPMForceComputeGPU::assignParticles()
     m_tuner_assign->begin();
     unsigned int block_size = m_tuner_assign->getParam()[0];
 
-    kernel::gpu_assign_particles(m_mesh_points,
+    kernel::gpu_assign_particles(m_exec_conf->getStream(), m_mesh_points,
                                  m_n_ghost_cells,
                                  m_grid_dim,
                                  group_size,
@@ -341,7 +341,7 @@ void PPPMForceComputeGPU::assignParticles()
     if (m_exec_conf->getNumActiveGPUs() > 1)
         {
         m_tuner_reduce_mesh->begin();
-        kernel::gpu_reduce_meshes((unsigned int)m_mesh.getNumElements(),
+        kernel::gpu_reduce_meshes(m_exec_conf->getStream(), (unsigned int)m_mesh.getNumElements(),
                                   d_mesh_scratch.data,
                                   d_mesh.data,
                                   m_exec_conf->getNumActiveGPUs(),
@@ -415,7 +415,7 @@ void PPPMForceComputeGPU::updateMeshes()
 
         unsigned int block_size = m_tuner_update->getParam()[0];
         m_tuner_update->begin();
-        kernel::gpu_update_meshes(m_n_inner_cells,
+        kernel::gpu_update_meshes(m_exec_conf->getStream(), m_n_inner_cells,
                                   d_mesh.data + m_ghost_offset,
                                   d_inv_fourier_mesh_x.data + m_ghost_offset,
                                   d_inv_fourier_mesh_y.data + m_ghost_offset,
@@ -578,7 +578,7 @@ void PPPMForceComputeGPU::interpolateForces()
 
     unsigned int block_size = m_tuner_force->getParam()[0];
     m_tuner_force->begin();
-    kernel::gpu_compute_forces(m_pdata->getN(),
+    kernel::gpu_compute_forces(m_exec_conf->getStream(), m_pdata->getN(),
                                d_postype.data,
                                d_force.data,
                                d_inv_fourier_mesh_x.data,
@@ -622,7 +622,7 @@ void PPPMForceComputeGPU::computeVirial()
         }
 #endif
 
-    kernel::gpu_compute_mesh_virial(m_n_inner_cells,
+    kernel::gpu_compute_mesh_virial(m_exec_conf->getStream(), m_n_inner_cells,
                                     d_mesh.data + m_ghost_offset,
                                     d_inf_f.data,
                                     d_virial_mesh.data,
@@ -641,7 +641,7 @@ void PPPMForceComputeGPU::computeVirial()
                                                  access_location::device,
                                                  access_mode::overwrite);
 
-        kernel::gpu_compute_virial(m_n_inner_cells,
+        kernel::gpu_compute_virial(m_exec_conf->getStream(), m_n_inner_cells,
                                    d_sum_virial_partial.data,
                                    d_sum_virial.data,
                                    d_virial_mesh.data,
@@ -678,7 +678,7 @@ Scalar PPPMForceComputeGPU::computePE()
         }
 #endif
 
-    kernel::gpu_compute_pe(m_n_inner_cells,
+    kernel::gpu_compute_pe(m_exec_conf->getStream(), m_n_inner_cells,
                            d_sum_partial.data,
                            m_sum.getDeviceFlags(),
                            d_mesh.data + m_ghost_offset,
@@ -755,7 +755,7 @@ void PPPMForceComputeGPU::computeInfluenceFunction()
 
     unsigned int block_size = m_tuner_influence->getParam()[0];
     m_tuner_influence->begin();
-    kernel::gpu_compute_influence_function(m_mesh_points,
+    kernel::gpu_compute_influence_function(m_exec_conf->getStream(), m_mesh_points,
                                            global_dim,
                                            d_inf_f.data,
                                            d_k.data,
@@ -801,7 +801,7 @@ void PPPMForceComputeGPU::fixExclusions()
 
     Index2D nex = m_nlist->getExListIndexer();
 
-    kernel::gpu_fix_exclusions(d_force.data,
+    kernel::gpu_fix_exclusions(m_exec_conf->getStream(), d_force.data,
                                d_virial.data,
                                m_virial.getPitch(),
                                m_pdata->getN() + m_pdata->getNGhosts(),

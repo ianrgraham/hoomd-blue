@@ -1810,7 +1810,7 @@ void CommunicatorGPU::migrateParticles()
             assert(stage < m_comm_mask.size());
 
             // mark all particles which have left the box for sending (rtag=NOT_LOCAL)
-            gpu_stage_particles(m_pdata->getN(),
+            gpu_stage_particles(m_exec_conf->getStream(), m_pdata->getN(),
                                 d_pos.data,
                                 d_comm_flag.data,
                                 m_pdata->getBox(),
@@ -1896,7 +1896,7 @@ void CommunicatorGPU::migrateParticles()
             ScopedAllocation<detail::pdata_element> d_in_copy(alloc, nsend);
             ScopedAllocation<unsigned int> d_tmp(alloc, nsend);
 
-            gpu_sort_migrating_particles(m_gpu_sendbuf.size(),
+            gpu_sort_migrating_particles(m_exec_conf->getStream(), m_gpu_sendbuf.size(),
                                          d_gpu_sendbuf.data,
                                          d_comm_flags.data,
                                          di,
@@ -2073,7 +2073,7 @@ void CommunicatorGPU::migrateParticles()
             const BoxDim shifted_box = getShiftedBox();
 
             // Apply boundary conditions
-            gpu_wrap_particles(n_recv_tot, d_gpu_recvbuf.data, shifted_box);
+            gpu_wrap_particles(m_exec_conf->getStream(), n_recv_tot, d_gpu_recvbuf.data, shifted_box);
             if (m_exec_conf->isCUDAErrorCheckingEnabled())
                 CHECK_CUDA_ERROR();
             }
@@ -2099,7 +2099,7 @@ void CommunicatorGPU::removeGhostParticleTags()
                                         access_location::device,
                                         access_mode::read);
 
-        gpu_reset_rtags(m_ghosts_added, d_tag.data + m_pdata->getN(), d_rtag.data);
+        gpu_reset_rtags(m_exec_conf->getStream(), m_ghosts_added, d_tag.data + m_pdata->getN(), d_rtag.data);
 
         if (m_exec_conf->isCUDAErrorCheckingEnabled())
             CHECK_CUDA_ERROR();
@@ -2173,7 +2173,7 @@ void CommunicatorGPU::exchangeGhosts()
                                                access_location::device,
                                                access_mode::read);
 
-            gpu_make_ghost_exchange_plan(d_ghost_plan.data,
+            gpu_make_ghost_exchange_plan(m_exec_conf->getStream(), d_ghost_plan.data,
                                          m_pdata->getN() + m_pdata->getNGhosts(),
                                          d_pos.data,
                                          d_body.data,
@@ -2235,7 +2235,7 @@ void CommunicatorGPU::exchangeGhosts()
 
             // count number of neighbors (total and per particle) the ghost ptls are sent to
             m_n_send_ghosts_tot[stage]
-                = gpu_exchange_ghosts_count_neighbors(m_pdata->getN() + m_pdata->getNGhosts(),
+                = gpu_exchange_ghosts_count_neighbors(m_exec_conf->getStream(), m_pdata->getN() + m_pdata->getNGhosts(),
                                                       d_ghost_plan.data,
                                                       d_adj_mask.data,
                                                       d_neigh_counts.data,
@@ -2314,7 +2314,7 @@ void CommunicatorGPU::exchangeGhosts()
                                                   access_mode::overwrite);
 
             //! Fill ghost send list and compute start and end indices per unique neighbor in list
-            gpu_exchange_ghosts_make_indices(m_pdata->getN() + m_pdata->getNGhosts(),
+            gpu_exchange_ghosts_make_indices(m_exec_conf->getStream(), m_pdata->getN() + m_pdata->getNGhosts(),
                                              d_ghost_plan.data,
                                              d_tag.data,
                                              d_adj_mask.data,
@@ -2400,7 +2400,7 @@ void CommunicatorGPU::exchangeGhosts()
             uint3 my_pos = m_pdata->getDomainDecomposition()->getGridPos();
 
             // Pack ghosts into send buffers
-            gpu_exchange_ghosts_pack(m_n_send_ghosts_tot[stage],
+            gpu_exchange_ghosts_pack(m_exec_conf->getStream(), m_n_send_ghosts_tot[stage],
                                      d_ghost_idx_adj.data + m_idx_offs[stage],
                                      d_tag.data,
                                      d_pos.data,
@@ -2984,7 +2984,7 @@ void CommunicatorGPU::exchangeGhosts()
                                                access_mode::readwrite);
 
             // copy recv buf into particle data
-            gpu_exchange_ghosts_copy_buf(m_n_recv_ghosts_tot[stage],
+            gpu_exchange_ghosts_copy_buf(m_exec_conf->getStream(), m_n_recv_ghosts_tot[stage],
                                          d_tag_ghost_recvbuf.data,
                                          d_pos_ghost_recvbuf.data,
                                          d_vel_ghost_recvbuf.data,
@@ -3025,7 +3025,7 @@ void CommunicatorGPU::exchangeGhosts()
                                              access_mode::readwrite);
 
             // update reverse-lookup table
-            gpu_compute_ghost_rtags(first_idx,
+            gpu_compute_ghost_rtags(m_exec_conf->getStream(), first_idx,
                                     m_n_recv_ghosts_tot[stage],
                                     d_tag.data + first_idx,
                                     d_rtag.data);
@@ -3088,7 +3088,7 @@ void CommunicatorGPU::beginUpdateGhosts(uint64_t timestep)
             uint3 my_pos = m_pdata->getDomainDecomposition()->getGridPos();
 
             // Pack ghosts into send buffers
-            gpu_exchange_ghosts_pack(m_n_send_ghosts_tot[stage],
+            gpu_exchange_ghosts_pack(m_exec_conf->getStream(), m_n_send_ghosts_tot[stage],
                                      d_ghost_idx_adj.data + m_idx_offs[stage],
                                      NULL,
                                      d_pos.data,
@@ -3353,7 +3353,7 @@ void CommunicatorGPU::beginUpdateGhosts(uint64_t timestep)
                                                    access_mode::readwrite);
 
                 // copy recv buf into particle data
-                gpu_exchange_ghosts_copy_buf(m_n_recv_ghosts_tot[stage],
+                gpu_exchange_ghosts_copy_buf(m_exec_conf->getStream(), m_n_recv_ghosts_tot[stage],
                                              NULL,
                                              d_pos_ghost_recvbuf.data,
                                              d_vel_ghost_recvbuf.data,
@@ -3434,7 +3434,7 @@ void CommunicatorGPU::finishUpdateGhosts(uint64_t timestep)
                                                access_mode::readwrite);
 
             // copy recv buf into particle data
-            gpu_exchange_ghosts_copy_buf(m_n_recv_ghosts_tot[stage],
+            gpu_exchange_ghosts_copy_buf(m_exec_conf->getStream(), m_n_recv_ghosts_tot[stage],
                                          NULL,
                                          d_pos_ghost_recvbuf.data,
                                          d_vel_ghost_recvbuf.data,
@@ -3530,7 +3530,7 @@ void CommunicatorGPU::updateNetForce(uint64_t timestep)
                                                           access_mode::overwrite);
 
             // Pack ghosts into send buffers
-            gpu_exchange_ghosts_pack_netforce(m_n_send_ghosts_tot[stage],
+            gpu_exchange_ghosts_pack_netforce(m_exec_conf->getStream(), m_n_send_ghosts_tot[stage],
                                               d_ghost_idx_adj.data + m_idx_offs[stage],
                                               d_netforce.data,
                                               d_netforce_ghost_sendbuf.data);
@@ -3557,7 +3557,7 @@ void CommunicatorGPU::updateNetForce(uint64_t timestep)
                                                            access_mode::overwrite);
 
             // Pack ghosts into send buffers
-            gpu_exchange_ghosts_pack_netforce(m_n_send_ghosts_tot[stage],
+            gpu_exchange_ghosts_pack_netforce(m_exec_conf->getStream(), m_n_send_ghosts_tot[stage],
                                               d_ghost_idx_adj.data + m_idx_offs[stage],
                                               d_nettorque.data,
                                               d_nettorque_ghost_sendbuf.data);
@@ -3584,7 +3584,7 @@ void CommunicatorGPU::updateNetForce(uint64_t timestep)
                                                           access_mode::overwrite);
 
             // Pack ghosts into send buffers
-            gpu_exchange_ghosts_pack_netvirial(m_n_send_ghosts_tot[stage],
+            gpu_exchange_ghosts_pack_netvirial(m_exec_conf->getStream(), m_n_send_ghosts_tot[stage],
                                                d_ghost_idx_adj.data + m_idx_offs[stage],
                                                d_netvirial.data,
                                                d_netvirial_ghost_sendbuf.data,
@@ -3778,7 +3778,7 @@ void CommunicatorGPU::updateNetForce(uint64_t timestep)
                                             access_mode::readwrite);
 
             // copy recv buf into particle data
-            gpu_exchange_ghosts_copy_netforce_buf(m_n_recv_ghosts_tot[stage],
+            gpu_exchange_ghosts_copy_netforce_buf(m_exec_conf->getStream(), m_n_recv_ghosts_tot[stage],
                                                   d_netforce_ghost_recvbuf.data,
                                                   d_netforce.data + first_idx);
 
@@ -3799,7 +3799,7 @@ void CommunicatorGPU::updateNetForce(uint64_t timestep)
                                              access_mode::readwrite);
 
             // copy recv buf into particle data
-            gpu_exchange_ghosts_copy_netforce_buf(m_n_recv_ghosts_tot[stage],
+            gpu_exchange_ghosts_copy_netforce_buf(m_exec_conf->getStream(), m_n_recv_ghosts_tot[stage],
                                                   d_nettorque_ghost_recvbuf.data,
                                                   d_nettorque.data + first_idx);
 
@@ -3821,6 +3821,7 @@ void CommunicatorGPU::updateNetForce(uint64_t timestep)
 
             // copy recv buf into particle data
             gpu_exchange_ghosts_copy_netvirial_buf(
+                m_exec_conf->getStream(), 
                 m_n_recv_ghosts_tot[stage],
                 d_netvirial_ghost_recvbuf.data,
                 d_netvirial.data + first_idx,

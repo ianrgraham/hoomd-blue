@@ -150,7 +150,7 @@ void TwoStepRATTLELangevinGPU<Manifold>::integrateStepOne(uint64_t timestep)
     this->m_exec_conf->beginMultiGPU();
     m_tuner_one->begin();
     // perform the update on the GPU
-    kernel::gpu_rattle_nve_step_one(d_pos.data,
+    kernel::gpu_rattle_nve_step_one(this->m_exec_conf->getStream(), d_pos.data,
                                     d_vel.data,
                                     d_accel.data,
                                     d_image.data,
@@ -186,7 +186,7 @@ void TwoStepRATTLELangevinGPU<Manifold>::integrateStepOne(uint64_t timestep)
         this->m_exec_conf->beginMultiGPU();
         m_tuner_angular_one->begin();
 
-        kernel::gpu_rattle_nve_angular_step_one(d_orientation.data,
+        kernel::gpu_rattle_nve_angular_step_one(this->m_exec_conf->getStream(), d_orientation.data,
                                                 d_angmom.data,
                                                 d_inertia.data,
                                                 d_net_torque.data,
@@ -264,7 +264,7 @@ void TwoStepRATTLELangevinGPU<Manifold>::integrateStepTwo(uint64_t timestep)
                                                    this->m_tally,
                                                    this->m_exec_conf->dev_prop);
 
-        kernel::gpu_rattle_langevin_step_two<Manifold>(d_pos.data,
+        kernel::gpu_rattle_langevin_step_two<Manifold>(this->m_exec_conf->getStream(), d_pos.data,
                                                        d_vel.data,
                                                        d_accel.data,
                                                        d_diameter.data,
@@ -363,7 +363,7 @@ void TwoStepRATTLELangevinGPU<Manifold>::includeRATTLEForce(uint64_t timestep)
     // perform the update on the GPU
     this->m_exec_conf->beginMultiGPU();
     m_tuner_force->begin();
-    kernel::gpu_include_rattle_force_nve<Manifold>(d_pos.data,
+    kernel::gpu_include_rattle_force_nve<Manifold>(this->m_exec_conf->getStream(), d_pos.data,
                                                    d_vel.data,
                                                    d_accel.data,
                                                    d_net_force.data,

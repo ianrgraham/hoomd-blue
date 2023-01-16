@@ -40,7 +40,7 @@ template<typename ranks_t> struct rank_element;
 #endif
 
 //! Mark particles that have left the local box for sending
-void gpu_stage_particles(const unsigned int n,
+void gpu_stage_particles(const hipStream_t& stream, const unsigned int n,
                          const Scalar4* d_pos,
                          unsigned int* d_comm_flag,
                          const BoxDim& box,
@@ -56,7 +56,7 @@ void gpu_stage_particles(const unsigned int n,
     \param d_neighbors List of neighbor ranks
     \param alloc Caching allocator
  */
-void gpu_sort_migrating_particles(const size_t nsend,
+void gpu_sort_migrating_particles(const hipStream_t& stream, const size_t nsend,
                                   detail::pdata_element* d_in,
                                   const unsigned int* d_comm_flags,
                                   const Index3D& di,
@@ -73,13 +73,13 @@ void gpu_sort_migrating_particles(const size_t nsend,
                                   CachedAllocator& alloc);
 
 //! Apply boundary conditions
-void gpu_wrap_particles(const unsigned int n_recv, detail::pdata_element* d_in, const BoxDim& box);
+void gpu_wrap_particles(const hipStream_t& stream, const unsigned int n_recv, detail::pdata_element* d_in, const BoxDim& box);
 
 //! Reset reverse lookup tags of particles we are removing
-void gpu_reset_rtags(unsigned int n_delete_ptls, unsigned int* d_delete_tags, unsigned int* d_rtag);
+void gpu_reset_rtags(const hipStream_t& stream, unsigned int n_delete_ptls, unsigned int* d_delete_tags, unsigned int* d_rtag);
 
 //! Construct plans for sending non-bonded ghost particles
-void gpu_make_ghost_exchange_plan(unsigned int* d_plan,
+void gpu_make_ghost_exchange_plan(const hipStream_t& stream, unsigned int* d_plan,
                                   unsigned int N,
                                   const Scalar4* d_pos,
                                   const unsigned int* d_body,
@@ -91,7 +91,7 @@ void gpu_make_ghost_exchange_plan(unsigned int* d_plan,
                                   unsigned int mask);
 
 //! Get neighbor counts
-unsigned int gpu_exchange_ghosts_count_neighbors(unsigned int N,
+unsigned int gpu_exchange_ghosts_count_neighbors(const hipStream_t& stream, unsigned int N,
                                                  const unsigned int* d_ghost_plan,
                                                  const unsigned int* d_adj,
                                                  unsigned int* d_counts,
@@ -100,7 +100,7 @@ unsigned int gpu_exchange_ghosts_count_neighbors(unsigned int N,
                                                  CachedAllocator& alloc);
 
 //! Construct tag lists per ghost particle
-void gpu_exchange_ghosts_make_indices(unsigned int N,
+void gpu_exchange_ghosts_make_indices(const hipStream_t& stream, unsigned int N,
                                       const unsigned int* d_ghost_plan,
                                       const unsigned int* d_tag,
                                       const unsigned int* d_adj,
@@ -117,7 +117,7 @@ void gpu_exchange_ghosts_make_indices(unsigned int N,
                                       CachedAllocator& alloc);
 
 //! Pack ghosts in output buffers
-void gpu_exchange_ghosts_pack(unsigned int n_out,
+void gpu_exchange_ghosts_pack(const hipStream_t& stream, unsigned int n_out,
                               const uint2* d_ghost_idx_adj,
                               const unsigned int* d_tag,
                               const Scalar4* d_pos,
@@ -148,7 +148,7 @@ void gpu_exchange_ghosts_pack(unsigned int n_out,
                               const BoxDim& box);
 
 //! Copy receive buffers into particle data
-void gpu_exchange_ghosts_copy_buf(unsigned int n_recv,
+void gpu_exchange_ghosts_copy_buf(const hipStream_t& stream, unsigned int n_recv,
                                   const unsigned int* d_tag_recvbuf,
                                   const Scalar4* d_pos_recvbuf,
                                   const Scalar4* d_vel_recvbuf,
@@ -175,17 +175,17 @@ void gpu_exchange_ghosts_copy_buf(unsigned int n_recv,
                                   bool send_orientation);
 
 //! Compute ghost rtags
-void gpu_compute_ghost_rtags(unsigned int first_idx,
+void gpu_compute_ghost_rtags(const hipStream_t& stream, unsigned int first_idx,
                              unsigned int n_ghost,
                              const unsigned int* d_tag,
                              unsigned int* d_rtag);
 
 //! Reset ghost plans
-void gpu_reset_exchange_plan(unsigned int N, unsigned int* d_plan);
+void gpu_reset_exchange_plan(const hipStream_t& stream, unsigned int N, unsigned int* d_plan);
 
 //! Mark groups for sending
 template<unsigned int group_size, bool inMesh, typename group_t, typename ranks_t>
-void gpu_mark_groups(unsigned int N,
+void gpu_mark_groups(const hipStream_t& stream, unsigned int N,
                      const unsigned int* d_comm_flags,
                      unsigned int n_groups,
                      const group_t* d_members,
@@ -207,7 +207,7 @@ template<unsigned int group_size,
          typename group_t,
          typename ranks_t,
          typename rank_element_t>
-void gpu_scatter_ranks_and_mark_send_groups(unsigned int n_groups,
+void gpu_scatter_ranks_and_mark_send_groups(const hipStream_t& stream, unsigned int n_groups,
                                             const unsigned int* d_group_tag,
                                             const ranks_t* d_group_ranks,
                                             unsigned int* d_rank_mask,
@@ -221,7 +221,7 @@ void gpu_scatter_ranks_and_mark_send_groups(unsigned int n_groups,
                                             CachedAllocator& alloc);
 
 template<unsigned int group_size, bool inMesh, typename ranks_t, typename rank_element_t>
-void gpu_update_ranks_table(unsigned int n_groups,
+void gpu_update_ranks_table(const hipStream_t& stream, unsigned int n_groups,
                             ranks_t* d_group_ranks,
                             unsigned int* d_group_rtag,
                             unsigned int n_recv,
@@ -232,7 +232,7 @@ template<unsigned int group_size,
          typename group_t,
          typename ranks_t,
          typename packed_t>
-void gpu_scatter_and_mark_groups_for_removal(unsigned int n_groups,
+void gpu_scatter_and_mark_groups_for_removal(const hipStream_t& stream, unsigned int n_groups,
                                              const group_t* d_groups,
                                              const typeval_union* d_group_typeval,
                                              const unsigned int* d_group_tag,
@@ -249,7 +249,7 @@ void gpu_scatter_and_mark_groups_for_removal(unsigned int n_groups,
                                              bool local_multiple);
 
 template<typename group_t, typename ranks_t>
-void gpu_remove_groups(unsigned int n_groups,
+void gpu_remove_groups(const hipStream_t& stream, unsigned int n_groups,
                        const group_t* d_groups,
                        group_t* d_groups_alt,
                        const typeval_union* d_group_typeval,
@@ -265,7 +265,7 @@ void gpu_remove_groups(unsigned int n_groups,
                        CachedAllocator& alloc);
 
 template<typename packed_t, typename group_t, typename ranks_t>
-void gpu_add_groups(unsigned int n_groups,
+void gpu_add_groups(const hipStream_t& stream, unsigned int n_groups,
                     unsigned int n_recv,
                     const packed_t* d_groups_in,
                     group_t* d_groups,
@@ -281,7 +281,7 @@ void gpu_add_groups(unsigned int n_groups,
                     CachedAllocator& alloc);
 
 template<unsigned int group_size, bool inMesh, typename members_t, typename ranks_t>
-void gpu_mark_bonded_ghosts(unsigned int n_groups,
+void gpu_mark_bonded_ghosts(const hipStream_t& stream, unsigned int n_groups,
                             members_t* d_groups,
                             ranks_t* d_ranks,
                             const Scalar4* d_postype,
@@ -295,7 +295,7 @@ void gpu_mark_bonded_ghosts(unsigned int n_groups,
                             unsigned int mask);
 
 template<unsigned int group_size, bool inMesh, typename members_t>
-void gpu_make_ghost_group_exchange_plan(unsigned int* d_ghost_group_plan,
+void gpu_make_ghost_group_exchange_plan(const hipStream_t& stream, unsigned int* d_ghost_group_plan,
                                         const members_t* d_groups,
                                         unsigned int N,
                                         const unsigned int* d_rtag,
@@ -303,7 +303,7 @@ void gpu_make_ghost_group_exchange_plan(unsigned int* d_ghost_group_plan,
                                         unsigned int n_local);
 
 template<class members_t, class ranks_t, class group_element_t>
-void gpu_exchange_ghost_groups_pack(unsigned int n_out,
+void gpu_exchange_ghost_groups_pack(const hipStream_t& stream, unsigned int n_out,
                                     const uint2* d_ghost_idx_adj,
                                     const unsigned int* d_group_tag,
                                     const members_t* d_groups,
@@ -312,7 +312,7 @@ void gpu_exchange_ghost_groups_pack(unsigned int n_out,
                                     group_element_t* d_groups_sendbuf);
 
 template<unsigned int size, bool inMesh, class members_t, class ranks_t, class group_element_t>
-void gpu_exchange_ghost_groups_copy_buf(unsigned int nrecv,
+void gpu_exchange_ghost_groups_copy_buf(const hipStream_t& stream, unsigned int nrecv,
                                         const group_element_t* d_groups_recvbuf,
                                         unsigned int* d_group_tag,
                                         members_t* d_groups,
@@ -326,22 +326,22 @@ void gpu_exchange_ghost_groups_copy_buf(unsigned int nrecv,
                                         unsigned int& n_keep,
                                         CachedAllocator& alloc);
 
-void gpu_exchange_ghosts_pack_netforce(unsigned int n_out,
+void gpu_exchange_ghosts_pack_netforce(const hipStream_t& stream, unsigned int n_out,
                                        const uint2* d_ghost_idx_adj,
                                        const Scalar4* d_netforce,
                                        Scalar4* d_netforce_sendbuf);
 
-void gpu_exchange_ghosts_copy_netforce_buf(unsigned int n_recv,
+void gpu_exchange_ghosts_copy_netforce_buf(const hipStream_t& stream, unsigned int n_recv,
                                            const Scalar4* d_netforce_recvbuf,
                                            Scalar4* d_netforce);
 
-void gpu_exchange_ghosts_pack_netvirial(unsigned int n_out,
+void gpu_exchange_ghosts_pack_netvirial(const hipStream_t& stream, unsigned int n_out,
                                         const uint2* d_ghost_idx_adj,
                                         const Scalar* d_netvirial,
                                         Scalar* d_netvirial_sendbuf,
                                         unsigned int pitch_in);
 
-void gpu_exchange_ghosts_copy_netvirial_buf(unsigned int n_recv,
+void gpu_exchange_ghosts_copy_netvirial_buf(const hipStream_t& stream, unsigned int n_recv,
                                             const Scalar* d_netvirial_recvbuf,
                                             Scalar* d_netvirial,
                                             unsigned int pitch_out);

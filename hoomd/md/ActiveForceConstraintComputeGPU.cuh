@@ -23,7 +23,7 @@ namespace md
 namespace kernel
     {
 template<class Manifold>
-hipError_t gpu_compute_active_force_set_constraints(const unsigned int group_size,
+hipError_t gpu_compute_active_force_set_constraints(const hipStream_t& stream, const unsigned int group_size,
                                                     unsigned int* d_index_array,
                                                     const Scalar4* d_pos,
                                                     Scalar4* d_orientation,
@@ -32,7 +32,7 @@ hipError_t gpu_compute_active_force_set_constraints(const unsigned int group_siz
                                                     unsigned int block_size);
 
 template<class Manifold>
-hipError_t gpu_compute_active_force_constraint_rotational_diffusion(const unsigned int group_size,
+hipError_t gpu_compute_active_force_constraint_rotational_diffusion(const hipStream_t& stream, const unsigned int group_size,
                                                                     unsigned int* d_tag,
                                                                     unsigned int* d_index_array,
                                                                     const Scalar4* d_pos,
@@ -156,7 +156,7 @@ gpu_compute_active_force_constraint_rotational_diffusion_kernel(const unsigned i
     }
 
 template<class Manifold>
-hipError_t gpu_compute_active_force_set_constraints(const unsigned int group_size,
+hipError_t gpu_compute_active_force_set_constraints(const hipStream_t& stream, const unsigned int group_size,
                                                     unsigned int* d_index_array,
                                                     const Scalar4* d_pos,
                                                     Scalar4* d_orientation,
@@ -184,7 +184,7 @@ hipError_t gpu_compute_active_force_set_constraints(const unsigned int group_siz
     }
 
 template<class Manifold>
-hipError_t gpu_compute_active_force_constraint_rotational_diffusion(const unsigned int group_size,
+hipError_t gpu_compute_active_force_constraint_rotational_diffusion(const hipStream_t& stream, const unsigned int group_size,
                                                                     unsigned int* d_tag,
                                                                     unsigned int* d_index_array,
                                                                     const Scalar4* d_pos,

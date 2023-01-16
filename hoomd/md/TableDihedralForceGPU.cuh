@@ -21,7 +21,7 @@ namespace md
 namespace kernel
     {
 //! Kernel driver that computes table forces on the GPU for TableDihedralForceGPU
-hipError_t gpu_compute_table_dihedral_forces(Scalar4* d_force,
+hipError_t gpu_compute_table_dihedral_forces(const hipStream_t& stream, Scalar4* d_force,
                                              Scalar* d_virial,
                                              const size_t virial_pitch,
                                              const unsigned int N,

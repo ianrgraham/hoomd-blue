@@ -62,14 +62,14 @@ struct hpmc_auxilliary_args_t
 
 //! Driver for kernel::hpmc_insert_depletants_auxilliary_phase2()
 template<class Shape>
-void hpmc_depletants_auxilliary_phase2(const hpmc_args_t& args,
+void hpmc_depletants_auxilliary_phase2(const hipStream_t& stream, const hpmc_args_t& args,
                                        const hpmc_implicit_args_t& implicit_args,
                                        const hpmc_auxilliary_args_t& auxilliary_args,
                                        const typename Shape::param_type* params);
 
 //! Driver for kernel::hpmc_insert_depletants_auxilliary_phase1()
 template<class Shape>
-void hpmc_depletants_auxilliary_phase1(const hpmc_args_t& args,
+void hpmc_depletants_auxilliary_phase1(const hipStream_t& stream, const hpmc_args_t& args,
                                        const hpmc_implicit_args_t& implicit_args,
                                        const hpmc_auxilliary_args_t& auxilliary_args,
                                        const typename Shape::param_type* params);
@@ -88,7 +88,7 @@ void hpmc_depletants_accept(const uint16_t seed,
                             const unsigned int block_size,
                             const unsigned int ntypes);
 
-void generate_num_depletants_ntrial(const Scalar4* d_vel,
+void generate_num_depletants_ntrial(const hipStream_t& stream, const Scalar4* d_vel,
                                     const Scalar4* d_trial_vel,
                                     const unsigned int ntrial,
                                     const unsigned int depletant_type_a,

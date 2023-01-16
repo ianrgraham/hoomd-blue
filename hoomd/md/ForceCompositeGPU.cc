@@ -178,7 +178,7 @@ void ForceCompositeGPU::computeForces(uint64_t timestep)
         unsigned int n_bodies_per_block = param[1];
 
         // launch GPU kernel
-        kernel::gpu_rigid_force(d_force.data,
+        kernel::gpu_rigid_force(m_exec_conf->getStream(), d_force.data,
                                 d_torque.data,
                                 d_molecule_length.data,
                                 d_molecule_list.data,
@@ -259,7 +259,7 @@ void ForceCompositeGPU::computeForces(uint64_t timestep)
         unsigned int n_bodies_per_block = param[1];
 
         // launch GPU kernel
-        kernel::gpu_rigid_virial(d_virial.data,
+        kernel::gpu_rigid_virial(m_exec_conf->getStream(), d_virial.data,
                                  d_molecule_length.data,
                                  d_molecule_list.data,
                                  d_molecule_idx.data,
@@ -344,7 +344,7 @@ void ForceCompositeGPU::updateCompositeParticles(uint64_t timestep)
         m_tuner_update->begin();
         unsigned int block_size = m_tuner_update->getParam()[0];
 
-        kernel::gpu_update_composite(m_pdata->getN(),
+        kernel::gpu_update_composite(m_exec_conf->getStream(), m_pdata->getN(),
                                      m_pdata->getNGhosts(),
                                      d_postype.data,
                                      d_orientation.data,
@@ -448,7 +448,7 @@ void ForceCompositeGPU::findRigidCenters()
                                               access_mode::overwrite);
 
     unsigned int n_rigid = 0;
-    kernel::gpu_find_rigid_centers(d_body.data,
+    kernel::gpu_find_rigid_centers(m_exec_conf->getStream(), d_body.data,
                                    d_tag.data,
                                    d_rtag.data,
                                    m_pdata->getN(),

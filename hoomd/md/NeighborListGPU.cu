@@ -83,7 +83,7 @@ __global__ void gpu_nlist_needs_update_check_new_kernel(unsigned int* d_result,
         }
     }
 
-hipError_t gpu_nlist_needs_update_check_new(unsigned int* d_result,
+hipError_t gpu_nlist_needs_update_check_new(const hipStream_t& stream, unsigned int* d_result,
                                             const Scalar4* d_last_pos,
                                             const Scalar4* d_pos,
                                             const unsigned int N,
@@ -222,7 +222,7 @@ __global__ void gpu_nlist_filter_kernel(unsigned int* d_n_neigh,
     d_n_neigh[idx] = new_n_neigh;
     }
 
-hipError_t gpu_nlist_filter(unsigned int* d_n_neigh,
+hipError_t gpu_nlist_filter(const hipStream_t& stream, unsigned int* d_n_neigh,
                             unsigned int* d_nlist,
                             const size_t* d_head_list,
                             const unsigned int* d_n_ex,
@@ -309,7 +309,7 @@ __global__ void gpu_update_exclusion_list_kernel(const unsigned int* tags,
     \param ex_list_indexer Indexer for per-idx exclusion list
     \param N number of particles
  */
-hipError_t gpu_update_exclusion_list(const unsigned int* d_tag,
+hipError_t gpu_update_exclusion_list(const hipStream_t& stream, const unsigned int* d_tag,
                                      const unsigned int* d_rtag,
                                      const unsigned int* d_n_ex_tag,
                                      const unsigned int* d_ex_list_tag,
@@ -412,7 +412,7 @@ __global__ void gpu_nlist_get_nlist_size_kernel(size_t* d_req_size_nlist,
  * performed in place on \a d_head_list using the thrust libraries and a single thread is used to
  * perform compute the total size of the neighbor list while still on device.
  */
-hipError_t gpu_nlist_build_head_list(size_t* d_head_list,
+hipError_t gpu_nlist_build_head_list(const hipStream_t& stream, size_t* d_head_list,
                                      size_t* d_req_size_nlist,
                                      const unsigned int* d_Nmax,
                                      const Scalar4* d_pos,

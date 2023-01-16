@@ -754,14 +754,14 @@ void ParticleGroup::rebuildIndexListGPU() const
     // reset membership properties
     if (m_member_tags.getNumElements() > 0)
         {
-        kernel::gpu_rebuild_index_list(m_pdata->getN(),
+        kernel::gpu_rebuild_index_list(m_exec_conf->getStream(), m_pdata->getN(),
                                        d_is_member_tag.data,
                                        d_is_member.data,
                                        d_tag.data);
         if (m_exec_conf->isCUDAErrorCheckingEnabled())
             CHECK_CUDA_ERROR();
 
-        kernel::gpu_compact_index_list(m_pdata->getN(),
+        kernel::gpu_compact_index_list(m_exec_conf->getStream(), m_pdata->getN(),
                                        d_is_member.data,
                                        d_member_idx.data,
                                        m_num_local_members,

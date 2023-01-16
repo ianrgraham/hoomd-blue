@@ -171,7 +171,7 @@ template<class Manifold> void TwoStepRATTLENVEGPU<Manifold>::integrateStepOne(ui
 
     this->m_exec_conf->beginMultiGPU();
     m_tuner_one->begin();
-    kernel::gpu_rattle_nve_step_one(d_pos.data,
+    kernel::gpu_rattle_nve_step_one(this->m_exec_conf->getStream(), d_pos.data,
                                     d_vel.data,
                                     d_accel.data,
                                     d_image.data,
@@ -208,7 +208,7 @@ template<class Manifold> void TwoStepRATTLENVEGPU<Manifold>::integrateStepOne(ui
         this->m_exec_conf->beginMultiGPU();
         m_tuner_angular_one->begin();
 
-        kernel::gpu_rattle_nve_angular_step_one(d_orientation.data,
+        kernel::gpu_rattle_nve_angular_step_one(this->m_exec_conf->getStream(), d_orientation.data,
                                                 d_angmom.data,
                                                 d_inertia.data,
                                                 d_net_torque.data,
@@ -254,7 +254,7 @@ template<class Manifold> void TwoStepRATTLENVEGPU<Manifold>::integrateStepTwo(ui
 
     auto limit_params = this->getKernelLimitValues(timestep);
 
-    kernel::gpu_rattle_nve_step_two<Manifold>(d_pos.data,
+    kernel::gpu_rattle_nve_step_two<Manifold>(this->m_exec_conf->getStream(), d_pos.data,
                                               d_vel.data,
                                               d_accel.data,
                                               d_index_array.data,
@@ -293,7 +293,7 @@ template<class Manifold> void TwoStepRATTLENVEGPU<Manifold>::integrateStepTwo(ui
         this->m_exec_conf->beginMultiGPU();
         m_tuner_angular_two->begin();
 
-        kernel::gpu_rattle_nve_angular_step_two(d_orientation.data,
+        kernel::gpu_rattle_nve_angular_step_two(this->m_exec_conf->getStream(), d_orientation.data,
                                                 d_angmom.data,
                                                 d_inertia.data,
                                                 d_net_torque.data,
@@ -338,7 +338,7 @@ template<class Manifold> void TwoStepRATTLENVEGPU<Manifold>::includeRATTLEForce(
     // perform the update on the GPU
     this->m_exec_conf->beginMultiGPU();
     m_tuner_force->begin();
-    kernel::gpu_include_rattle_force_nve<Manifold>(d_pos.data,
+    kernel::gpu_include_rattle_force_nve<Manifold>(this->m_exec_conf->getStream(), d_pos.data,
                                                    d_vel.data,
                                                    d_accel.data,
                                                    d_net_force.data,

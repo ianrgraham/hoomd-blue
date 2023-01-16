@@ -125,7 +125,7 @@ __global__ void gpu_nve_step_one_kernel(Scalar4* d_pos,
 
     See gpu_nve_step_one_kernel() for full documentation, this function is just a driver.
 */
-hipError_t gpu_nve_step_one(Scalar4* d_pos,
+hipError_t gpu_nve_step_one(const hipStream_t& stream, Scalar4* d_pos,
                             Scalar4* d_vel,
                             const Scalar3* d_accel,
                             int3* d_image,
@@ -316,7 +316,7 @@ __global__ void gpu_nve_angular_step_one_kernel(Scalar4* d_orientation,
     \param group_size Number of members in the group
     \param deltaT timestep
 */
-hipError_t gpu_nve_angular_step_one(Scalar4* d_orientation,
+hipError_t gpu_nve_angular_step_one(const hipStream_t& stream, Scalar4* d_orientation,
                                     Scalar4* d_angmom,
                                     const Scalar3* d_inertia,
                                     const Scalar4* d_net_torque,
@@ -454,7 +454,7 @@ __global__ void gpu_nve_step_two_kernel(Scalar4* d_vel,
 
     This is just a driver for gpu_nve_step_two_kernel(), see it for details.
 */
-hipError_t gpu_nve_step_two(Scalar4* d_vel,
+hipError_t gpu_nve_step_two(const hipStream_t& stream, Scalar4* d_vel,
                             Scalar3* d_accel,
                             unsigned int* d_group_members,
                             const GPUPartition& gpu_partition,
@@ -571,7 +571,7 @@ __global__ void gpu_nve_angular_step_two_kernel(const Scalar4* d_orientation,
     \param group_size Number of members in the group
     \param deltaT timestep
 */
-hipError_t gpu_nve_angular_step_two(const Scalar4* d_orientation,
+hipError_t gpu_nve_angular_step_two(const hipStream_t& stream, const Scalar4* d_orientation,
                                     Scalar4* d_angmom,
                                     const Scalar3* d_inertia,
                                     const Scalar4* d_net_torque,

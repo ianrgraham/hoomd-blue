@@ -328,7 +328,7 @@ __global__ void gpu_brownian_step_one_kernel(Scalar4* d_pos,
 
     This is just a driver for gpu_brownian_step_one_kernel(), see it for details.
 */
-hipError_t gpu_brownian_step_one(Scalar4* d_pos,
+hipError_t gpu_brownian_step_one(const hipStream_t& stream, Scalar4* d_pos,
                                  Scalar4* d_vel,
                                  int3* d_image,
                                  const BoxDim& box,

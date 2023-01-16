@@ -82,7 +82,7 @@ void TwoStepLangevinGPU::integrateStepOne(uint64_t timestep)
     m_exec_conf->beginMultiGPU();
     m_tuner_one->begin();
     // perform the update on the GPU
-    kernel::gpu_nve_step_one(d_pos.data,
+    kernel::gpu_nve_step_one(m_exec_conf->getStream(), d_pos.data,
                              d_vel.data,
                              d_accel.data,
                              d_image.data,
@@ -119,7 +119,7 @@ void TwoStepLangevinGPU::integrateStepOne(uint64_t timestep)
         m_exec_conf->beginMultiGPU();
         m_tuner_angular_one->begin();
 
-        kernel::gpu_nve_angular_step_one(d_orientation.data,
+        kernel::gpu_nve_angular_step_one(m_exec_conf->getStream(), d_orientation.data,
                                          d_angmom.data,
                                          d_inertia.data,
                                          d_net_torque.data,
@@ -195,7 +195,7 @@ void TwoStepLangevinGPU::integrateStepTwo(uint64_t timestep)
                                             m_tally,
                                             m_exec_conf->dev_prop);
 
-        kernel::gpu_langevin_step_two(d_pos.data,
+        kernel::gpu_langevin_step_two(m_exec_conf->getStream(), d_pos.data,
                                       d_vel.data,
                                       d_accel.data,
                                       d_diameter.data,
@@ -227,7 +227,7 @@ void TwoStepLangevinGPU::integrateStepTwo(uint64_t timestep)
                                            access_mode::read);
 
             unsigned int group_size = m_group->getNumMembers();
-            gpu_langevin_angular_step_two(d_pos.data,
+            gpu_langevin_angular_step_two(m_exec_conf->getStream(), d_pos.data,
                                           d_orientation.data,
                                           d_angmom.data,
                                           d_inertia.data,

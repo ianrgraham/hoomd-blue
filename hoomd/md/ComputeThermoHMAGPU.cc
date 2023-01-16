@@ -162,7 +162,7 @@ void ComputeThermoHMAGPU::computeProperties()
         args.harmonicPressure = m_harmonicPressure;
 
         // perform the computation on the GPU(s)
-        gpu_compute_thermo_hma_partial(d_pos.data,
+        gpu_compute_thermo_hma_partial(m_exec_conf->getStream(), d_pos.data,
                                        d_lattice_site.data,
                                        d_image.data,
                                        d_body.data,
@@ -180,7 +180,7 @@ void ComputeThermoHMAGPU::computeProperties()
         m_exec_conf->endMultiGPU();
 
         // perform the computation on GPU 0
-        gpu_compute_thermo_hma_final(d_properties.data,
+        gpu_compute_thermo_hma_final(m_exec_conf->getStream(), d_properties.data,
                                      d_body.data,
                                      d_tag.data,
                                      d_index_array.data,

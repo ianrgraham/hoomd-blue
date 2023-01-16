@@ -59,7 +59,7 @@ struct pdata_element;
 namespace kernel
     {
 //! Pack particle data into output buffer and remove marked particles
-unsigned int gpu_pdata_remove(const unsigned int N,
+unsigned int gpu_pdata_remove(const hipStream_t& stream, const unsigned int N,
                               const Scalar4* d_pos,
                               const Scalar4* d_vel,
                               const Scalar3* d_accel,
@@ -99,7 +99,7 @@ unsigned int gpu_pdata_remove(const unsigned int N,
                               GPUPartition& gpu_partition);
 
 //! Update particle data with new particles
-void gpu_pdata_add_particles(const unsigned int old_nparticles,
+void gpu_pdata_add_particles(const hipStream_t& stream, const unsigned int old_nparticles,
                              const unsigned int num_add_ptls,
                              Scalar4* d_pos,
                              Scalar4* d_vel,

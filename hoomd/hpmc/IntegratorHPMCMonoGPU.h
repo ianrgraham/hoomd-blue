@@ -1047,7 +1047,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
 
         // update the expanded cells
         this->m_tuner_excell_block_size->begin();
-        gpu::hpmc_excell(d_excell_idx.data,
+        gpu::hpmc_excell(this->m_exec_conf->getStream(), d_excell_idx.data,
                          d_excell_size.data,
                          m_excell_list_indexer,
                          m_cl->getPerDevice() ? d_cell_idx_per_device.data : d_cell_idx.data,
@@ -1156,7 +1156,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                 // reset acceptance results and move types
                 m_tuner_moves->begin();
                 args.block_size = m_tuner_moves->getParam()[0];
-                gpu::hpmc_gen_moves<Shape>(args, params.data());
+                gpu::hpmc_gen_moves<Shape>(this->m_exec_conf->getStream(), args, params.data());
                 if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
                     CHECK_CUDA_ERROR();
                 m_tuner_moves->end();
@@ -1379,7 +1379,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                     args.block_size = param[0];
                     args.tpp = param[1];
                     args.overlap_threads = param[2];
-                    gpu::hpmc_narrow_phase<Shape>(args, params.data());
+                    gpu::hpmc_narrow_phase<Shape>(this->m_exec_conf->getStream(), args, params.data());
                     if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
                         CHECK_CUDA_ERROR();
                     m_tuner_narrow->end();
@@ -1404,7 +1404,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                             // draw random number of depletant insertions per particle from
                             // Poisson distribution
                             m_tuner_num_depletants->begin();
-                            gpu::generate_num_depletants(this->m_sysdef->getSeed(),
+                            gpu::generate_num_depletants(this->m_exec_conf->getStream(), this->m_sysdef->getSeed(),
                                                          timestep,
                                                          i,
                                                          this->m_exec_conf->getRank(),
@@ -1449,7 +1449,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                                 &max_n_depletants[0],
                                 depletants_per_thread,
                                 &m_depletant_streams[itype].front());
-                            gpu::hpmc_insert_depletants<Shape>(args, implicit_args, params.data());
+                            gpu::hpmc_insert_depletants<Shape>(this->m_exec_conf->getStream(), args, implicit_args, params.data());
                             if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
                                 CHECK_CUDA_ERROR();
                             m_tuner_depletants->end();
@@ -1460,6 +1460,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                             // trial insertion and configuration
                             m_tuner_num_depletants_ntrial->begin();
                             gpu::generate_num_depletants_ntrial(
+                                this->m_exec_conf->getStream(),
                                 d_vel.data,
                                 d_trial_vel.data,
                                 ntrial,
@@ -1570,7 +1571,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                             args.block_size = param[0];
                             implicit_args.depletants_per_thread = param[1];
                             args.tpp = param[2];
-                            gpu::hpmc_depletants_auxilliary_phase1<Shape>(args,
+                            gpu::hpmc_depletants_auxilliary_phase1<Shape>(this->m_exec_conf->getStream(), args,
                                                                           implicit_args,
                                                                           auxilliary_args,
                                                                           params.data());
@@ -1584,7 +1585,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                             args.block_size = param[0];
                             implicit_args.depletants_per_thread = param[1];
                             args.tpp = param[2];
-                            gpu::hpmc_depletants_auxilliary_phase2<Shape>(args,
+                            gpu::hpmc_depletants_auxilliary_phase2<Shape>(this->m_exec_conf->getStream(), args,
                                                                           implicit_args,
                                                                           auxilliary_args,
                                                                           params.data());
@@ -1836,7 +1837,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
 
                     this->m_exec_conf->beginMultiGPU();
                     m_tuner_convergence->begin();
-                    gpu::hpmc_check_convergence(d_trial_move_type.data,
+                    gpu::hpmc_check_convergence(this->m_exec_conf->getStream(), d_trial_move_type.data,
                                                 d_reject_out_of_cell.data,
                                                 d_reject.data,
                                                 d_reject_out.data,
@@ -1917,7 +1918,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                                              d_trial_move_type.data,
                                              d_reject.data,
                                              m_tuner_update_pdata->getParam()[0]);
-                gpu::hpmc_update_pdata<Shape>(args, params.data());
+                gpu::hpmc_update_pdata<Shape>(this->m_exec_conf->getStream(), args, params.data());
                 if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
                     CHECK_CUDA_ERROR();
                 m_tuner_update_pdata->end();
@@ -1979,7 +1980,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                                   access_location::device,
                                   access_mode::readwrite);
 
-        gpu::hpmc_shift(d_postype.data, d_image.data, this->m_pdata->getN(), box, shift, 128);
+        gpu::hpmc_shift(this->m_exec_conf->getStream(), d_postype.data, d_image.data, this->m_pdata->getN(), box, shift, 128);
         }
     if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
         CHECK_CUDA_ERROR();

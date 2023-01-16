@@ -315,7 +315,7 @@ __global__ void gpu_compute_table_dihedral_forces_kernel(Scalar4* d_force,
     \note This is just a kernel driver. See gpu_compute_table_dihedral_forces_kernel for full
    documentation.
 */
-hipError_t gpu_compute_table_dihedral_forces(Scalar4* d_force,
+hipError_t gpu_compute_table_dihedral_forces(const hipStream_t& stream, Scalar4* d_force,
                                              Scalar* d_virial,
                                              const size_t virial_pitch,
                                              const unsigned int N,

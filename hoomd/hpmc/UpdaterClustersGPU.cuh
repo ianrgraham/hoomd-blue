@@ -186,12 +186,12 @@ struct clusters_transform_args_t
     };
 
 template<class Shape>
-void transform_particles(const clusters_transform_args_t& args,
+void transform_particles(const hipStream_t& stream, const clusters_transform_args_t& args,
                          const typename Shape::param_type* d_params);
 
 //! Kernel driver for kernel::hpmc_clusters_overlaps
 template<class Shape>
-void hpmc_cluster_overlaps(const cluster_args_t& args, const typename Shape::param_type* params);
+void hpmc_cluster_overlaps(const hipStream_t& stream, const cluster_args_t& args, const typename Shape::param_type* params);
 
 #ifdef __HIPCC__
 namespace kernel
@@ -683,7 +683,7 @@ __global__ void transform_particles(Scalar4* d_postype,
 
 //! Kernel driver for kernel::hpmc_clusters_overlaps
 template<class Shape>
-void hpmc_cluster_overlaps(const cluster_args_t& args, const typename Shape::param_type* params)
+void hpmc_cluster_overlaps(const hipStream_t& stream, const cluster_args_t& args, const typename Shape::param_type* params)
     {
     assert(args.d_postype);
     assert(args.d_orientation);
@@ -700,7 +700,7 @@ void hpmc_cluster_overlaps(const cluster_args_t& args, const typename Shape::par
     }
 
 template<class Shape>
-void transform_particles(const clusters_transform_args_t& args,
+void transform_particles(const hipStream_t& stream, const clusters_transform_args_t& args,
                          const typename Shape::param_type* d_params)
     {
     // determine the maximum block size and clamp the input block size down

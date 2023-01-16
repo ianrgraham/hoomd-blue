@@ -605,7 +605,7 @@ void UpdaterClustersGPU<Shape>::transform(const quat<Scalar>& q,
 
     this->m_exec_conf->beginMultiGPU();
     m_tuner_transform->begin();
-    gpu::transform_particles<Shape>(args, params.data());
+    gpu::transform_particles<Shape>(this->m_exec_conf->getStream(), args, params.data());
     if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
         CHECK_CUDA_ERROR();
     m_tuner_transform->end();
@@ -744,7 +744,7 @@ void UpdaterClustersGPU<Shape>::findInteractions(uint64_t timestep,
 
     // update the expanded cells
     this->m_tuner_excell_block_size->begin();
-    gpu::hpmc_excell(d_excell_idx.data,
+    gpu::hpmc_excell(this->m_exec_conf->getStream(), d_excell_idx.data,
                      d_excell_size.data,
                      m_excell_list_indexer,
                      m_cl->getPerDevice() ? d_cell_idx_per_device.data : d_cell_idx.data,
@@ -875,7 +875,7 @@ void UpdaterClustersGPU<Shape>::findInteractions(uint64_t timestep,
             args.block_size = param[0];
             args.tpp = param[1];
             args.overlap_threads = param[2];
-            gpu::hpmc_cluster_overlaps<Shape>(args, params.data());
+            gpu::hpmc_cluster_overlaps<Shape>(this->m_exec_conf->getStream(), args, params.data());
             if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
                 CHECK_CUDA_ERROR();
             m_tuner_overlaps->end();
@@ -898,7 +898,7 @@ void UpdaterClustersGPU<Shape>::findInteractions(uint64_t timestep,
                 // distribution
                 m_tuner_num_depletants->begin();
 
-                gpu::generate_num_depletants(this->m_sysdef->getSeed(),
+                gpu::generate_num_depletants(this->m_exec_conf->getStream(), this->m_sysdef->getSeed(),
                                              timestep,
                                              0, // is select really always 0 here?
                                              this->m_exec_conf->getRank(),
@@ -939,7 +939,7 @@ void UpdaterClustersGPU<Shape>::findInteractions(uint64_t timestep,
                                                         &max_n_depletants[0],
                                                         depletants_per_thread,
                                                         &m_depletant_streams[itype].front());
-                gpu::hpmc_clusters_depletants<Shape>(args, implicit_args, params.data());
+                gpu::hpmc_clusters_depletants<Shape>(this->m_exec_conf->getStream(), args, implicit_args, params.data());
                 if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
                     CHECK_CUDA_ERROR();
                 m_tuner_depletants->end();

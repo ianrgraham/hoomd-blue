@@ -307,7 +307,7 @@ __global__ void gpu_kernel_2(Scalar4* d_force,
     }
 
 //! compute forces on GPU
-hipError_t gpu_compute_eam_tex_inter_forces(Scalar4* d_force,
+hipError_t gpu_compute_eam_tex_inter_forces(const hipStream_t& stream, Scalar4* d_force,
                                             Scalar* d_virial,
                                             const size_t virial_pitch,
                                             const unsigned int N,

@@ -19,7 +19,7 @@ namespace md
     {
 namespace kernel
     {
-hipError_t gpu_fill_matrix_vector(unsigned int n_constraint,
+hipError_t gpu_fill_matrix_vector(const hipStream_t& stream, unsigned int n_constraint,
                                   unsigned int nptl_local,
                                   double* d_matrix,
                                   double* d_vec,
@@ -42,14 +42,14 @@ hipError_t gpu_fill_matrix_vector(unsigned int n_constraint,
 
 #ifdef CUSOLVER_AVAILABLE
 
-hipError_t gpu_count_nnz(unsigned int n_constraint,
+hipError_t gpu_count_nnz(const hipStream_t& stream, unsigned int n_constraint,
                          double* d_matrix,
                          int* d_nnz,
                          int& nnz,
                          cusparseHandle_t cusparse_handle,
                          cusparseMatDescr_t cusparse_mat_descr);
 #ifndef CUSPARSE_NEW_API
-hipError_t gpu_dense2sparse(unsigned int n_constraint,
+hipError_t gpu_dense2sparse(const hipStream_t& stream, unsigned int n_constraint,
                             double* d_matrix,
                             int* d_nnz,
                             cusparseHandle_t cusparse_handle,
@@ -60,7 +60,7 @@ hipError_t gpu_dense2sparse(unsigned int n_constraint,
 #endif
 #endif
 
-hipError_t gpu_compute_constraint_forces(const Scalar4* d_pos,
+hipError_t gpu_compute_constraint_forces(const hipStream_t& stream, const Scalar4* d_pos,
                                          const group_storage<2>* d_gpu_clist,
                                          const Index2D& gpu_clist_indexer,
                                          const unsigned int* d_gpu_n_constraints,

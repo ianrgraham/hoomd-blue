@@ -80,7 +80,7 @@ void BondTablePotentialGPU::computeForces(uint64_t timestep)
 
         // run the kernel on all GPUs in parallel
         m_tuner->begin();
-        kernel::gpu_compute_bondtable_forces(d_force.data,
+        kernel::gpu_compute_bondtable_forces(m_exec_conf->getStream(), d_force.data,
                                              d_virial.data,
                                              m_virial.getPitch(),
                                              m_pdata->getN(),

@@ -143,7 +143,7 @@ struct get_migrate_key_gpu : public thrust::unary_function<const unsigned int, u
     \param comm_mask Mask of allowed communication directions
     \param alloc Caching allocator
  */
-void gpu_stage_particles(const unsigned int N,
+void gpu_stage_particles(const hipStream_t& stream, const unsigned int N,
                          const Scalar4* d_pos,
                          unsigned int* d_comm_flag,
                          const BoxDim& box,
@@ -179,7 +179,7 @@ void gpu_stage_particles(const unsigned int N,
     \param mask Mask of communicating directions
     \param alloc Caching allocator
  */
-void gpu_sort_migrating_particles(const size_t nsend,
+void gpu_sort_migrating_particles(const hipStream_t& stream, const size_t nsend,
                                   detail::pdata_element* d_in,
                                   const unsigned int* d_comm_flags,
                                   const Index3D& di,
@@ -268,7 +268,7 @@ __global__ void gpu_wrap_particles_kernel(const unsigned int n_recv,
     \param d_in Buffer of particle data elements
     \param box Box for which to apply boundary conditions
  */
-void gpu_wrap_particles(const unsigned int n_recv, detail::pdata_element* d_in, const BoxDim& box)
+void gpu_wrap_particles(const hipStream_t& stream, const unsigned int n_recv, detail::pdata_element* d_in, const BoxDim& box)
     {
     assert(d_in);
 
@@ -290,7 +290,7 @@ void gpu_wrap_particles(const unsigned int n_recv, detail::pdata_element* d_in, 
  * \param d_delete_tags Array of particle tags to delete
  * \param d_rtag Array for tag->idx lookup
  */
-void gpu_reset_rtags(unsigned int n_delete_ptls, unsigned int* d_delete_tags, unsigned int* d_rtag)
+void gpu_reset_rtags(const hipStream_t& stream, unsigned int n_delete_ptls, unsigned int* d_delete_tags, unsigned int* d_rtag)
     {
     assert(d_delete_tags);
     assert(d_rtag);
@@ -362,7 +362,7 @@ __global__ void gpu_make_ghost_exchange_plan_kernel(unsigned int N,
  * \param box Dimensions of local simulation box
  * \param r_ghost Width of boundary layer
  */
-void gpu_make_ghost_exchange_plan(unsigned int* d_plan,
+void gpu_make_ghost_exchange_plan(const hipStream_t& stream, unsigned int* d_plan,
                                   unsigned int N,
                                   const Scalar4* d_pos,
                                   const unsigned int* d_body,
@@ -473,7 +473,7 @@ __global__ void gpu_make_ghost_group_exchange_plan_kernel(unsigned int N,
     };
 
 template<unsigned int group_size, bool inMesh, typename members_t>
-void gpu_make_ghost_group_exchange_plan(unsigned int* d_ghost_group_plan,
+void gpu_make_ghost_group_exchange_plan(const hipStream_t& stream, unsigned int* d_ghost_group_plan,
                                         const members_t* d_groups,
                                         unsigned int N,
                                         const unsigned int* d_rtag,
@@ -562,7 +562,7 @@ struct get_neighbor_rank_n
         }
     };
 
-unsigned int gpu_exchange_ghosts_count_neighbors(unsigned int N,
+unsigned int gpu_exchange_ghosts_count_neighbors(const hipStream_t& stream, unsigned int N,
                                                  const unsigned int* d_ghost_plan,
                                                  const unsigned int* d_adj,
                                                  unsigned int* d_counts,
@@ -650,7 +650,7 @@ __global__ void gpu_expand_neighbors_kernel(const unsigned int n_out,
     d_idx_adj_out[idx] = make_uint2(pidx, neighbor_adj.y);
     }
 
-void gpu_exchange_ghosts_make_indices(unsigned int N,
+void gpu_exchange_ghosts_make_indices(const hipStream_t& stream, unsigned int N,
                                       const unsigned int* d_ghost_plan,
                                       const unsigned int* d_tag,
                                       const unsigned int* d_adj,
@@ -877,7 +877,7 @@ __global__ void gpu_pack_wrap_kernel(unsigned int n_out,
         }
     }
 
-void gpu_exchange_ghosts_pack(unsigned int n_out,
+void gpu_exchange_ghosts_pack(const hipStream_t& stream, unsigned int n_out,
                               const uint2* d_ghost_idx_adj,
                               const unsigned int* d_tag,
                               const Scalar4* d_pos,
@@ -1020,7 +1020,7 @@ void gpu_exchange_ghosts_pack(unsigned int n_out,
         }
     }
 
-void gpu_exchange_ghosts_pack_netforce(unsigned int n_out,
+void gpu_exchange_ghosts_pack_netforce(const hipStream_t& stream, unsigned int n_out,
                                        const uint2* d_ghost_idx_adj,
                                        const Scalar4* d_netforce,
                                        Scalar4* d_netforce_sendbuf)
@@ -1060,7 +1060,7 @@ __global__ void gpu_pack_netvirial_kernel(unsigned int n_out,
     out[6 * buf_idx + 5] = in[idx + 5 * pitch_in];
     }
 
-void gpu_exchange_ghosts_pack_netvirial(unsigned int n_out,
+void gpu_exchange_ghosts_pack_netvirial(const hipStream_t& stream, unsigned int n_out,
                                         const uint2* d_ghost_idx_adj,
                                         const Scalar* d_netvirial,
                                         Scalar* d_netvirial_sendbuf,
@@ -1109,7 +1109,7 @@ __global__ void gpu_group_pack_kernel(unsigned int n_out,
     }
 
 template<class members_t, class ranks_t, class group_element_t>
-void gpu_exchange_ghost_groups_pack(unsigned int n_out,
+void gpu_exchange_ghost_groups_pack(const hipStream_t& stream, unsigned int n_out,
                                     const uint2* d_ghost_idx_adj,
                                     const unsigned int* d_group_tag,
                                     const members_t* d_groups,
@@ -1149,7 +1149,7 @@ template<typename T> __global__ void gpu_unpack_kernel(unsigned int n_in, const 
     out[buf_idx] = in[buf_idx];
     }
 
-void gpu_exchange_ghosts_copy_buf(unsigned int n_recv,
+void gpu_exchange_ghosts_copy_buf(const hipStream_t& stream, unsigned int n_recv,
                                   const unsigned int* d_tag_recvbuf,
                                   const Scalar4* d_pos_recvbuf,
                                   const Scalar4* d_vel_recvbuf,
@@ -1267,7 +1267,7 @@ void gpu_exchange_ghosts_copy_buf(unsigned int n_recv,
         }
     }
 
-void gpu_exchange_ghosts_copy_netforce_buf(unsigned int n_recv,
+void gpu_exchange_ghosts_copy_netforce_buf(const hipStream_t& stream, unsigned int n_recv,
                                            const Scalar4* d_netforce_recvbuf,
                                            Scalar4* d_netforce)
     {
@@ -1302,7 +1302,7 @@ __global__ void gpu_unpack_netvirial_kernel(unsigned int n_in,
     out[buf_idx + 5 * pitch_out] = in[6 * buf_idx + 5];
     }
 
-void gpu_exchange_ghosts_copy_netvirial_buf(unsigned int n_recv,
+void gpu_exchange_ghosts_copy_netvirial_buf(const hipStream_t& stream, unsigned int n_recv,
                                             const Scalar* d_netvirial_recvbuf,
                                             Scalar* d_netvirial,
                                             unsigned int pitch_out)
@@ -1392,7 +1392,7 @@ __global__ void gpu_mark_received_ghost_groups_kernel(unsigned int nrecv,
     }
 
 template<unsigned int size, bool inMesh, class members_t, class ranks_t, class group_element_t>
-void gpu_exchange_ghost_groups_copy_buf(unsigned int nrecv,
+void gpu_exchange_ghost_groups_copy_buf(const hipStream_t& stream, unsigned int nrecv,
                                         const group_element_t* d_groups_recvbuf,
                                         unsigned int* d_group_tag,
                                         members_t* d_groups,
@@ -1474,7 +1474,7 @@ void gpu_exchange_ghost_groups_copy_buf(unsigned int nrecv,
                        d_scan);
     }
 
-void gpu_compute_ghost_rtags(unsigned int first_idx,
+void gpu_compute_ghost_rtags(const hipStream_t& stream, unsigned int first_idx,
                              unsigned int n_ghost,
                              const unsigned int* d_tag,
                              unsigned int* d_rtag)
@@ -1632,7 +1632,7 @@ __global__ void gpu_mark_groups_kernel(unsigned int N,
     \param incomplete If true, initially update auxiliary rank information
  */
 template<unsigned int group_size, bool inMesh, typename group_t, typename ranks_t>
-void gpu_mark_groups(unsigned int N,
+void gpu_mark_groups(const hipStream_t& stream, unsigned int N,
                      const unsigned int* d_comm_flags,
                      unsigned int n_groups,
                      const group_t* d_members,
@@ -1783,7 +1783,7 @@ template<unsigned int group_size,
          typename group_t,
          typename ranks_t,
          typename rank_element_t>
-void gpu_scatter_ranks_and_mark_send_groups(unsigned int n_groups,
+void gpu_scatter_ranks_and_mark_send_groups(const hipStream_t& stream, unsigned int n_groups,
                                             const unsigned int* d_group_tag,
                                             const ranks_t* d_group_ranks,
                                             unsigned int* d_rank_mask,
@@ -1910,7 +1910,7 @@ __global__ void gpu_update_ranks_table_kernel(unsigned int n_groups,
     }
 
 template<unsigned int group_size, bool inMesh, typename ranks_t, typename rank_element_t>
-void gpu_update_ranks_table(unsigned int n_groups,
+void gpu_update_ranks_table(const hipStream_t& stream, unsigned int n_groups,
                             ranks_t* d_group_ranks,
                             unsigned int* d_group_rtag,
                             unsigned int n_recv,
@@ -2013,7 +2013,7 @@ template<unsigned int group_size,
          typename group_t,
          typename ranks_t,
          typename packed_t>
-void gpu_scatter_and_mark_groups_for_removal(unsigned int n_groups,
+void gpu_scatter_and_mark_groups_for_removal(const hipStream_t& stream, unsigned int n_groups,
                                              const group_t* d_groups,
                                              const typeval_union* d_group_typeval,
                                              const unsigned int* d_group_tag,
@@ -2105,7 +2105,7 @@ __global__ void gpu_remove_groups_kernel(unsigned int n_groups,
     }
 
 template<typename group_t, typename ranks_t>
-void gpu_remove_groups(unsigned int n_groups,
+void gpu_remove_groups(const hipStream_t& stream, unsigned int n_groups,
                        const group_t* d_groups,
                        group_t* d_groups_alt,
                        const typeval_union* d_group_typeval,
@@ -2275,7 +2275,7 @@ __global__ void gpu_add_groups_kernel(unsigned int n_recv,
     }
 
 template<typename packed_t, typename group_t, typename ranks_t>
-void gpu_add_groups(unsigned int n_groups,
+void gpu_add_groups(const hipStream_t& stream, unsigned int n_groups,
                     unsigned int n_recv,
                     const packed_t* d_groups_in,
                     group_t* d_groups,
@@ -2486,7 +2486,7 @@ __global__ void gpu_mark_bonded_ghosts_kernel(unsigned int n_groups,
     }
 
 template<unsigned int group_size, bool inMesh, typename members_t, typename ranks_t>
-void gpu_mark_bonded_ghosts(unsigned int n_groups,
+void gpu_mark_bonded_ghosts(const hipStream_t& stream, unsigned int n_groups,
                             members_t* d_groups,
                             ranks_t* d_ranks,
                             const Scalar4* d_postype,
@@ -2528,7 +2528,7 @@ void gpu_mark_bonded_ghosts(unsigned int n_groups,
                        mask);
     }
 
-void gpu_reset_exchange_plan(unsigned int N, unsigned int* d_plan)
+void gpu_reset_exchange_plan(const hipStream_t& stream, unsigned int N, unsigned int* d_plan)
     {
     hipMemsetAsync(d_plan, 0, sizeof(unsigned int) * N);
     }
@@ -2537,7 +2537,7 @@ void gpu_reset_exchange_plan(unsigned int N, unsigned int* d_plan)
  */
 
 template void
-gpu_mark_groups<2, false, group_storage<2>, group_storage<2>>(unsigned int N,
+gpu_mark_groups<2, false, group_storage<2>, group_storage<2>>(const hipStream_t& stream, unsigned int N,
                                                               const unsigned int* d_comm_flags,
                                                               unsigned int n_groups,
                                                               const group_storage<2>* d_members,
@@ -2554,7 +2554,7 @@ gpu_mark_groups<2, false, group_storage<2>, group_storage<2>>(unsigned int N,
                                                               CachedAllocator& alloc);
 
 template void
-gpu_scatter_ranks_and_mark_send_groups<2, false>(unsigned int n_groups,
+gpu_scatter_ranks_and_mark_send_groups<2, false>(const hipStream_t& stream, unsigned int n_groups,
                                                  const unsigned int* d_group_tag,
                                                  const group_storage<2>* d_group_ranks,
                                                  unsigned int* d_rank_mask,
@@ -2568,14 +2568,14 @@ gpu_scatter_ranks_and_mark_send_groups<2, false>(unsigned int n_groups,
                                                  CachedAllocator& alloc);
 
 template void
-gpu_update_ranks_table<2, false>(unsigned int n_groups,
+gpu_update_ranks_table<2, false>(const hipStream_t& stream, unsigned int n_groups,
                                  group_storage<2>* d_group_ranks,
                                  unsigned int* d_group_rtag,
                                  unsigned int n_recv,
                                  const rank_element<group_storage<2>>* d_ranks_recvbuf);
 
 template void
-gpu_scatter_and_mark_groups_for_removal<2, false>(unsigned int n_groups,
+gpu_scatter_and_mark_groups_for_removal<2, false>(const hipStream_t& stream, unsigned int n_groups,
                                                   const group_storage<2>* d_groups,
                                                   const typeval_union* d_group_typeval,
                                                   const unsigned int* d_group_tag,
@@ -2591,7 +2591,7 @@ gpu_scatter_and_mark_groups_for_removal<2, false>(unsigned int n_groups,
                                                   unsigned int* d_out_rank_mask,
                                                   bool local_multiple);
 
-template void gpu_remove_groups(unsigned int n_groups,
+template void gpu_remove_groups(const hipStream_t& stream, unsigned int n_groups,
                                 const group_storage<2>* d_groups,
                                 group_storage<2>* d_groups_alt,
                                 const typeval_union* d_group_typeval,
@@ -2606,7 +2606,7 @@ template void gpu_remove_groups(unsigned int n_groups,
                                 unsigned int* d_scan,
                                 CachedAllocator& alloc);
 
-template void gpu_add_groups(unsigned int n_groups,
+template void gpu_add_groups(const hipStream_t& stream, unsigned int n_groups,
                              unsigned int n_recv,
                              const packed_storage<2>* d_groups_in,
                              group_storage<2>* d_groups,
@@ -2621,7 +2621,7 @@ template void gpu_add_groups(unsigned int n_groups,
                              unsigned int myrank,
                              CachedAllocator& alloc);
 
-template void gpu_mark_bonded_ghosts<2, false>(unsigned int n_groups,
+template void gpu_mark_bonded_ghosts<2, false>(const hipStream_t& stream, unsigned int n_groups,
                                                group_storage<2>* d_groups,
                                                group_storage<2>* d_ranks,
                                                const Scalar4* d_postype,
@@ -2639,7 +2639,7 @@ template void gpu_mark_bonded_ghosts<2, false>(unsigned int n_groups,
  */
 
 template void
-gpu_mark_groups<3, false, group_storage<3>, group_storage<3>>(unsigned int N,
+gpu_mark_groups<3, false, group_storage<3>, group_storage<3>>(const hipStream_t& stream, unsigned int N,
                                                               const unsigned int* d_comm_flags,
                                                               unsigned int n_groups,
                                                               const group_storage<3>* d_members,
@@ -2656,7 +2656,7 @@ gpu_mark_groups<3, false, group_storage<3>, group_storage<3>>(unsigned int N,
                                                               CachedAllocator& alloc);
 
 template void
-gpu_scatter_ranks_and_mark_send_groups<3, false>(unsigned int n_groups,
+gpu_scatter_ranks_and_mark_send_groups<3, false>(const hipStream_t& stream, unsigned int n_groups,
                                                  const unsigned int* d_group_tag,
                                                  const group_storage<3>* d_group_ranks,
                                                  unsigned int* d_rank_mask,
@@ -2670,14 +2670,14 @@ gpu_scatter_ranks_and_mark_send_groups<3, false>(unsigned int n_groups,
                                                  CachedAllocator& alloc);
 
 template void
-gpu_update_ranks_table<3, false>(unsigned int n_groups,
+gpu_update_ranks_table<3, false>(const hipStream_t& stream, unsigned int n_groups,
                                  group_storage<3>* d_group_ranks,
                                  unsigned int* d_group_rtag,
                                  unsigned int n_recv,
                                  const rank_element<group_storage<3>>* d_ranks_recvbuf);
 
 template void
-gpu_scatter_and_mark_groups_for_removal<3, false>(unsigned int n_groups,
+gpu_scatter_and_mark_groups_for_removal<3, false>(const hipStream_t& stream, unsigned int n_groups,
                                                   const group_storage<3>* d_groups,
                                                   const typeval_union* d_group_typeval,
                                                   const unsigned int* d_group_tag,
@@ -2693,7 +2693,7 @@ gpu_scatter_and_mark_groups_for_removal<3, false>(unsigned int n_groups,
                                                   unsigned int* d_out_rank_mask,
                                                   bool local_multiple);
 
-template void gpu_remove_groups(unsigned int n_groups,
+template void gpu_remove_groups(const hipStream_t& stream, unsigned int n_groups,
                                 const group_storage<3>* d_groups,
                                 group_storage<3>* d_groups_alt,
                                 const typeval_union* d_group_typeval,
@@ -2708,7 +2708,7 @@ template void gpu_remove_groups(unsigned int n_groups,
                                 unsigned int* d_scan,
                                 CachedAllocator& alloc);
 
-template void gpu_add_groups(unsigned int n_groups,
+template void gpu_add_groups(const hipStream_t& stream, unsigned int n_groups,
                              unsigned int n_recv,
                              const packed_storage<3>* d_groups_in,
                              group_storage<3>* d_groups,
@@ -2723,7 +2723,7 @@ template void gpu_add_groups(unsigned int n_groups,
                              unsigned int myrank,
                              CachedAllocator& alloc);
 
-template void gpu_mark_bonded_ghosts<3, false>(unsigned int n_groups,
+template void gpu_mark_bonded_ghosts<3, false>(const hipStream_t& stream, unsigned int n_groups,
                                                group_storage<3>* d_groups,
                                                group_storage<3>* d_ranks,
                                                const Scalar4* d_postype,
@@ -2741,7 +2741,7 @@ template void gpu_mark_bonded_ghosts<3, false>(unsigned int n_groups,
  */
 
 template void
-gpu_mark_groups<4, false, group_storage<4>, group_storage<4>>(unsigned int N,
+gpu_mark_groups<4, false, group_storage<4>, group_storage<4>>(const hipStream_t& stream, unsigned int N,
                                                               const unsigned int* d_comm_flags,
                                                               unsigned int n_groups,
                                                               const group_storage<4>* d_members,
@@ -2758,7 +2758,7 @@ gpu_mark_groups<4, false, group_storage<4>, group_storage<4>>(unsigned int N,
                                                               CachedAllocator& alloc);
 
 template void
-gpu_mark_groups<4, true, group_storage<4>, group_storage<4>>(unsigned int N,
+gpu_mark_groups<4, true, group_storage<4>, group_storage<4>>(const hipStream_t& stream, unsigned int N,
                                                              const unsigned int* d_comm_flags,
                                                              unsigned int n_groups,
                                                              const group_storage<4>* d_members,
@@ -2775,7 +2775,7 @@ gpu_mark_groups<4, true, group_storage<4>, group_storage<4>>(unsigned int N,
                                                              CachedAllocator& alloc);
 
 template void
-gpu_scatter_ranks_and_mark_send_groups<4, false>(unsigned int n_groups,
+gpu_scatter_ranks_and_mark_send_groups<4, false>(const hipStream_t& stream, unsigned int n_groups,
                                                  const unsigned int* d_group_tag,
                                                  const group_storage<4>* d_group_ranks,
                                                  unsigned int* d_rank_mask,
@@ -2789,7 +2789,7 @@ gpu_scatter_ranks_and_mark_send_groups<4, false>(unsigned int n_groups,
                                                  CachedAllocator& alloc);
 
 template void
-gpu_scatter_ranks_and_mark_send_groups<4, true>(unsigned int n_groups,
+gpu_scatter_ranks_and_mark_send_groups<4, true>(const hipStream_t& stream, unsigned int n_groups,
                                                 const unsigned int* d_group_tag,
                                                 const group_storage<4>* d_group_ranks,
                                                 unsigned int* d_rank_mask,
@@ -2803,21 +2803,21 @@ gpu_scatter_ranks_and_mark_send_groups<4, true>(unsigned int n_groups,
                                                 CachedAllocator& alloc);
 
 template void
-gpu_update_ranks_table<4, false>(unsigned int n_groups,
+gpu_update_ranks_table<4, false>(const hipStream_t& stream, unsigned int n_groups,
                                  group_storage<4>* d_group_ranks,
                                  unsigned int* d_group_rtag,
                                  unsigned int n_recv,
                                  const rank_element<group_storage<4>>* d_ranks_recvbuf);
 
 template void
-gpu_update_ranks_table<4, true>(unsigned int n_groups,
+gpu_update_ranks_table<4, true>(const hipStream_t& stream, unsigned int n_groups,
                                 group_storage<4>* d_group_ranks,
                                 unsigned int* d_group_rtag,
                                 unsigned int n_recv,
                                 const rank_element<group_storage<4>>* d_ranks_recvbuf);
 
 template void
-gpu_scatter_and_mark_groups_for_removal<4, false>(unsigned int n_groups,
+gpu_scatter_and_mark_groups_for_removal<4, false>(const hipStream_t& stream, unsigned int n_groups,
                                                   const group_storage<4>* d_groups,
                                                   const typeval_union* d_group_typeval,
                                                   const unsigned int* d_group_tag,
@@ -2834,7 +2834,7 @@ gpu_scatter_and_mark_groups_for_removal<4, false>(unsigned int n_groups,
                                                   bool local_multiple);
 
 template void
-gpu_scatter_and_mark_groups_for_removal<4, true>(unsigned int n_groups,
+gpu_scatter_and_mark_groups_for_removal<4, true>(const hipStream_t& stream, unsigned int n_groups,
                                                  const group_storage<4>* d_groups,
                                                  const typeval_union* d_group_typeval,
                                                  const unsigned int* d_group_tag,
@@ -2850,7 +2850,7 @@ gpu_scatter_and_mark_groups_for_removal<4, true>(unsigned int n_groups,
                                                  unsigned int* d_out_rank_mask,
                                                  bool local_multiple);
 
-template void gpu_remove_groups(unsigned int n_groups,
+template void gpu_remove_groups(const hipStream_t& stream, unsigned int n_groups,
                                 const group_storage<4>* d_groups,
                                 group_storage<4>* d_groups_alt,
                                 const typeval_union* d_group_typeval,
@@ -2865,7 +2865,7 @@ template void gpu_remove_groups(unsigned int n_groups,
                                 unsigned int* d_scan,
                                 CachedAllocator& alloc);
 
-template void gpu_add_groups(unsigned int n_groups,
+template void gpu_add_groups(const hipStream_t& stream, unsigned int n_groups,
                              unsigned int n_recv,
                              const packed_storage<4>* d_groups_in,
                              group_storage<4>* d_groups,
@@ -2880,7 +2880,7 @@ template void gpu_add_groups(unsigned int n_groups,
                              unsigned int myrank,
                              CachedAllocator& alloc);
 
-template void gpu_mark_bonded_ghosts<4, false>(unsigned int n_groups,
+template void gpu_mark_bonded_ghosts<4, false>(const hipStream_t& stream, unsigned int n_groups,
                                                group_storage<4>* d_groups,
                                                group_storage<4>* d_ranks,
                                                const Scalar4* d_postype,
@@ -2893,7 +2893,7 @@ template void gpu_mark_bonded_ghosts<4, false>(unsigned int n_groups,
                                                unsigned int my_rank,
                                                unsigned int mask);
 
-template void gpu_mark_bonded_ghosts<4, true>(unsigned int n_groups,
+template void gpu_mark_bonded_ghosts<4, true>(const hipStream_t& stream, unsigned int n_groups,
                                               group_storage<4>* d_groups,
                                               group_storage<4>* d_ranks,
                                               const Scalar4* d_postype,
@@ -2911,7 +2911,7 @@ template void gpu_mark_bonded_ghosts<4, true>(unsigned int n_groups,
  */
 
 template void
-gpu_mark_groups<6, false, group_storage<6>, group_storage<6>>(unsigned int N,
+gpu_mark_groups<6, false, group_storage<6>, group_storage<6>>(const hipStream_t& stream, unsigned int N,
                                                               const unsigned int* d_comm_flags,
                                                               unsigned int n_groups,
                                                               const group_storage<6>* d_members,
@@ -2928,7 +2928,7 @@ gpu_mark_groups<6, false, group_storage<6>, group_storage<6>>(unsigned int N,
                                                               CachedAllocator& alloc);
 
 template void
-gpu_mark_groups<6, true, group_storage<6>, group_storage<6>>(unsigned int N,
+gpu_mark_groups<6, true, group_storage<6>, group_storage<6>>(const hipStream_t& stream, unsigned int N,
                                                              const unsigned int* d_comm_flags,
                                                              unsigned int n_groups,
                                                              const group_storage<6>* d_members,
@@ -2945,7 +2945,7 @@ gpu_mark_groups<6, true, group_storage<6>, group_storage<6>>(unsigned int N,
                                                              CachedAllocator& alloc);
 
 template void
-gpu_scatter_ranks_and_mark_send_groups<6, false>(unsigned int n_groups,
+gpu_scatter_ranks_and_mark_send_groups<6, false>(const hipStream_t& stream, unsigned int n_groups,
                                                  const unsigned int* d_group_tag,
                                                  const group_storage<6>* d_group_ranks,
                                                  unsigned int* d_rank_mask,
@@ -2959,7 +2959,7 @@ gpu_scatter_ranks_and_mark_send_groups<6, false>(unsigned int n_groups,
                                                  CachedAllocator& alloc);
 
 template void
-gpu_scatter_ranks_and_mark_send_groups<6, true>(unsigned int n_groups,
+gpu_scatter_ranks_and_mark_send_groups<6, true>(const hipStream_t& stream, unsigned int n_groups,
                                                 const unsigned int* d_group_tag,
                                                 const group_storage<6>* d_group_ranks,
                                                 unsigned int* d_rank_mask,
@@ -2973,21 +2973,21 @@ gpu_scatter_ranks_and_mark_send_groups<6, true>(unsigned int n_groups,
                                                 CachedAllocator& alloc);
 
 template void
-gpu_update_ranks_table<6, false>(unsigned int n_groups,
+gpu_update_ranks_table<6, false>(const hipStream_t& stream, unsigned int n_groups,
                                  group_storage<6>* d_group_ranks,
                                  unsigned int* d_group_rtag,
                                  unsigned int n_recv,
                                  const rank_element<group_storage<6>>* d_ranks_recvbuf);
 
 template void
-gpu_update_ranks_table<6, true>(unsigned int n_groups,
+gpu_update_ranks_table<6, true>(const hipStream_t& stream, unsigned int n_groups,
                                 group_storage<6>* d_group_ranks,
                                 unsigned int* d_group_rtag,
                                 unsigned int n_recv,
                                 const rank_element<group_storage<6>>* d_ranks_recvbuf);
 
 template void
-gpu_scatter_and_mark_groups_for_removal<6, false>(unsigned int n_groups,
+gpu_scatter_and_mark_groups_for_removal<6, false>(const hipStream_t& stream, unsigned int n_groups,
                                                   const group_storage<6>* d_groups,
                                                   const typeval_union* d_group_typeval,
                                                   const unsigned int* d_group_tag,
@@ -3004,7 +3004,7 @@ gpu_scatter_and_mark_groups_for_removal<6, false>(unsigned int n_groups,
                                                   bool local_multiple);
 
 template void
-gpu_scatter_and_mark_groups_for_removal<6, true>(unsigned int n_groups,
+gpu_scatter_and_mark_groups_for_removal<6, true>(const hipStream_t& stream, unsigned int n_groups,
                                                  const group_storage<6>* d_groups,
                                                  const typeval_union* d_group_typeval,
                                                  const unsigned int* d_group_tag,
@@ -3020,7 +3020,7 @@ gpu_scatter_and_mark_groups_for_removal<6, true>(unsigned int n_groups,
                                                  unsigned int* d_out_rank_mask,
                                                  bool local_multiple);
 
-template void gpu_remove_groups(unsigned int n_groups,
+template void gpu_remove_groups(const hipStream_t& stream, unsigned int n_groups,
                                 const group_storage<6>* d_groups,
                                 group_storage<6>* d_groups_alt,
                                 const typeval_union* d_group_typeval,
@@ -3035,7 +3035,7 @@ template void gpu_remove_groups(unsigned int n_groups,
                                 unsigned int* d_scan,
                                 CachedAllocator& alloc);
 
-template void gpu_add_groups(unsigned int n_groups,
+template void gpu_add_groups(const hipStream_t& stream, unsigned int n_groups,
                              unsigned int n_recv,
                              const packed_storage<6>* d_groups_in,
                              group_storage<6>* d_groups,
@@ -3050,7 +3050,7 @@ template void gpu_add_groups(unsigned int n_groups,
                              unsigned int myrank,
                              CachedAllocator& alloc);
 
-template void gpu_mark_bonded_ghosts<6, true>(unsigned int n_groups,
+template void gpu_mark_bonded_ghosts<6, true>(const hipStream_t& stream, unsigned int n_groups,
                                               group_storage<6>* d_groups,
                                               group_storage<6>* d_ranks,
                                               const Scalar4* d_postype,
@@ -3063,7 +3063,7 @@ template void gpu_mark_bonded_ghosts<6, true>(unsigned int n_groups,
                                               unsigned int my_rank,
                                               unsigned int mask);
 
-template void gpu_mark_bonded_ghosts<6, false>(unsigned int n_groups,
+template void gpu_mark_bonded_ghosts<6, false>(const hipStream_t& stream, unsigned int n_groups,
                                                group_storage<6>* d_groups,
                                                group_storage<6>* d_ranks,
                                                const Scalar4* d_postype,
@@ -3079,14 +3079,14 @@ template void gpu_mark_bonded_ghosts<6, false>(unsigned int n_groups,
 /*
  *! Explicit template instantiations for ConstraintData (n=2)
  */
-template void gpu_make_ghost_group_exchange_plan<2, false>(unsigned int* d_ghost_group_plan,
+template void gpu_make_ghost_group_exchange_plan<2, false>(const hipStream_t& stream, unsigned int* d_ghost_group_plan,
                                                            const group_storage<2>* d_groups,
                                                            unsigned int N,
                                                            const unsigned int* d_rtag,
                                                            const unsigned int* d_plans,
                                                            unsigned int n_local);
 
-template void gpu_exchange_ghost_groups_pack(unsigned int n_out,
+template void gpu_exchange_ghost_groups_pack(const hipStream_t& stream, unsigned int n_out,
                                              const uint2* d_ghost_idx_adj,
                                              const unsigned int* d_group_tag,
                                              const group_storage<2>* d_groups,
@@ -3095,7 +3095,7 @@ template void gpu_exchange_ghost_groups_pack(unsigned int n_out,
                                              packed_storage<2>* d_groups_sendbuf);
 
 template void
-gpu_exchange_ghost_groups_copy_buf<2, false>(unsigned int nrecv,
+gpu_exchange_ghost_groups_copy_buf<2, false>(const hipStream_t& stream, unsigned int nrecv,
                                              const packed_storage<2>* d_groups_recvbuf,
                                              unsigned int* d_group_tag,
                                              group_storage<2>* d_groups,

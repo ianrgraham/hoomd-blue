@@ -134,7 +134,7 @@ struct vel_search_binary_opt : public thrust::binary_function<Scalar3, Scalar3, 
         }
     };
 
-hipError_t gpu_search_min_max_velocity(const unsigned int group_size,
+hipError_t gpu_search_min_max_velocity(const hipStream_t& stream, const unsigned int group_size,
                                        const Scalar4* const d_vel,
                                        const Scalar4* const d_pos,
                                        const unsigned int* const d_tag,
@@ -234,7 +234,7 @@ void __global__ gpu_update_min_max_velocity_kernel(const unsigned int* const d_r
         }
     }
 
-hipError_t gpu_update_min_max_velocity(const unsigned int* const d_rtag,
+hipError_t gpu_update_min_max_velocity(const hipStream_t& stream, const unsigned int* const d_rtag,
                                        Scalar4* const d_vel,
                                        const unsigned int Ntotal,
                                        const Scalar3 last_max_vel,

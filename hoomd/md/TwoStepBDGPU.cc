@@ -126,7 +126,7 @@ void TwoStepBDGPU::integrateStepOne(uint64_t timestep)
     args.block_size = m_tuner->getParam()[0];
 
     // perform the update on the GPU
-    gpu_brownian_step_one(d_pos.data,
+    gpu_brownian_step_one(m_exec_conf->getStream(), d_pos.data,
                           d_vel.data,
                           d_image.data,
                           box,

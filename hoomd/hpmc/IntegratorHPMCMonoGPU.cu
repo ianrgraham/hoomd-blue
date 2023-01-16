@@ -149,7 +149,7 @@ __global__ void hpmc_check_convergence(const unsigned int* d_trial_move_type,
     } // end namespace kernel
 
 //! Driver for kernel::hpmc_excell()
-void hpmc_excell(unsigned int* d_excell_idx,
+void hpmc_excell(const hipStream_t& stream, unsigned int* d_excell_idx,
                  unsigned int* d_excell_size,
                  const Index2D& excli,
                  const unsigned int* d_cell_idx,
@@ -225,7 +225,7 @@ void hpmc_shift(Scalar4* d_postype,
     hipDeviceSynchronize();
     }
 
-void hpmc_check_convergence(const unsigned int* d_trial_move_type,
+void hpmc_check_convergence(const hipStream_t& stream, const unsigned int* d_trial_move_type,
                             const unsigned int* d_reject_out_of_cell,
                             unsigned int* d_reject_in,
                             unsigned int* d_reject_out,

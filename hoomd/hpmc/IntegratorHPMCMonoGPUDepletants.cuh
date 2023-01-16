@@ -742,7 +742,7 @@ void depletants_launcher(const hpmc_args_t& args,
     \ingroup hpmc_kernels
 */
 template<class Shape>
-void hpmc_insert_depletants(const hpmc_args_t& args,
+void hpmc_insert_depletants(const hipStream_t& stream, const hpmc_args_t& args,
                             const hpmc_implicit_args_t& implicit_args,
                             const typename Shape::param_type* params)
     {
