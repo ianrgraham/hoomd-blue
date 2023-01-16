@@ -75,7 +75,7 @@ void hpmc_depletants_auxilliary_phase1(const hipStream_t& stream, const hpmc_arg
                                        const typename Shape::param_type* params);
 
 //! Driver for kernel::hpmc_depletants_accept
-void hpmc_depletants_accept(const uint16_t seed,
+void hpmc_depletants_accept(const hipStream_t& stream, const uint16_t seed,
                             const uint64_t timestep,
                             const unsigned int select,
                             const unsigned int rank,

@@ -1719,7 +1719,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
 
                     this->m_exec_conf->beginMultiGPU();
                     m_tuner_depletants_accept->begin();
-                    gpu::hpmc_depletants_accept(this->m_sysdef->getSeed(),
+                    gpu::hpmc_depletants_accept(this->m_exec_conf->getStream(), this->m_sysdef->getSeed(),
                                                 timestep,
                                                 i,
                                                 this->m_exec_conf->getRank(),
@@ -1943,7 +1943,7 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::update(uint64_t timeste
                 access_location::device,
                 access_mode::read);
 
-            gpu::reduce_counters(this->m_exec_conf->getNumActiveGPUs(),
+            gpu::reduce_counters(this->m_exec_conf->getStream(), this->m_exec_conf->getNumActiveGPUs(),
                                  (unsigned int)m_counters.getPitch(),
                                  d_counters_per_device.data,
                                  d_count_total.data,

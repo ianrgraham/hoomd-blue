@@ -268,7 +268,7 @@ void generate_num_depletants_ntrial(const hipStream_t& stream, const Scalar4* d_
         }
     }
 
-void get_max_num_depletants(const hipStream_t& stream, unsigned int* d_n_depletants,
+void get_max_num_depletants(unsigned int* d_n_depletants,
                             unsigned int* max_n_depletants,
                             const hipStream_t* streams,
                             const GPUPartition& gpu_partition,
@@ -293,7 +293,7 @@ void get_max_num_depletants(const hipStream_t& stream, unsigned int* d_n_depleta
     }
 
 //! Compute the max # of depletants per particle, trial insertion, and configuration
-void get_max_num_depletants_ntrial(const hipStream_t& stream, const unsigned int ntrial,
+void get_max_num_depletants_ntrial(const unsigned int ntrial,
                                    unsigned int* d_n_depletants,
                                    unsigned int* max_n_depletants,
                                    const bool add_ghosts,

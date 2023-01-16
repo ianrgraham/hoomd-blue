@@ -76,7 +76,7 @@ void get_max_num_depletants(unsigned int* d_n_depletants,
                             const GPUPartition& gpu_partition,
                             CachedAllocator& alloc);
 
-void reduce_counters(const unsigned int ngpu,
+void reduce_counters(const hipStream_t& stream, const unsigned int ngpu,
                      const unsigned int pitch,
                      const hpmc_counters_t* d_per_device_counters,
                      hpmc_counters_t* d_counters,
