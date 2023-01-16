@@ -449,7 +449,7 @@ struct PairForceComputeKernel
      * \param d_params Parameters for the potential, stored per type pair
      */
 
-    static void launch(const pair_args_t& pair_args,
+    static void launch(const hipStream_t& stream, const pair_args_t& pair_args,
                        std::pair<unsigned int, unsigned int> range,
                        const typename evaluator::param_type* d_params)
         {
@@ -515,7 +515,7 @@ struct PairForceComputeKernel
                                    dim3(grid),
                                    dim3(block_size),
                                    param_shared_bytes + extra_shared_bytes,
-                                   0,
+                                   stream,
                                    pair_args.d_force,
                                    pair_args.d_virial,
                                    pair_args.virial_pitch,
@@ -544,7 +544,7 @@ struct PairForceComputeKernel
                                    dim3(grid),
                                    dim3(block_size),
                                    param_shared_bytes + extra_shared_bytes,
-                                   0,
+                                   stream,
                                    pair_args.d_force,
                                    pair_args.d_virial,
                                    pair_args.virial_pitch,
@@ -567,6 +567,7 @@ struct PairForceComputeKernel
         else
             {
             PairForceComputeKernel<evaluator, shift_mode, compute_virial, tpp / 2>::launch(
+                stream,
                 pair_args,
                 range,
                 d_params);
@@ -578,7 +579,7 @@ struct PairForceComputeKernel
 template<class evaluator, unsigned int shift_mode, unsigned int compute_virial>
 struct PairForceComputeKernel<evaluator, shift_mode, compute_virial, 0>
     {
-    static void launch(const pair_args_t& pair_args,
+    static void launch(const hipStream_t& stream, const pair_args_t& pair_args,
                        std::pair<unsigned int, unsigned int> range,
                        const typename evaluator::param_type* d_params)
         {
@@ -594,7 +595,7 @@ struct PairForceComputeKernel<evaluator, shift_mode, compute_virial, 0>
 */
 template<class evaluator>
 __attribute__((visibility("default"))) hipError_t
-gpu_compute_pair_forces(const pair_args_t& pair_args,
+gpu_compute_pair_forces(const hipStream_t& stream, const pair_args_t& pair_args,
                         const typename evaluator::param_type* d_params)
     {
     assert(d_params);
@@ -614,21 +615,21 @@ gpu_compute_pair_forces(const pair_args_t& pair_args,
                 {
             case 0:
                 {
-                PairForceComputeKernel<evaluator, 0, 1, gpu_pair_force_max_tpp>::launch(pair_args,
+                PairForceComputeKernel<evaluator, 0, 1, gpu_pair_force_max_tpp>::launch(stream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
                 }
             case 1:
                 {
-                PairForceComputeKernel<evaluator, 1, 1, gpu_pair_force_max_tpp>::launch(pair_args,
+                PairForceComputeKernel<evaluator, 1, 1, gpu_pair_force_max_tpp>::launch(stream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
                 }
             case 2:
                 {
-                PairForceComputeKernel<evaluator, 2, 1, gpu_pair_force_max_tpp>::launch(pair_args,
+                PairForceComputeKernel<evaluator, 2, 1, gpu_pair_force_max_tpp>::launch(stream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
@@ -643,21 +644,21 @@ gpu_compute_pair_forces(const pair_args_t& pair_args,
                 {
             case 0:
                 {
-                PairForceComputeKernel<evaluator, 0, 0, gpu_pair_force_max_tpp>::launch(pair_args,
+                PairForceComputeKernel<evaluator, 0, 0, gpu_pair_force_max_tpp>::launch(stream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
                 }
             case 1:
                 {
-                PairForceComputeKernel<evaluator, 1, 0, gpu_pair_force_max_tpp>::launch(pair_args,
+                PairForceComputeKernel<evaluator, 1, 0, gpu_pair_force_max_tpp>::launch(stream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
                 }
             case 2:
                 {
-                PairForceComputeKernel<evaluator, 2, 0, gpu_pair_force_max_tpp>::launch(pair_args,
+                PairForceComputeKernel<evaluator, 2, 0, gpu_pair_force_max_tpp>::launch(stream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
@@ -673,7 +674,7 @@ gpu_compute_pair_forces(const pair_args_t& pair_args,
 #else
 template<class evaluator>
 __attribute__((visibility("default"))) hipError_t
-gpu_compute_pair_forces(const pair_args_t& pair_args,
+gpu_compute_pair_forces(const hipStream_t& stream, const pair_args_t& pair_args,
                         const typename evaluator::param_type* d_params);
 #endif
 

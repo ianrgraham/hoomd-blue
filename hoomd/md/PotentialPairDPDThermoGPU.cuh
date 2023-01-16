@@ -371,7 +371,7 @@ struct DPDForceComputeKernel
      * \param args Other arguments to pass onto the kernel
      * \param d_params Parameters for the potential, stored per type pair
      */
-    static void launch(const dpd_pair_args_t& args, const typename evaluator::param_type* d_params)
+    static void launch(const hipStream_t& stream, const dpd_pair_args_t& args, const typename evaluator::param_type* d_params)
         {
         if (tpp == args.threads_per_particle)
             {
@@ -406,7 +406,7 @@ struct DPDForceComputeKernel
                                dim3(grid),
                                dim3(block_size),
                                shared_bytes,
-                               0,
+                               stream,
                                args.d_force,
                                args.d_virial,
                                args.virial_pitch,
@@ -429,7 +429,7 @@ struct DPDForceComputeKernel
         else
             {
             DPDForceComputeKernel<evaluator, shift_mode, compute_virial, use_gmem_nlist, tpp / 2>::
-                launch(args, d_params);
+                launch(stream, args, d_params);
             }
         }
     };
@@ -441,7 +441,7 @@ template<class evaluator,
          unsigned int use_gmem_nlist>
 struct DPDForceComputeKernel<evaluator, shift_mode, compute_virial, use_gmem_nlist, 0>
     {
-    static void launch(const dpd_pair_args_t& args, const typename evaluator::param_type* d_params)
+    static void launch(const hipStream_t& stream, const dpd_pair_args_t& args, const typename evaluator::param_type* d_params)
         {
         // do nothing
         }
@@ -455,7 +455,7 @@ struct DPDForceComputeKernel<evaluator, shift_mode, compute_virial, use_gmem_nli
 */
 template<class evaluator>
 __attribute__((visibility("default"))) hipError_t
-gpu_compute_dpd_forces(const dpd_pair_args_t& args, const typename evaluator::param_type* d_params)
+gpu_compute_dpd_forces(const hipStream_t& stream, const dpd_pair_args_t& args, const typename evaluator::param_type* d_params)
     {
     assert(d_params);
     assert(args.d_rcutsq);
@@ -468,13 +468,13 @@ gpu_compute_dpd_forces(const dpd_pair_args_t& args, const typename evaluator::pa
             {
         case 0:
             {
-            DPDForceComputeKernel<evaluator, 0, 1, 0, gpu_dpd_pair_force_max_tpp>::launch(args,
+            DPDForceComputeKernel<evaluator, 0, 1, 0, gpu_dpd_pair_force_max_tpp>::launch(stream, args,
                                                                                           d_params);
             break;
             }
         case 1:
             {
-            DPDForceComputeKernel<evaluator, 1, 1, 0, gpu_dpd_pair_force_max_tpp>::launch(args,
+            DPDForceComputeKernel<evaluator, 1, 1, 0, gpu_dpd_pair_force_max_tpp>::launch(stream, args,
                                                                                           d_params);
             break;
             }
@@ -488,13 +488,13 @@ gpu_compute_dpd_forces(const dpd_pair_args_t& args, const typename evaluator::pa
             {
         case 0:
             {
-            DPDForceComputeKernel<evaluator, 0, 0, 0, gpu_dpd_pair_force_max_tpp>::launch(args,
+            DPDForceComputeKernel<evaluator, 0, 0, 0, gpu_dpd_pair_force_max_tpp>::launch(stream, args,
                                                                                           d_params);
             break;
             }
         case 1:
             {
-            DPDForceComputeKernel<evaluator, 1, 0, 0, gpu_dpd_pair_force_max_tpp>::launch(args,
+            DPDForceComputeKernel<evaluator, 1, 0, 0, gpu_dpd_pair_force_max_tpp>::launch(stream, args,
                                                                                           d_params);
             break;
             }
@@ -508,7 +508,7 @@ gpu_compute_dpd_forces(const dpd_pair_args_t& args, const typename evaluator::pa
 #else
 template<class evaluator>
 __attribute__((visibility("default"))) hipError_t
-gpu_compute_dpd_forces(const dpd_pair_args_t& args, const typename evaluator::param_type* d_params);
+gpu_compute_dpd_forces(const hipStream_t& stream, const dpd_pair_args_t& args, const typename evaluator::param_type* d_params);
 #endif
 
     } // end namespace kernel

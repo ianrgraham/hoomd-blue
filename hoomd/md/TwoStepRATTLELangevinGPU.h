@@ -297,7 +297,7 @@ void TwoStepRATTLELangevinGPU<Manifold>::integrateStepTwo(uint64_t timestep)
                                            access_mode::read);
 
             unsigned int group_size = this->m_group->getNumMembers();
-            kernel::gpu_rattle_langevin_angular_step_two(d_pos.data,
+            kernel::gpu_rattle_langevin_angular_step_two(this->m_exec_conf->getStream(), d_pos.data,
                                                          d_orientation.data,
                                                          d_angmom.data,
                                                          d_inertia.data,

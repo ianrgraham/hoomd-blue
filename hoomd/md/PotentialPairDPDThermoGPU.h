@@ -138,6 +138,7 @@ void PotentialPairDPDThermoGPU<evaluator>::computeForces(uint64_t timestep)
     unsigned int threads_per_particle = param[1];
 
     kernel::gpu_compute_dpd_forces<evaluator>(
+        this->m_exec_conf->getStream(),
         kernel::dpd_pair_args_t(d_force.data,
                                 d_virial.data,
                                 this->m_virial.getPitch(),

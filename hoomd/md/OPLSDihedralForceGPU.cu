@@ -355,7 +355,7 @@ hipError_t gpu_compute_opls_dihedral_forces(const hipStream_t& stream, Scalar4* 
                        dim3(grid),
                        dim3(threads),
                        0,
-                       0,
+                       stream,
                        d_force,
                        d_virial,
                        virial_pitch,

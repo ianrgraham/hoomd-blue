@@ -123,6 +123,7 @@ template<class evaluator> void PotentialSpecialPairGPU<evaluator>::computeForces
 
         m_tuner->begin();
         kernel::gpu_compute_bond_forces<evaluator, 2>(
+            this->m_exec_conf->getStream(),
             kernel::bond_args_t<2>(d_force.data,
                                    d_virial.data,
                                    this->m_virial.getPitch(),

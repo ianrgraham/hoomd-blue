@@ -76,7 +76,7 @@ hipError_t gpu_compute_constant_force_set_forces(const hipStream_t& stream, cons
                        dim3(grid),
                        dim3(threads),
                        0,
-                       0,
+                       stream,
                        group_size,
                        d_index_array,
                        d_force,

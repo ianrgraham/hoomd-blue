@@ -258,7 +258,7 @@ __global__ void gpu_compute_bond_forces_kernel(Scalar4* d_force,
 */
 template<class evaluator, int group_size>
 __attribute__((visibility("default"))) hipError_t
-gpu_compute_bond_forces(const kernel::bond_args_t<group_size>& bond_args,
+gpu_compute_bond_forces(const hipStream_t& stream, const kernel::bond_args_t<group_size>& bond_args,
                         const typename evaluator::param_type* d_params,
                         unsigned int* d_flags)
     {
@@ -298,7 +298,7 @@ gpu_compute_bond_forces(const kernel::bond_args_t<group_size>& bond_args,
                            grid,
                            threads,
                            shared_bytes,
-                           0,
+                           stream,
                            bond_args.d_force,
                            bond_args.d_virial,
                            bond_args.virial_pitch,
@@ -320,7 +320,7 @@ gpu_compute_bond_forces(const kernel::bond_args_t<group_size>& bond_args,
                            grid,
                            threads,
                            shared_bytes,
-                           0,
+                           stream,
                            bond_args.d_force,
                            bond_args.d_virial,
                            bond_args.virial_pitch,
@@ -342,7 +342,7 @@ gpu_compute_bond_forces(const kernel::bond_args_t<group_size>& bond_args,
 #else
 template<class evaluator, int group_size>
 __attribute__((visibility("default"))) hipError_t
-gpu_compute_bond_forces(const kernel::bond_args_t<group_size>& bond_args,
+gpu_compute_bond_forces(const hipStream_t& stream, const kernel::bond_args_t<group_size>& bond_args,
                         const typename evaluator::param_type* d_params,
                         unsigned int* d_flags);
 #endif

@@ -140,6 +140,7 @@ template<class evaluator> void PotentialPairGPU<evaluator>::computeForces(uint64
     unsigned int threads_per_particle = param[1];
 
     kernel::gpu_compute_pair_forces<evaluator>(
+        this->m_exec_conf->getStream(),
         kernel::pair_args_t(d_force.data,
                             d_virial.data,
                             this->m_virial.getPitch(),

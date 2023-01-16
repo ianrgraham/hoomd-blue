@@ -158,6 +158,7 @@ void PotentialBondGPU<evaluator, Bonds>::computeForces(uint64_t timestep)
 
         this->m_tuner->begin();
         kernel::gpu_compute_bond_forces<evaluator, Bonds::size>(
+            this->m_exec_conf->getStream(),
             kernel::bond_args_t<Bonds::size>(d_force.data,
                                              d_virial.data,
                                              this->m_virial.getPitch(),

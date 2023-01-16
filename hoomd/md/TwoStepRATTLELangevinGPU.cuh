@@ -76,7 +76,7 @@ struct rattle_langevin_step_two_args
     };
 
 hipError_t
-gpu_rattle_langevin_angular_step_two(const Scalar4* d_pos,
+gpu_rattle_langevin_angular_step_two(const hipStream_t& stream, const Scalar4* d_pos,
                                      Scalar4* d_orientation,
                                      Scalar4* d_angmom,
                                      const Scalar3* d_inertia,
@@ -404,7 +404,7 @@ hipError_t gpu_rattle_langevin_step_two(const hipStream_t& stream, const Scalar4
                        grid,
                        threads,
                        shared_bytes,
-                       0,
+                       stream,
                        d_pos,
                        d_vel,
                        d_accel,
@@ -434,7 +434,7 @@ hipError_t gpu_rattle_langevin_step_two(const hipStream_t& stream, const Scalar4
                            dim3(grid1),
                            dim3(threads1),
                            rattle_langevin_args.block_size * sizeof(Scalar),
-                           0,
+                           stream,
                            &rattle_langevin_args.d_sum_bdenergy[0],
                            rattle_langevin_args.d_partial_sum_bdenergy,
                            rattle_langevin_args.num_blocks);

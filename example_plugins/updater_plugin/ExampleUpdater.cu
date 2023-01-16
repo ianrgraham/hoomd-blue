@@ -52,7 +52,7 @@ hipError_t gpu_zero_velocities(const hipStream_t& stream, Scalar4* d_vel, unsign
     dim3 threads(block_size, 1, 1);
 
     // run the kernel
-    hipLaunchKernelGGL(gpu_zero_velocities_kernel, dim3(grid), dim3(threads), 0, 0, d_vel, N);
+    hipLaunchKernelGGL(gpu_zero_velocities_kernel, dim3(grid), dim3(threads), 0, stream, d_vel, N);
 
     // this method always succeeds. If you had a cuda* call in this driver, you could return its
     // error code if not hipSuccess

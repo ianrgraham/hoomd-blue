@@ -234,7 +234,7 @@ hipError_t gpu_compute_bondtable_forces(const hipStream_t& stream, Scalar4* d_fo
                        dim3(grid),
                        dim3(threads),
                        shared_bytes,
-                       0,
+                       stream,
                        d_force,
                        d_virial,
                        virial_pitch,

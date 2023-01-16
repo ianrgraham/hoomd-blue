@@ -131,7 +131,7 @@ void get_num_neighbors(const unsigned int* d_nneigh,
                        const GPUPartition& gpu_partition,
                        CachedAllocator& alloc);
 
-void concatenate_adjacency_list(const unsigned int* d_adjacency,
+void concatenate_adjacency_list(const hipStream_t& stream, const unsigned int* d_adjacency,
                                 const unsigned int* d_nneigh,
                                 const unsigned int* d_nneigh_scan,
                                 const unsigned int maxn,
@@ -140,7 +140,7 @@ void concatenate_adjacency_list(const unsigned int* d_adjacency,
                                 const unsigned int block_size,
                                 const unsigned int group_size);
 
-void flip_clusters(Scalar4* d_postype,
+void flip_clusters(const hipStream_t& stream, Scalar4* d_postype,
                    Scalar4* d_orientation,
                    int3* d_image,
                    const Scalar4* d_postype_backup,
@@ -728,7 +728,7 @@ void transform_particles(const hipStream_t& stream, const clusters_transform_arg
                            grid,
                            threads,
                            shared_bytes,
-                           0,
+                           stream,
                            args.d_postype,
                            args.d_orientation,
                            args.d_image,

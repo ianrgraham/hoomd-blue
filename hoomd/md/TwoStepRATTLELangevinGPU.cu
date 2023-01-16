@@ -187,7 +187,7 @@ __global__ void gpu_rattle_langevin_angular_step_two_kernel(const Scalar4* d_pos
 
 */
 hipError_t
-gpu_rattle_langevin_angular_step_two(const Scalar4* d_pos,
+gpu_rattle_langevin_angular_step_two(const hipStream_t& stream, const Scalar4* d_pos,
                                      Scalar4* d_orientation,
                                      Scalar4* d_angmom,
                                      const Scalar3* d_inertia,
@@ -220,7 +220,7 @@ gpu_rattle_langevin_angular_step_two(const Scalar4* d_pos,
                        grid,
                        threads,
                        shared_bytes,
-                       0,
+                       stream,
                        d_pos,
                        d_orientation,
                        d_angmom,

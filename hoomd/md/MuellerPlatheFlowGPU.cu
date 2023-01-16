@@ -248,7 +248,7 @@ hipError_t gpu_update_min_max_velocity(const hipStream_t& stream, const unsigned
                        dim3(grid),
                        dim3(threads),
                        0,
-                       0,
+                       stream,
                        d_rtag,
                        d_vel,
                        Ntotal,

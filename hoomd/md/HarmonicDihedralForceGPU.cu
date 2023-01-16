@@ -359,7 +359,7 @@ hipError_t gpu_compute_harmonic_dihedral_forces(const hipStream_t& stream, Scala
                        grid,
                        threads,
                        0,
-                       0,
+                       stream,
                        d_force,
                        d_virial,
                        virial_pitch,

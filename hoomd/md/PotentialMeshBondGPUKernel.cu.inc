@@ -18,7 +18,7 @@ namespace md
 namespace kernel
     {
 template __attribute__((visibility("default"))) hipError_t
-gpu_compute_bond_forces<EVALUATOR_CLASS, 4>(const kernel::bond_args_t<4>& bond_args,
+gpu_compute_bond_forces<EVALUATOR_CLASS, 4>(const hipStream_t& stream, const kernel::bond_args_t<4>& bond_args,
                                             const typename EVALUATOR_CLASS::param_type* d_params,
                                             unsigned int* d_flags);
     } // end namespace kernel

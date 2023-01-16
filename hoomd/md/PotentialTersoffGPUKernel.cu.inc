@@ -18,7 +18,7 @@ namespace md
 namespace kernel
     {
 template __attribute__((visibility("default"))) hipError_t
-gpu_compute_triplet_forces<EVALUATOR_CLASS>(const tersoff_args_t& pair_args,
+gpu_compute_triplet_forces<EVALUATOR_CLASS>(const hipStream_t& stream, const tersoff_args_t& pair_args,
                                             const typename EVALUATOR_CLASS::param_type* d_params);
     } // end namespace kernel
     } // end namespace md

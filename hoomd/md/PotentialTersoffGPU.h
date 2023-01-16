@@ -131,6 +131,7 @@ template<class evaluator> void PotentialTersoffGPU<evaluator>::computeForces(uin
     unsigned int threads_per_particle = param[1];
 
     kernel::gpu_compute_triplet_forces<evaluator>(
+        this->m_exec_conf->getStream(),
         kernel::tersoff_args_t(d_force.data,
                                this->m_pdata->getN(),
                                this->m_pdata->getNGhosts(),

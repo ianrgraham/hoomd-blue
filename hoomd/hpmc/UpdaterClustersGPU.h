@@ -440,7 +440,7 @@ template<class Shape> void UpdaterClustersGPU<Shape>::connectedComponents()
     unsigned int block_size = param[0];
     unsigned int group_size = param[1];
     m_tuner_concatenate->begin();
-    gpu::concatenate_adjacency_list(d_adjacency.data,
+    gpu::concatenate_adjacency_list(this->m_exec_conf->getStream(), d_adjacency.data,
                                     d_nneigh.data,
                                     d_nneigh_scan.data,
                                     m_maxn,
@@ -638,7 +638,7 @@ template<class Shape> void UpdaterClustersGPU<Shape>::flip(uint64_t timestep)
 
     this->m_exec_conf->beginMultiGPU();
     m_tuner_flip->begin();
-    gpu::flip_clusters(d_postype.data,
+    gpu::flip_clusters(this->m_exec_conf->getStream(), d_postype.data,
                        d_orientation.data,
                        d_image.data,
                        d_postype_backup.data,

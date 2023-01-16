@@ -121,7 +121,7 @@ void gpu_load_balance_mark_rank(const hipStream_t& stream, unsigned int* d_ranks
                        dim3(n_blocks),
                        dim3(run_block_size),
                        0,
-                       0,
+                       stream,
                        d_ranks,
                        d_pos,
                        d_cart_ranks,

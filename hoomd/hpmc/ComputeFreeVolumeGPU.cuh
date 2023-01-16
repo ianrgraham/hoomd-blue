@@ -418,7 +418,7 @@ hipError_t gpu_hpmc_free_volume(const hipStream_t& stream, const hpmc_free_volum
                        dim3(grid),
                        dim3(threads),
                        shared_bytes,
-                       0,
+                       stream,
                        args.n_sample,
                        args.type,
                        args.d_postype,

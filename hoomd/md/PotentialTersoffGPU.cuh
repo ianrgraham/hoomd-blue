@@ -901,7 +901,7 @@ template<class evaluator, unsigned int compute_virial, int tpp> struct TersoffCo
      * \param pair_args Other arguments to pass onto the kernel
      * \param d_params Parameters for the potential, stored per type pair
      */
-    static void launch(const tersoff_args_t& pair_args,
+    static void launch(const hipStream_t& stream, const tersoff_args_t& pair_args,
                        const typename evaluator::param_type* d_params)
         {
         if (tpp == pair_args.tpp)
@@ -947,7 +947,7 @@ template<class evaluator, unsigned int compute_virial, int tpp> struct TersoffCo
                                dim3(grid),
                                dim3(threads),
                                shared_bytes,
-                               0,
+                               stream,
                                pair_args.d_force,
                                pair_args.N,
                                pair_args.d_virial,
@@ -963,7 +963,7 @@ template<class evaluator, unsigned int compute_virial, int tpp> struct TersoffCo
             }
         else
             {
-            TersoffComputeKernel<evaluator, compute_virial, tpp / 2>::launch(pair_args, d_params);
+            TersoffComputeKernel<evaluator, compute_virial, tpp / 2>::launch(stream, pair_args, d_params);
             }
         }
     };
@@ -972,7 +972,7 @@ template<class evaluator, unsigned int compute_virial, int tpp> struct TersoffCo
 template<class evaluator, unsigned int compute_virial>
 struct TersoffComputeKernel<evaluator, compute_virial, 0>
     {
-    static void launch(const tersoff_args_t& pair_args,
+    static void launch(const hipStream_t& stream, const tersoff_args_t& pair_args,
                        const typename evaluator::param_type* d_params)
         {
         // do nothing
@@ -987,7 +987,7 @@ struct TersoffComputeKernel<evaluator, compute_virial, 0>
 */
 template<class evaluator>
 __attribute__((visibility("default"))) hipError_t
-gpu_compute_triplet_forces(const tersoff_args_t& pair_args,
+gpu_compute_triplet_forces(const hipStream_t& stream, const tersoff_args_t& pair_args,
                            const typename evaluator::param_type* d_params)
     {
     assert(d_params);
@@ -997,18 +997,18 @@ gpu_compute_triplet_forces(const tersoff_args_t& pair_args,
     // compute the new forces
     if (!pair_args.compute_virial)
         {
-        TersoffComputeKernel<evaluator, 0, gpu_tersoff_max_tpp>::launch(pair_args, d_params);
+        TersoffComputeKernel<evaluator, 0, gpu_tersoff_max_tpp>::launch(stream, pair_args, d_params);
         }
     else
         {
-        TersoffComputeKernel<evaluator, 1, gpu_tersoff_max_tpp>::launch(pair_args, d_params);
+        TersoffComputeKernel<evaluator, 1, gpu_tersoff_max_tpp>::launch(stream, pair_args, d_params);
         }
     return hipSuccess;
     }
 #else
 template<class evaluator>
 __attribute__((visibility("default"))) hipError_t
-gpu_compute_triplet_forces(const tersoff_args_t& pair_args,
+gpu_compute_triplet_forces(const hipStream_t& stream, const tersoff_args_t& pair_args,
                            const typename evaluator::param_type* d_params);
 #endif
 
