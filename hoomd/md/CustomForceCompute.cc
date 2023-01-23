@@ -55,7 +55,10 @@ void CustomForceCompute::computeForces(uint64_t timestep)
         memset(h_virial.data, 0, sizeof(Scalar) * m_virial.getNumElements());
         }
     // execute python callback to update the forces, if present
-    m_setForces(timestep);
+        {
+        pybind11::gil_scoped_acquire gil;
+        m_setForces(timestep);
+        }
     }
 
 namespace detail

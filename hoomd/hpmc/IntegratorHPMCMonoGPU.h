@@ -2057,6 +2057,8 @@ template<class Shape> void IntegratorHPMCMonoGPU<Shape>::updateCellWidth()
 #endif
 
     // sync up so we can access the parameters
+    // hipStreamSynchronize(this->m_exec_conf->getStream());
+    // I'm lazy, and I don't understand the hpmc code fully, so I'm not going to worry about it for now
     hipDeviceSynchronize();
 
     for (unsigned int i = 0; i < this->m_pdata->getNTypes(); ++i)

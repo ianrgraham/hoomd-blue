@@ -24,6 +24,7 @@ class PYBIND11_EXPORT ParticleFilterCustom : public ParticleFilter
     virtual std::vector<unsigned int>
     getSelectedTags(std::shared_ptr<SystemDefinition> sysdef) const
         {
+        pybind11::gil_scoped_acquire acquire;
         pybind11::array_t<unsigned int, pybind11::array::c_style | pybind11::array::forcecast> tags(
             m_py_filter(m_state));
         unsigned int* tags_ptr = (unsigned int*)tags.data();

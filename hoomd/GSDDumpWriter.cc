@@ -62,6 +62,7 @@ GSDDumpWriter::GSDDumpWriter(std::shared_ptr<SystemDefinition> sysdef,
         {
         throw std::invalid_argument("Invalid GSD file mode: " + mode);
         }
+    m_log_writer_set = false;
     m_log_writer = pybind11::none();
     }
 
@@ -234,9 +235,12 @@ void GSDDumpWriter::analyze(uint64_t timestep)
     // emit on all ranks, the slot needs to handle the mpi logic.
     m_write_signal.emit(m_handle);
 
-    if (!m_log_writer.is_none())
+    // only acquire the GIL if m_log_writer was set
+    if (m_log_writer_set)
         {
-        m_log_writer.attr("_write_frame")(this);
+        pybind11::gil_scoped_acquire acquire;
+        if (!m_log_writer.is_none())  // double check that the writer is still valid
+            m_log_writer.attr("_write_frame")(this);
         }
 
     if (root)

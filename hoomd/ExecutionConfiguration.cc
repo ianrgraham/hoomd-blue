@@ -531,7 +531,7 @@ void ExecutionConfiguration::multiGPUBarrier() const
             {
             hipSetDevice(m_gpu_id[idev_i]);
             for (int idev_j = 0; idev_j < (int)m_gpu_id.size(); ++idev_j)
-                hipStreamWaitEvent(0, m_events[idev_j], 0);
+                hipStreamWaitEvent(0, m_events[idev_j], 0);  // likey want to use a dedicated stream here
             }
         }
 #endif
@@ -553,7 +553,7 @@ void ExecutionConfiguration::beginMultiGPU() const
         for (int idev = (unsigned int)(m_gpu_id.size() - 1); idev >= 1; --idev)
             {
             hipSetDevice(m_gpu_id[idev]);
-            hipStreamWaitEvent(0, m_events[0], 0);
+            hipStreamWaitEvent(0, m_events[0], 0);  // likey want to use a dedicated stream here
             }
 
         // set GPU 0
@@ -587,7 +587,7 @@ void ExecutionConfiguration::endMultiGPU() const
         hipSetDevice(m_gpu_id[0]);
         for (int idev = (unsigned int)(m_gpu_id.size() - 1); idev >= 1; --idev)
             {
-            hipStreamWaitEvent(0, m_events[idev], 0);
+            hipStreamWaitEvent(0, m_events[idev], 0);  // likey want to use a dedicated stream here
             }
 
         if (isCUDAErrorCheckingEnabled())

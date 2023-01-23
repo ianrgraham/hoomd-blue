@@ -117,7 +117,7 @@ struct cluster_args_t
     const hipStream_t* streams;           //!< kernel streams
     };
 
-void connected_components(uint2* d_adj,
+void connected_components(const hipStream_t& stream, uint2* d_adj,
                           unsigned int N,
                           const unsigned int n_elements,
                           int* d_components,
@@ -125,7 +125,7 @@ void connected_components(uint2* d_adj,
                           const hipDeviceProp_t& dev_prop,
                           CachedAllocator& alloc);
 
-void get_num_neighbors(const unsigned int* d_nneigh,
+void get_num_neighbors(const hipStream_t& stream, const unsigned int* d_nneigh,
                        unsigned int* d_nneigh_scan,
                        unsigned int& nneigh_total,
                        const GPUPartition& gpu_partition,

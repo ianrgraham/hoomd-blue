@@ -369,11 +369,14 @@ void Messenger::openPython()
 
 /*! Some notebook operations swap out sys.stdout and sys.stderr. Check if these have been swapped
    and reopen the output streams as necessary.
+
+    \note GIL needs to be held, and so this function explicitly 
 */
 void Messenger::reopenPythonIfNeeded()
     {
     // only attempt to reopen python streams if we previously opened them
     // and python is initialized
+    pybind11::gil_scoped_acquire acquire;  // must hold the GIL to call Py_IsInitialized
     if (m_python_open && Py_IsInitialized())
         {
         // flush and reopen the streams if sys.stdout or sys.stderr change

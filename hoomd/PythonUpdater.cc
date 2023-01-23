@@ -18,6 +18,7 @@ PythonUpdater::PythonUpdater(std::shared_ptr<SystemDefinition> sysdef,
 
 void PythonUpdater::update(uint64_t timestep)
     {
+    pybind11::gil_scoped_acquire acquire;
     Updater::update(timestep);
     m_updater.attr("act")(timestep);
     }

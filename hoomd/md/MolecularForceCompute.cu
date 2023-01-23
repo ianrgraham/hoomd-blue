@@ -33,7 +33,7 @@
 #include <string>
 #define CHECK_CUDA()                                                                       \
         {                                                                                  \
-        hipError_t err = hipDeviceSynchronize();                                           \
+        hipError_t err = hipStreamSynchronize(stream);                                           \
         if (err != hipSuccess)                                                             \
             {                                                                              \
             throw std::runtime_error("CUDA error in MolecularForceCompute "                \
@@ -134,9 +134,9 @@ hipError_t gpu_sort_by_molecule(const hipStream_t& stream, unsigned int nptl,
     thrust::device_ptr<unsigned int> molecule_by_idx(d_molecule_by_idx);
 
 #ifdef __HIP_PLATFORM_HCC__
-    thrust::copy(thrust::hip::par(alloc),
+    thrust::copy(thrust::hip::par(alloc).on(stream),
 #else
-    thrust::copy(thrust::cuda::par(alloc),
+    thrust::copy(thrust::cuda::par(alloc).on(stream),
 #endif
                  molecule_tag_lookup_sorted_by_tag,
                  molecule_tag_lookup_sorted_by_tag + nptl,
@@ -327,9 +327,9 @@ hipError_t gpu_sort_by_molecule(const hipStream_t& stream, unsigned int nptl,
     thrust::device_ptr<unsigned int> local_molecules_lowest_idx_unsorted(
         d_local_molecules_lowest_idx_unsorted);
 #ifdef __HIP_PLATFORM_HCC__
-    thrust::copy(thrust::hip::par(alloc),
+    thrust::copy(thrust::hip::par(alloc).on(stream),
 #else
-    thrust::copy(thrust::cuda::par(alloc),
+    thrust::copy(thrust::cuda::par(alloc).on(stream),
 #endif
                  lowest_idx_by_ptl_in_molecule,
                  lowest_idx_by_ptl_in_molecule + n_local_ptls_in_molecules,
@@ -414,9 +414,9 @@ hipError_t gpu_fill_molecule_table(const hipStream_t& stream, unsigned int nptl,
     thrust::constant_iterator<unsigned int> one(1);
 
 #ifdef __HIP_PLATFORM_HCC__
-    thrust::exclusive_scan_by_key(thrust::hip::par(alloc),
+    thrust::exclusive_scan_by_key(thrust::hip::par(alloc).on(stream),
 #else
-    thrust::exclusive_scan_by_key(thrust::cuda::par(alloc),
+    thrust::exclusive_scan_by_key(thrust::cuda::par(alloc).on(stream),
 #endif
                                   local_molecule_tags,
                                   local_molecule_tags + n_local_ptls_in_molecules,

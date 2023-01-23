@@ -174,9 +174,9 @@ void gpu_update_group_table(const hipStream_t& stream, const unsigned int n_grou
         thrust::device_ptr<unsigned int> scratch_idx(d_scratch_idx);
         thrust::device_ptr<unsigned int> scratch_g(d_scratch_g);
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::sort_by_key(thrust::hip::par(alloc),
+        thrust::sort_by_key(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::sort_by_key(thrust::cuda::par(alloc),
+        thrust::sort_by_key(thrust::cuda::par(alloc).on(stream),
 #endif
                             scratch_idx,
                             scratch_idx + group_size * n_groups,
@@ -186,9 +186,9 @@ void gpu_update_group_table(const hipStream_t& stream, const unsigned int n_grou
         thrust::device_ptr<unsigned int> offsets(d_offsets);
         thrust::constant_iterator<unsigned int> const_it(1);
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::exclusive_scan_by_key(thrust::hip::par(alloc),
+        thrust::exclusive_scan_by_key(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::exclusive_scan_by_key(thrust::cuda::par(alloc),
+        thrust::exclusive_scan_by_key(thrust::cuda::par(alloc).on(stream),
 #endif
                                       scratch_idx,
                                       scratch_idx + group_size * n_groups,

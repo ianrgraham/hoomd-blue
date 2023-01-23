@@ -227,9 +227,9 @@ void gpu_sort_migrating_particles(const hipStream_t& stream, const size_t nsend,
 
     // sort buffer by neighbors
 #ifdef __HIP_PLATFORM_HCC__
-    thrust::sort_by_key(thrust::hip::par(alloc),
+    thrust::sort_by_key(thrust::hip::par(alloc).on(stream),
 #else
-    thrust::sort_by_key(thrust::cuda::par(alloc),
+    thrust::sort_by_key(thrust::cuda::par(alloc).on(stream),
 #endif
                         keys_ptr,
                         keys_ptr + nsend,
@@ -692,18 +692,18 @@ void gpu_exchange_ghosts_make_indices(const hipStream_t& stream, unsigned int N,
 
         thrust::device_ptr<unsigned int> output_indices(d_output_indices);
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::fill(thrust::hip::par(alloc),
+        thrust::fill(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::fill(thrust::cuda::par(alloc),
+        thrust::fill(thrust::cuda::par(alloc).on(stream),
 #endif
                      output_indices,
                      output_indices + n_out,
                      0);
 
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::scatter_if(thrust::hip::par(alloc),
+        thrust::scatter_if(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::scatter_if(thrust::cuda::par(alloc),
+        thrust::scatter_if(thrust::cuda::par(alloc).on(stream),
 #endif
                            thrust::counting_iterator<unsigned int>(0),
                            thrust::counting_iterator<unsigned int>(N),
@@ -713,9 +713,9 @@ void gpu_exchange_ghosts_make_indices(const hipStream_t& stream, unsigned int N,
 
 // compute max-scan over the output indices, filling in the holes
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::inclusive_scan(thrust::hip::par(alloc),
+        thrust::inclusive_scan(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::inclusive_scan(thrust::cuda::par(alloc),
+        thrust::inclusive_scan(thrust::cuda::par(alloc).on(stream),
 #endif
                                output_indices,
                                output_indices + n_out,
@@ -747,9 +747,9 @@ void gpu_exchange_ghosts_make_indices(const hipStream_t& stream, unsigned int N,
         thrust::device_ptr<unsigned int> ghost_neigh(d_ghost_neigh);
         thrust::device_ptr<uint2> ghost_idx_adj(d_ghost_idx_adj);
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::sort_by_key(thrust::hip::par(alloc),
+        thrust::sort_by_key(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::sort_by_key(thrust::cuda::par(alloc),
+        thrust::sort_by_key(thrust::cuda::par(alloc).on(stream),
 #endif
                             ghost_neigh,
                             ghost_neigh + n_out,
@@ -759,13 +759,24 @@ void gpu_exchange_ghosts_make_indices(const hipStream_t& stream, unsigned int N,
         thrust::device_ptr<unsigned int> ghost_begin(d_ghost_begin);
         thrust::device_ptr<unsigned int> ghost_end(d_ghost_end);
 
-        thrust::lower_bound(ghost_neigh,
+// ian note: need to double check that par(alloc) is incorrect here
+#ifdef __HIP_PLATFORM_HCC__
+        thrust::lower_bound(thrust::hip::par.on(stream),
+#else
+        thrust::lower_bound(thrust::cuda::par.on(stream),
+#endif
+                            ghost_neigh,
                             ghost_neigh + n_out,
                             unique_neighbors,
                             unique_neighbors + n_unique_neigh,
                             ghost_begin);
 
-        thrust::upper_bound(ghost_neigh,
+#ifdef __HIP_PLATFORM_HCC__
+        thrust::upper_bound(thrust::hip::par.on(stream),
+#else
+        thrust::upper_bound(thrust::cuda::par.on(stream),
+#endif
+                            ghost_neigh,
                             ghost_neigh + n_out,
                             unique_neighbors,
                             unique_neighbors + n_unique_neigh,
@@ -2530,7 +2541,7 @@ void gpu_mark_bonded_ghosts(const hipStream_t& stream, unsigned int n_groups,
 
 void gpu_reset_exchange_plan(const hipStream_t& stream, unsigned int N, unsigned int* d_plan)
     {
-    hipMemsetAsync(d_plan, 0, sizeof(unsigned int) * N);
+    hipMemsetAsync(d_plan, 0, sizeof(unsigned int) * N, stream);
     }
 /*
  *! Explicit template instantiations for BondData (n=2)

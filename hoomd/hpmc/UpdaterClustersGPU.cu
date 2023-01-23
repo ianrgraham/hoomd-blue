@@ -75,7 +75,7 @@ struct pair_less : public thrust::binary_function<uint2, uint2, bool>
         }
     };
 
-void get_num_neighbors(const unsigned int* d_nneigh,
+void get_num_neighbors(const hipStream_t& stream, const unsigned int* d_nneigh,
                        unsigned int* d_nneigh_scan,
                        unsigned int& nneigh_total,
                        const GPUPartition& gpu_partition,
@@ -91,9 +91,9 @@ void get_num_neighbors(const unsigned int* d_nneigh,
         auto range = gpu_partition.getRangeAndSetGPU(idev);
 
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::exclusive_scan(thrust::hip::par(alloc),
+        thrust::exclusive_scan(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::exclusive_scan(thrust::cuda::par(alloc),
+        thrust::exclusive_scan(thrust::cuda::par(alloc).on(stream),
 #endif
                                nneigh + range.first,
                                nneigh + range.second,
@@ -101,9 +101,9 @@ void get_num_neighbors(const unsigned int* d_nneigh,
                                nneigh_total);
 
 #ifdef __HIP_PLATFORM_HCC__
-        nneigh_total += thrust::reduce(thrust::hip::par(alloc),
+        nneigh_total += thrust::reduce(thrust::hip::par(alloc).on(stream),
 #else
-        nneigh_total += thrust::reduce(thrust::cuda::par(alloc),
+        nneigh_total += thrust::reduce(thrust::cuda::par(alloc).on(stream),
 #endif
                                        nneigh + range.first,
                                        nneigh + range.second,
@@ -288,7 +288,7 @@ void flip_clusters(const hipStream_t& stream, Scalar4* d_postype,
         }
     }
 
-void connected_components(uint2* d_adj,
+void connected_components(const hipStream_t& stream, uint2* d_adj,
                           unsigned int N,
                           const unsigned int n_elements,
                           int* d_components,
@@ -300,10 +300,10 @@ void connected_components(uint2* d_adj,
     thrust::device_ptr<uint2> adj(d_adj);
 
     // sort the list of pairs
-    thrust::sort(thrust::cuda::par(alloc), adj, adj + n_elements, pair_less());
+    thrust::sort(thrust::cuda::par(alloc).on(stream), adj, adj + n_elements, pair_less());
 
     // remove duplicates
-    auto new_last = thrust::unique(thrust::cuda::par(alloc), adj, adj + n_elements);
+    auto new_last = thrust::unique(thrust::cuda::par(alloc).on(stream), adj, adj + n_elements);
     unsigned int nnz = static_cast<unsigned int>(new_last - adj);
 
     auto source = thrust::make_transform_iterator(adj, get_source());
@@ -338,13 +338,13 @@ void connected_components(uint2* d_adj,
     thrust::device_ptr<int> components(d_components);
     thrust::device_ptr<int> work(d_work);
 
-    thrust::copy(thrust::cuda::par(alloc), components, components + nverts, work);
-    thrust::sort(thrust::cuda::par(alloc), work, work + nverts);
+    thrust::copy(thrust::cuda::par(alloc).on(stream), components, components + nverts, work);
+    thrust::sort(thrust::cuda::par(alloc).on(stream), work, work + nverts);
 
     int* d_unique = alloc.getTemporaryBuffer<int>(nverts);
     thrust::device_ptr<int> unique(d_unique);
 
-    auto it = thrust::reduce_by_key(thrust::cuda::par(alloc),
+    auto it = thrust::reduce_by_key(thrust::cuda::par(alloc).on(stream),
                                     work,
                                     work + nverts,
                                     thrust::constant_iterator<int>(1),
@@ -354,7 +354,7 @@ void connected_components(uint2* d_adj,
     num_components = static_cast<unsigned int>(it.first - unique);
 
     // make contiguous
-    thrust::lower_bound(thrust::cuda::par(alloc),
+    thrust::lower_bound(thrust::cuda::par(alloc).on(stream),
                         unique,
                         unique + num_components,
                         components,

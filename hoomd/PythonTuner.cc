@@ -18,6 +18,7 @@ PythonTuner::PythonTuner(std::shared_ptr<SystemDefinition> sysdef,
 
 void PythonTuner::update(uint64_t timestep)
     {
+    pybind11::gil_scoped_acquire acquire;
     Updater::update(timestep);
     m_tuner.attr("act")(timestep);
     }

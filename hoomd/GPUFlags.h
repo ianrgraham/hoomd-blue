@@ -322,6 +322,7 @@ template<class T> void GPUFlags<T>::memclear()
     if (m_exec_conf && m_exec_conf->isCUDAEnabled() && m_mapped)
         {
         hipDeviceSynchronize();
+        // hipStreamSynchronize(this->m_exec_conf->getStream());
         }
 #endif
 
@@ -348,6 +349,7 @@ template<class T> const T GPUFlags<T>::readFlags()
         {
         // synch to wait for kernels
         hipDeviceSynchronize();
+        // hipStreamSynchronize(this->m_exec_conf->getStream());
         }
     else
         {
@@ -375,6 +377,7 @@ template<class T> void GPUFlags<T>::resetFlags(const T flags)
 #ifdef ENABLE_HIP
         // synch to wait for kernels
         hipDeviceSynchronize();
+        // hipStreamSynchronize(this->m_exec_conf->getStream());
 #endif
         // set the flags
         *h_data = flags;

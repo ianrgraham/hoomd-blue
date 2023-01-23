@@ -537,6 +537,7 @@ double ForceCompute::benchmark(unsigned int num_iters)
 #ifdef ENABLE_HIP
     if (m_exec_conf->isCUDAEnabled())
         {
+        // hipStreamSynchronize(this->m_exec_conf->getStream());
         hipDeviceSynchronize();
         CHECK_CUDA_ERROR();
         }
@@ -550,6 +551,7 @@ double ForceCompute::benchmark(unsigned int num_iters)
 #ifdef ENABLE_HIP
     if (m_exec_conf->isCUDAEnabled())
         hipDeviceSynchronize();
+        // hipStreamSynchronize(this->m_exec_conf->getStream());
 #endif
     uint64_t total_time_ns = t.getTime() - start_time;
 

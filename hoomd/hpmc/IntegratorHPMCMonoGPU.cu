@@ -222,6 +222,7 @@ void hpmc_shift(const hipStream_t& stream, Scalar4* d_postype,
                        shift);
 
     // after this kernel we return control of cuda managed memory to the host
+    // why is this necessary? commenting out this line
     hipDeviceSynchronize();
     }
 

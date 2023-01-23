@@ -90,11 +90,12 @@ void CellListGPU::computeCellList()
                                         access_location::device,
                                         access_mode::overwrite);
 
+        auto stream = m_exec_conf->getStream();
         // reset cell list contents
         hipMemsetAsync(d_cell_size.data,
                        0,
                        sizeof(unsigned int) * m_cell_indexer.getNumElements(),
-                       0);
+                       stream);
         if (m_exec_conf->isCUDAErrorCheckingEnabled())
             CHECK_CUDA_ERROR();
 
@@ -104,7 +105,7 @@ void CellListGPU::computeCellList()
             hipMemsetAsync(d_cell_size_scratch.data,
                            0,
                            sizeof(unsigned int) * m_cell_size_scratch.getNumElements(),
-                           0);
+                           stream);
             if (m_exec_conf->isCUDAErrorCheckingEnabled())
                 CHECK_CUDA_ERROR();
             }

@@ -128,6 +128,7 @@ void System::run(uint64_t nsteps, bool write_at_start)
         }
 
     // run the steps
+    // pybind11::gil_scoped_release release;
     for (uint64_t count = 0; count < nsteps; count++)
         {
         for (auto& tuner : m_tuners)
@@ -173,10 +174,10 @@ void System::run(uint64_t nsteps, bool write_at_start)
         updateTPS();
 
         // propagate Python exceptions related to signals
-        if (PyErr_CheckSignals() != 0)
-            {
-            throw pybind11::error_already_set();
-            }
+        // if (PyErr_CheckSignals() != 0)
+        //     {
+        //     throw pybind11::error_already_set();
+        //     }
         }
     }
 
@@ -273,7 +274,7 @@ void export_System(pybind11::module& m)
         .def("setIntegrator", &System::setIntegrator)
         .def("getIntegrator", &System::getIntegrator)
 
-        .def("run", &System::run)
+        .def("run", &System::run, pybind11::call_guard<pybind11::gil_scoped_release>())
 
         .def("getLastTPS", &System::getLastTPS)
         .def("getCurrentTimeStep", &System::getCurrentTimeStep)

@@ -1091,6 +1091,7 @@ template<class T> void GPUArray<T>::memcpyDeviceToHost(bool async) const
 #ifdef ENABLE_HIP
         if (!async)
             hipDeviceSynchronize();
+            // hipStreamSynchronize(this->m_exec_conf->getStream());
 #endif
         return;
         }
@@ -1105,7 +1106,8 @@ template<class T> void GPUArray<T>::memcpyDeviceToHost(bool async) const
         hipMemcpyAsync(h_data.get(),
                        d_data.get(),
                        sizeof(T) * m_num_elements,
-                       hipMemcpyDeviceToHost);
+                       hipMemcpyDeviceToHost,
+                       this->m_exec_conf->getStream());
         }
     else
         {
@@ -1140,7 +1142,8 @@ template<class T> void GPUArray<T>::memcpyHostToDevice(bool async) const
         hipMemcpyAsync(d_data.get(),
                        h_data.get(),
                        sizeof(T) * m_num_elements,
-                       hipMemcpyHostToDevice);
+                       hipMemcpyHostToDevice,
+                       this->m_exec_conf->getStream());
 #endif
     else
 #ifdef ENABLE_HIP

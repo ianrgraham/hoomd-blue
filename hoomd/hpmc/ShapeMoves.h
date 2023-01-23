@@ -153,6 +153,7 @@ template<typename Shape> class PythonShapeMove : public ShapeMoveBase<Shape>
             Scalar x = (r < this->m_move_probability) ? uniform(rng) : 0.0;
             m_params[type_id][i] += x;
             }
+        pybind11::gil_scoped_acquire acquire;
         pybind11::object d = m_python_callback(type_id, m_params[type_id]);
         pybind11::dict shape_dict = pybind11::cast<pybind11::dict>(d);
         shape = typename Shape::param_type(shape_dict);

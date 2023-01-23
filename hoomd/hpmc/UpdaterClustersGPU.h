@@ -418,7 +418,7 @@ template<class Shape> void UpdaterClustersGPU<Shape>::connectedComponents()
     // determine total size of adjacency list, and do prefix sum
     unsigned int nneigh_total;
     this->m_exec_conf->beginMultiGPU();
-    gpu::get_num_neighbors(d_nneigh.data,
+    gpu::get_num_neighbors(this->m_exec_conf->getStream(), d_nneigh.data,
                            d_nneigh_scan.data,
                            nneigh_total,
                            this->m_pdata->getGPUPartition(),
@@ -459,7 +459,7 @@ template<class Shape> void UpdaterClustersGPU<Shape>::connectedComponents()
                                       access_location::device,
                                       access_mode::overwrite);
 
-        gpu::connected_components(d_adjacency_copy.data,
+        gpu::connected_components(this->m_exec_conf->getStream(), d_adjacency_copy.data,
                                   this->m_pdata->getN(),
                                   nneigh_total * 2,
                                   d_components.data,

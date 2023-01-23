@@ -119,6 +119,14 @@ class PYBIND11_EXPORT GSDDumpWriter : public Analyzer
     /// Set the log writer
     void setLogWriter(pybind11::object log_writer)
         {
+        if (log_writer.is_none())
+            {
+            m_log_writer_set = false;
+            }
+        else
+            {
+            m_log_writer_set = true;
+            }
         m_log_writer = log_writer;
         }
 
@@ -133,7 +141,7 @@ class PYBIND11_EXPORT GSDDumpWriter : public Analyzer
         {
         PDataFlags flags;
 
-        if (!m_log_writer.is_none())
+        if (m_log_writer_set)
             {
             flags.set();
             }
@@ -155,6 +163,7 @@ class PYBIND11_EXPORT GSDDumpWriter : public Analyzer
     static std::list<std::string> particle_chunks;
 
     /// Callback to write log quantities to file
+    bool m_log_writer_set;
     pybind11::object m_log_writer;
 
     std::shared_ptr<ParticleGroup> m_group; //!< Group to write out to the file

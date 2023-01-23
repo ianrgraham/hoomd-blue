@@ -18,6 +18,7 @@ PythonAnalyzer::PythonAnalyzer(std::shared_ptr<SystemDefinition> sysdef,
 
 void PythonAnalyzer::analyze(uint64_t timestep)
     {
+    pybind11::gil_scoped_acquire acquire;
     Analyzer::analyze(timestep);
     m_analyzer.attr("act")(timestep);
     }

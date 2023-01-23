@@ -113,9 +113,9 @@ hipError_t gpu_compact_index_list(const hipStream_t& stream, unsigned int N,
 
     thrust::device_ptr<unsigned int> is_member(d_is_member);
 #ifdef __HIP_PLATFORM_HCC__
-    num_local_members = thrust::reduce(thrust::hip::par(alloc),
+    num_local_members = thrust::reduce(thrust::hip::par(alloc).on(stream),
 #else
-    num_local_members = thrust::reduce(thrust::cuda::par(alloc),
+    num_local_members = thrust::reduce(thrust::cuda::par(alloc).on(stream),
 #endif
                                        is_member,
                                        is_member + N);

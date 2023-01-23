@@ -377,7 +377,11 @@ void NeighborListGPUTree::buildTree()
             }
 
         // then, launch all of the builds in their own streams
-        hipDeviceSynchronize();
+        // this synchronization seems unneccesary?
+        for (unsigned int i = 0; i < m_pdata->getNTypes(); ++i)
+            {
+            hipStreamSynchronize(m_streams[i]);
+            }
         m_build_tuner->begin();
         const unsigned int block_size = m_build_tuner->getParam()[0];
 
@@ -410,7 +414,10 @@ void NeighborListGPUTree::buildTree()
             }
         m_build_tuner->end();
         // wait for all builds to finish
-        hipDeviceSynchronize();
+        for (unsigned int i = 0; i < m_pdata->getNTypes(); ++i)
+            {
+            hipStreamSynchronize(m_streams[i]);
+            }
         }
 
         // put particles in primitive order for traversal and compress the lbvhs so that the data is
@@ -447,7 +454,10 @@ void NeighborListGPUTree::buildTree()
 
         // loops are not fused to avoid streams or syncing in kernel loop above, but could be done
         // if necessary
-        hipDeviceSynchronize();
+        for (unsigned int i = 0; i < m_pdata->getNTypes(); ++i)
+            {
+            hipStreamSynchronize(m_streams[i]);
+            }
         for (unsigned int i = 0; i < m_pdata->getNTypes(); ++i)
             {
             if (m_lbvhs[i]->getN() == 0)
@@ -456,7 +466,10 @@ void NeighborListGPUTree::buildTree()
                                    *(m_lbvhs[i]->get()),
                                    m_streams[i]);
             }
-        hipDeviceSynchronize();
+        for (unsigned int i = 0; i < m_pdata->getNTypes(); ++i)
+            {
+            hipStreamSynchronize(m_streams[i]);
+            }
         }
     }
 
@@ -506,7 +519,10 @@ void NeighborListGPUTree::traverseTree()
     const BoxDim& box = m_pdata->getBox();
 
     // traverse all pairs in (now-transposed) streams
-    hipDeviceSynchronize();
+    for (unsigned int i = 0; i < m_pdata->getNTypes(); ++i)
+        {
+        hipStreamSynchronize(m_streams[i]);
+        }
     m_traverse_tuner->begin();
     const unsigned int block_size = m_traverse_tuner->getParam()[0];
     for (unsigned int i = 0; i < m_pdata->getNTypes(); ++i)
@@ -575,7 +591,10 @@ void NeighborListGPUTree::traverseTree()
         }
     m_traverse_tuner->end();
     // wait for all traversals to finish
-    hipDeviceSynchronize();
+    for (unsigned int i = 0; i < m_pdata->getNTypes(); ++i)
+        {
+        hipStreamSynchronize(m_streams[i]);
+        }
     }
 
 /*!

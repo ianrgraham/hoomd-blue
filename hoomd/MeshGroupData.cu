@@ -140,7 +140,7 @@ void gpu_update_mesh_table(const hipStream_t& stream, const unsigned int n_group
     unsigned int group_size_half = group_size / 2;
 
     // reset number of groups
-    hipMemsetAsync(d_n_groups, 0, sizeof(unsigned int) * N);
+    hipMemsetAsync(d_n_groups, 0, sizeof(unsigned int) * N, stream);
 
     hipLaunchKernelGGL(HIP_KERNEL_NAME(gpu_count_mesh_kernel<group_size>),
                        dim3(n_blocks),
@@ -167,9 +167,9 @@ void gpu_update_mesh_table(const hipStream_t& stream, const unsigned int n_group
         thrust::device_ptr<unsigned int> scratch_idx(d_scratch_idx);
         thrust::device_ptr<unsigned int> scratch_g(d_scratch_g);
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::sort_by_key(thrust::hip::par(alloc),
+        thrust::sort_by_key(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::sort_by_key(thrust::cuda::par(alloc),
+        thrust::sort_by_key(thrust::cuda::par(alloc).on(stream),
 #endif
                             scratch_idx,
                             scratch_idx + group_size_half * n_groups,
@@ -179,9 +179,9 @@ void gpu_update_mesh_table(const hipStream_t& stream, const unsigned int n_group
         thrust::device_ptr<unsigned int> offsets(d_offsets);
         thrust::constant_iterator<unsigned int> const_it(1);
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::exclusive_scan_by_key(thrust::hip::par(alloc),
+        thrust::exclusive_scan_by_key(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::exclusive_scan_by_key(thrust::cuda::par(alloc),
+        thrust::exclusive_scan_by_key(thrust::cuda::par(alloc).on(stream),
 #endif
                                       scratch_idx,
                                       scratch_idx + group_size_half * n_groups,

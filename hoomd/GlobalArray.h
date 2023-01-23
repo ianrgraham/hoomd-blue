@@ -120,6 +120,7 @@ template<class T> class managed_deleter
 #ifdef ENABLE_HIP
         if (m_use_device)
             {
+            // hipStreamSynchronize(this->m_exec_conf->getStream());
             hipDeviceSynchronize();
             CHECK_CUDA_ERROR();
             }
@@ -278,6 +279,8 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
                 for (int idev = this->m_exec_conf->getNumActiveGPUs() - 1; idev >= 0; --idev)
                     {
                     hipSetDevice(gpu_map[idev]);
+                    // hipDeviceSynchronize();
+                    // hipStreamSynchronize(this->m_exec_conf->getStream());
                     hipDeviceSynchronize();
                     }
                 }
@@ -316,6 +319,7 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
                     for (int idev = this->m_exec_conf->getNumActiveGPUs() - 1; idev >= 0; --idev)
                         {
                         hipSetDevice(gpu_map[idev]);
+                        // hipStreamSynchronize(this->m_exec_conf->getStream());
                         hipDeviceSynchronize();
                         }
                     }
@@ -544,6 +548,7 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
             for (int idev = this->m_exec_conf->getNumActiveGPUs() - 1; idev >= 0; --idev)
                 {
                 hipSetDevice(gpu_map[idev]);
+                // hipStreamSynchronize(this->m_exec_conf->getStream());
                 hipDeviceSynchronize();
                 }
             }
@@ -599,6 +604,7 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
             for (int idev = this->m_exec_conf->getNumActiveGPUs() - 1; idev >= 0; --idev)
                 {
                 hipSetDevice(gpu_map[idev]);
+                // hipStreamSynchronize(this->m_exec_conf->getStream());
                 hipDeviceSynchronize();
                 }
             }
@@ -818,6 +824,7 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
 #ifdef ENABLE_HIP
         if (use_device)
             {
+            // hipStreamSynchronize(this->m_exec_conf->getStream());
             hipDeviceSynchronize();
             CHECK_CUDA_ERROR();
             }

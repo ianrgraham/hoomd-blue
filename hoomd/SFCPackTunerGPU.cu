@@ -135,9 +135,9 @@ void gpu_generate_sorted_order(const hipStream_t& stream, unsigned int N,
         thrust::device_ptr<unsigned int> particle_bins(d_particle_bins);
         thrust::device_ptr<unsigned int> sorted_order(d_sorted_order);
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::sort_by_key(thrust::hip::par(alloc),
+        thrust::sort_by_key(thrust::hip::par(alloc).on(stream),
 #else
-        thrust::sort_by_key(thrust::cuda::par(alloc),
+        thrust::sort_by_key(thrust::cuda::par(alloc).on(stream),
 #endif
                             particle_bins,
                             particle_bins + N,
