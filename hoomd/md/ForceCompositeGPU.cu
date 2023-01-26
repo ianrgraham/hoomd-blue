@@ -476,6 +476,7 @@ hipError_t gpu_rigid_force(const hipStream_t& stream, Scalar4* d_force,
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -518,7 +519,7 @@ hipError_t gpu_rigid_force(const hipStream_t& stream, Scalar4* d_force,
                            dim3(force_grid),
                            dim3(run_block_size),
                            shared_bytes,
-                           stream,
+                           istream,
                            d_force,
                            d_torque,
                            d_molecule_len,
@@ -576,6 +577,7 @@ hipError_t gpu_rigid_virial(const hipStream_t& stream, Scalar* d_virial,
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -618,7 +620,7 @@ hipError_t gpu_rigid_virial(const hipStream_t& stream, Scalar* d_virial,
                            dim3(force_grid),
                            dim3(run_block_size),
                            shared_bytes,
-                           stream,
+                           istream,
                            d_virial,
                            d_molecule_len,
                            d_molecule_list,
@@ -777,6 +779,7 @@ void gpu_update_composite(const hipStream_t& stream, unsigned int N,
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -789,7 +792,7 @@ void gpu_update_composite(const hipStream_t& stream, unsigned int N,
                            dim3(n_blocks),
                            dim3(run_block_size),
                            0,
-                           stream,
+                           istream,
                            N,
                            nwork,
                            range.first,

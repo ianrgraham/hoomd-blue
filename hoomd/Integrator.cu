@@ -189,6 +189,7 @@ hipError_t gpu_integrator_sum_net_force(const hipStream_t& stream, Scalar4* d_ne
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -198,7 +199,7 @@ hipError_t gpu_integrator_sum_net_force(const hipStream_t& stream, Scalar4* d_ne
                                dim3(nwork / block_size + 1),
                                dim3(block_size),
                                0,
-                               stream,
+                               istream,
                                d_net_force,
                                d_net_virial,
                                net_virial_pitch,
@@ -214,7 +215,7 @@ hipError_t gpu_integrator_sum_net_force(const hipStream_t& stream, Scalar4* d_ne
                                dim3(nwork / block_size + 1),
                                dim3(block_size),
                                0,
-                               stream,
+                               istream,
                                d_net_force,
                                d_net_virial,
                                net_virial_pitch,

@@ -332,7 +332,7 @@ void gpu_assign_particles(const hipStream_t& stream, const uint3 mesh_dim,
                           const hipDeviceProp_t& dev_prop,
                           const GPUPartition& gpu_partition)
     {
-    hipMemsetAsync(d_mesh, 0, sizeof(hipfftComplex) * grid_dim.x * grid_dim.y * grid_dim.z);
+    hipMemsetAsync(d_mesh, 0, sizeof(hipfftComplex) * grid_dim.x * grid_dim.y * grid_dim.z, stream);
     Scalar V_cell = box.getVolume() / (Scalar)(mesh_dim.x * mesh_dim.y * mesh_dim.z);
 
     unsigned int max_block_size;
@@ -352,13 +352,15 @@ void gpu_assign_particles(const hipStream_t& stream, const uint3 mesh_dim,
     for (int idev = ngpu - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         if (ngpu > 1)
             {
             // zero the temporary mesh array
             hipMemsetAsync(d_mesh_scratch + idev * mesh_elements,
                            0,
-                           sizeof(hipfftComplex) * mesh_elements);
+                           sizeof(hipfftComplex) * mesh_elements,
+                           istream);
             }
 
         unsigned int nwork = range.second - range.first;
@@ -369,7 +371,7 @@ void gpu_assign_particles(const hipStream_t& stream, const uint3 mesh_dim,
                            dim3(n_blocks),
                            dim3(run_block_size),
                            shared_bytes,
-                           stream,
+                           istream,
                            mesh_dim,
                            n_ghost_bins,
                            nwork,
@@ -721,15 +723,17 @@ void gpu_compute_forces(const hipStream_t& stream, const unsigned int N,
     for (int idev = all_gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = all_gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = all_gpu_partition.getStream(idev);
 
         // reset force array for ALL particles
-        hipMemsetAsync(d_force + range.first, 0, sizeof(Scalar4) * (range.second - range.first));
+        hipMemsetAsync(d_force + range.first, 0, sizeof(Scalar4) * (range.second - range.first), istream);
         }
 
     // iterate over active GPUs in reverse, to end up on first GPU when returning from this function
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
         unsigned int n_blocks = nwork / run_block_size + 1;
@@ -740,7 +744,7 @@ void gpu_compute_forces(const hipStream_t& stream, const unsigned int N,
             dim3(n_blocks),
             dim3(run_block_size),
             shared_bytes,
-            stream,
+            istream,
             nwork,
             d_postype,
             d_force,

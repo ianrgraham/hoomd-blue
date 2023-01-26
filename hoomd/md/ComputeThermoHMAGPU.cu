@@ -281,6 +281,7 @@ hipError_t gpu_compute_thermo_hma_partial(const hipStream_t& stream, Scalar4* d_
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -289,7 +290,7 @@ hipError_t gpu_compute_thermo_hma_partial(const hipStream_t& stream, Scalar4* d_
 
         const size_t shared_bytes = sizeof(Scalar3) * args.block_size;
 
-        gpu_compute_thermo_hma_partial_sums<<<grid, threads, shared_bytes>>>(args.d_scratch,
+        gpu_compute_thermo_hma_partial_sums<<<grid, threads, shared_bytes, istream>>>(args.d_scratch,
                                                                              box,
                                                                              args.d_net_force,
                                                                              args.d_net_virial,

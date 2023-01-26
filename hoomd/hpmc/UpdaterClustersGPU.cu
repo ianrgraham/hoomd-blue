@@ -89,11 +89,12 @@ void get_num_neighbors(const hipStream_t& stream, const unsigned int* d_nneigh,
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
 #ifdef __HIP_PLATFORM_HCC__
-        thrust::exclusive_scan(thrust::hip::par(alloc).on(stream),
+        thrust::exclusive_scan(thrust::hip::par(alloc).on(istream),
 #else
-        thrust::exclusive_scan(thrust::cuda::par(alloc).on(stream),
+        thrust::exclusive_scan(thrust::cuda::par(alloc).on(istream),
 #endif
                                nneigh + range.first,
                                nneigh + range.second,
@@ -101,9 +102,9 @@ void get_num_neighbors(const hipStream_t& stream, const unsigned int* d_nneigh,
                                nneigh_total);
 
 #ifdef __HIP_PLATFORM_HCC__
-        nneigh_total += thrust::reduce(thrust::hip::par(alloc).on(stream),
+        nneigh_total += thrust::reduce(thrust::hip::par(alloc).on(istream),
 #else
-        nneigh_total += thrust::reduce(thrust::cuda::par(alloc).on(stream),
+        nneigh_total += thrust::reduce(thrust::cuda::par(alloc).on(istream),
 #endif
                                        nneigh + range.first,
                                        nneigh + range.second,
@@ -216,6 +217,7 @@ void concatenate_adjacency_list(const hipStream_t& stream, const unsigned int* d
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
         const unsigned int num_blocks = nwork / n_groups + 1;
@@ -225,7 +227,7 @@ void concatenate_adjacency_list(const hipStream_t& stream, const unsigned int* d
                            grid,
                            threads,
                            0,
-                           stream,
+                           istream,
                            d_adjacency,
                            d_nneigh,
                            d_nneigh_scan,
@@ -263,6 +265,7 @@ void flip_clusters(const hipStream_t& stream, Scalar4* d_postype,
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
         const unsigned int num_blocks = nwork / run_block_size + 1;
@@ -272,7 +275,7 @@ void flip_clusters(const hipStream_t& stream, Scalar4* d_postype,
                            grid,
                            threads,
                            0,
-                           stream,
+                           istream,
                            d_postype,
                            d_orientation,
                            d_image,

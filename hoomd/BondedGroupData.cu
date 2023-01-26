@@ -147,7 +147,7 @@ void gpu_update_group_table(const hipStream_t& stream, const unsigned int n_grou
     unsigned n_blocks = n_groups / block_size + 1;
 
     // reset number of groups
-    hipMemsetAsync(d_n_groups, 0, sizeof(unsigned int) * N);
+    hipMemsetAsync(d_n_groups, 0, sizeof(unsigned int) * N, stream);
 
     hipLaunchKernelGGL(HIP_KERNEL_NAME(gpu_count_groups_kernel<group_size>),
                        dim3(n_blocks),

@@ -293,6 +293,7 @@ unsigned int gpu_pdata_remove(const hipStream_t& stream, const unsigned int N,
         for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
             {
             auto range = gpu_partition.getRangeAndSetGPU(idev);
+            auto istream = gpu_partition.getStream(idev);
 
             unsigned int nwork = range.second - range.first;
             unsigned int offset = range.first;
@@ -304,7 +305,7 @@ unsigned int gpu_pdata_remove(const hipStream_t& stream, const unsigned int N,
                                dim3(n_blocks),
                                dim3(block_size),
                                0,
-                               stream,
+                               istream,
                                nwork,
                                d_pos,
                                d_vel,

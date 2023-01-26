@@ -98,7 +98,7 @@ void PatchEnergyJITGPU::computePatchEnergyGPU(const gpu_args_t& args, hipStream_
                                                       grid,
                                                       thread,
                                                       shared_bytes,
-                                                      hStream,
+                                                      hStream,  // ian: this may need to change
                                                       eval_threads,
                                                       block_size);
 

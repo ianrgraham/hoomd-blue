@@ -558,7 +558,7 @@ hipError_t gpu_compute_pair_aniso_forces(const hipStream_t& stream, const a_pair
                 {
             case 0:
                 {
-                AnisoPairForceComputeKernel<evaluator, 0, 1, gpu_aniso_pair_force_max_tpp>::launch(
+                AnisoPairForceComputeKernel<evaluator, 0, 1, gpu_aniso_pair_force_max_tpp>::launch(  // ian: this may need to change
                     pair_args,
                     range,
                     d_params,
@@ -567,6 +567,7 @@ hipError_t gpu_compute_pair_aniso_forces(const hipStream_t& stream, const a_pair
                 }
             case 1:
                 {
+                // ian: this may need to change
                 AnisoPairForceComputeKernel<evaluator,
                                             1 && evaluator::implementsEnergyShift(),
                                             1,
@@ -586,6 +587,7 @@ hipError_t gpu_compute_pair_aniso_forces(const hipStream_t& stream, const a_pair
                 {
             case 0:
                 {
+                // ian: this may need to change
                 AnisoPairForceComputeKernel<evaluator, 0, 0, gpu_aniso_pair_force_max_tpp>::launch(
                     pair_args,
                     range,
@@ -595,6 +597,7 @@ hipError_t gpu_compute_pair_aniso_forces(const hipStream_t& stream, const a_pair
                 }
             case 1:
                 {
+                // ian: this may need to change
                 AnisoPairForceComputeKernel<evaluator,
                                             1 && evaluator::implementsEnergyShift(),
                                             0,

@@ -481,7 +481,7 @@ void narrow_phase_launcher(const hpmc_args_t& args,
                                grid,
                                thread,
                                shared_bytes,
-                               args.streams[idev],
+                               args.streams[idev],  // ian: this may need to change
                                args.d_postype,
                                args.d_orientation,
                                args.d_trial_postype,

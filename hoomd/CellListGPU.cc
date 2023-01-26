@@ -379,6 +379,7 @@ void CellListGPU::initializeMemory()
         {
         // map cell list arrays into memory of all active GPUs
         auto& gpu_map = m_exec_conf->getGPUIds();
+        auto& streams = m_exec_conf->getStreams();
 
         for (unsigned int idev = 0; idev < m_exec_conf->getNumActiveGPUs(); ++idev)
             {
@@ -423,31 +424,36 @@ void CellListGPU::initializeMemory()
             // prefetch to preferred location
             cudaMemPrefetchAsync(m_cell_size_scratch.get() + idev * m_cell_indexer.getNumElements(),
                                  m_cell_indexer.getNumElements() * sizeof(unsigned int),
-                                 gpu_map[idev]);
+                                 gpu_map[idev],
+                                 streams[idev]);
 
             if (!m_idx.isNull())
                 cudaMemPrefetchAsync(m_idx_scratch.get()
                                          + idev * m_cell_list_indexer.getNumElements(),
                                      m_cell_list_indexer.getNumElements() * sizeof(unsigned int),
-                                     gpu_map[idev]);
+                                     gpu_map[idev],
+                                     streams[idev]);
 
             if (!m_xyzf_scratch.isNull())
                 cudaMemPrefetchAsync(m_xyzf_scratch.get()
                                          + idev * m_cell_list_indexer.getNumElements(),
                                      m_cell_list_indexer.getNumElements() * sizeof(Scalar4),
-                                     gpu_map[idev]);
+                                     gpu_map[idev],
+                                     streams[idev]);
 
             if (!m_tdb_scratch.isNull())
                 cudaMemPrefetchAsync(m_tdb_scratch.get()
                                          + idev * m_cell_list_indexer.getNumElements(),
                                      m_cell_list_indexer.getNumElements() * sizeof(Scalar4),
-                                     gpu_map[idev]);
+                                     gpu_map[idev],
+                                     streams[idev]);
 
             if (!m_orientation_scratch.isNull())
                 cudaMemPrefetchAsync(m_orientation_scratch.get()
                                          + idev * m_cell_list_indexer.getNumElements(),
                                      m_cell_list_indexer.getNumElements() * sizeof(Scalar4),
-                                     gpu_map[idev]);
+                                     gpu_map[idev],
+                                     streams[idev]);
             }
         CHECK_CUDA_ERROR();
         }

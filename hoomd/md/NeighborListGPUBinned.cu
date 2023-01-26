@@ -817,8 +817,9 @@ hipError_t gpu_compute_nlist_binned(const hipStream_t& stream, unsigned int* d_n
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
-        launcher<max_threads_per_particle>(stream, d_nlist,
+        launcher<max_threads_per_particle>(istream, d_nlist,
                                            d_n_neigh,
                                            d_last_updated_pos,
                                            d_conditions,

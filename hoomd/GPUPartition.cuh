@@ -24,12 +24,12 @@ class __attribute__((visibility("default"))) GPUPartition
     {
     public:
     // Empty constructor
-    GPUPartition() : m_n_gpu(0), m_gpu_map(nullptr), m_gpu_range(nullptr) { }
+    GPUPartition() : m_n_gpu(0), m_gpu_map(nullptr), m_stream_map(nullptr), m_gpu_range(nullptr) { }
 
     //! Constructor
     /*! \param gpu_id Mapping of contiguous device IDs onto CUDA devices
      */
-    GPUPartition(const std::vector<unsigned int>& gpu_id)
+    GPUPartition(const std::vector<unsigned int>& gpu_id, const std::vector<hipStream_t>& streams)
         {
         m_gpu_range = nullptr;
         m_gpu_map = nullptr;
@@ -37,8 +37,12 @@ class __attribute__((visibility("default"))) GPUPartition
         if (m_n_gpu != 0)
             {
             m_gpu_map = new unsigned int[gpu_id.size()];
+            m_stream_map = new hipStream_t[streams.size()];
             for (unsigned int i = 0; i < m_n_gpu; ++i)
+                {
                 m_gpu_map[i] = gpu_id[i];
+                m_stream_map[i] = streams[i];
+                }
             m_gpu_range = new std::pair<unsigned int, unsigned int>[gpu_id.size()];
 
             // reset to defaults
@@ -54,6 +58,7 @@ class __attribute__((visibility("default"))) GPUPartition
             {
             delete[] m_gpu_map;
             delete[] m_gpu_range;
+            delete[] m_stream_map;
             }
         }
 
@@ -62,17 +67,20 @@ class __attribute__((visibility("default"))) GPUPartition
         {
         m_gpu_range = nullptr;
         m_gpu_map = nullptr;
+        m_stream_map = nullptr;
         m_n_gpu = other.m_n_gpu;
 
         if (m_n_gpu != 0)
             {
             m_gpu_range = new std::pair<unsigned int, unsigned int>[m_n_gpu];
             m_gpu_map = new unsigned int[m_n_gpu];
+            m_stream_map = new hipStream_t[m_n_gpu];
             }
         for (unsigned int i = 0; i < m_n_gpu; ++i)
             {
             m_gpu_range[i] = other.m_gpu_range[i];
             m_gpu_map[i] = other.m_gpu_map[i];
+            m_stream_map[i] = other.m_stream_map[i];
             }
         }
 
@@ -86,16 +94,19 @@ class __attribute__((visibility("default"))) GPUPartition
                 {
                 m_gpu_range = new std::pair<unsigned int, unsigned int>[m_n_gpu];
                 m_gpu_map = new unsigned int[m_n_gpu];
+                m_stream_map = new hipStream_t[m_n_gpu];
                 }
             else
                 {
                 m_gpu_range = nullptr;
                 m_gpu_map = nullptr;
+                m_stream_map = nullptr;
                 }
             for (unsigned int i = 0; i < m_n_gpu; ++i)
                 {
                 m_gpu_range[i] = rhs.m_gpu_range[i];
                 m_gpu_map[i] = rhs.m_gpu_map[i];
+                m_stream_map[i] = rhs.m_stream_map[i];
                 }
             }
         return *this;
@@ -134,6 +145,15 @@ class __attribute__((visibility("default"))) GPUPartition
         return m_gpu_range[igpu];
         }
 
+    inline hipStream_t getStream(unsigned int igpu) const
+        {
+        if (igpu > m_n_gpu)
+            throw std::runtime_error("GPU " + std::to_string(igpu)
+                                     + " not in execution configuration");
+
+        return m_stream_map[igpu];
+        }
+
     //! Get the index range for a given GPU
     /*! \param igpu The logical ID of the GPU
      */
@@ -154,6 +174,7 @@ class __attribute__((visibility("default"))) GPUPartition
     private:
     unsigned int m_n_gpu;
     unsigned int* m_gpu_map;
+    hipStream_t* m_stream_map;
 
     std::pair<unsigned int, unsigned int>* m_gpu_range;
     };

@@ -248,6 +248,7 @@ void hpmc_check_convergence(const hipStream_t& stream, const unsigned int* d_tri
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
         const unsigned int num_blocks = nwork / run_block_size + 1;
@@ -257,7 +258,7 @@ void hpmc_check_convergence(const hipStream_t& stream, const unsigned int* d_tri
                            grid,
                            threads,
                            0,
-                           stream,
+                           istream,
                            d_trial_move_type,
                            d_reject_out_of_cell,
                            d_reject_in,

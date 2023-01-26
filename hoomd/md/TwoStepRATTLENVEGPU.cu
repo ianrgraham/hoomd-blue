@@ -144,6 +144,7 @@ hipError_t gpu_rattle_nve_step_one(const hipStream_t& stream, Scalar4* d_pos,
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -156,7 +157,7 @@ hipError_t gpu_rattle_nve_step_one(const hipStream_t& stream, Scalar4* d_pos,
                            dim3(grid),
                            dim3(threads),
                            0,
-                           stream,
+                           istream,
                            d_pos,
                            d_vel,
                            d_accel,
@@ -331,6 +332,7 @@ hipError_t gpu_rattle_nve_angular_step_one(const hipStream_t& stream, Scalar4* d
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -343,7 +345,7 @@ hipError_t gpu_rattle_nve_angular_step_one(const hipStream_t& stream, Scalar4* d
                            dim3(grid),
                            dim3(threads),
                            0,
-                           stream,
+                           istream,
                            d_orientation,
                            d_angmom,
                            d_inertia,
@@ -448,6 +450,7 @@ hipError_t gpu_rattle_nve_angular_step_two(const hipStream_t& stream, const Scal
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -460,7 +463,7 @@ hipError_t gpu_rattle_nve_angular_step_two(const hipStream_t& stream, const Scal
                            dim3(grid),
                            dim3(threads),
                            0,
-                           stream,
+                           istream,
                            d_orientation,
                            d_angmom,
                            d_inertia,

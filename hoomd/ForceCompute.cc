@@ -130,6 +130,7 @@ void ForceCompute::updateGPUAdvice()
     if (m_exec_conf->isCUDAEnabled() && m_exec_conf->allConcurrentManagedAccess())
         {
         auto gpu_map = m_exec_conf->getGPUIds();
+        auto streams = m_exec_conf->getStreams();
 
         // split preferred location of particle data across GPUs
         const GPUPartition& gpu_partition = m_pdata->getGPUPartition();
@@ -159,14 +160,17 @@ void ForceCompute::updateGPUAdvice()
 
             cudaMemPrefetchAsync(m_force.get() + range.first,
                                  sizeof(Scalar4) * nelem,
-                                 gpu_map[idev]);
+                                 gpu_map[idev],
+                                 streams[idev]);
             for (unsigned int i = 0; i < 6; ++i)
                 cudaMemPrefetchAsync(m_virial.get() + i * m_virial.getPitch() + range.first,
                                      sizeof(Scalar) * nelem,
-                                     gpu_map[idev]);
+                                     gpu_map[idev],
+                                     streams[idev]);
             cudaMemPrefetchAsync(m_torque.get() + range.first,
                                  sizeof(Scalar4) * nelem,
-                                 gpu_map[idev]);
+                                 gpu_map[idev],
+                                 streams[idev]);
             }
         CHECK_CUDA_ERROR();
 

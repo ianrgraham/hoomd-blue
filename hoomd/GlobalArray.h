@@ -120,8 +120,8 @@ template<class T> class managed_deleter
 #ifdef ENABLE_HIP
         if (m_use_device)
             {
-            // hipStreamSynchronize(this->m_exec_conf->getStream());
-            hipDeviceSynchronize();
+            hipStreamSynchronize(this->m_exec_conf->getStream());
+            // hipDeviceSynchronize();
             CHECK_CUDA_ERROR();
             }
 #endif
@@ -280,8 +280,7 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
                     {
                     hipSetDevice(gpu_map[idev]);
                     // hipDeviceSynchronize();
-                    // hipStreamSynchronize(this->m_exec_conf->getStream());
-                    hipDeviceSynchronize();
+                    hipStreamSynchronize(this->m_exec_conf->getStream());
                     }
                 }
 #endif
@@ -319,8 +318,8 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
                     for (int idev = this->m_exec_conf->getNumActiveGPUs() - 1; idev >= 0; --idev)
                         {
                         hipSetDevice(gpu_map[idev]);
-                        // hipStreamSynchronize(this->m_exec_conf->getStream());
-                        hipDeviceSynchronize();
+                        hipStreamSynchronize(this->m_exec_conf->getStream());
+                        // hipDeviceSynchronize();
                         }
                     }
 #endif
@@ -548,8 +547,8 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
             for (int idev = this->m_exec_conf->getNumActiveGPUs() - 1; idev >= 0; --idev)
                 {
                 hipSetDevice(gpu_map[idev]);
-                // hipStreamSynchronize(this->m_exec_conf->getStream());
-                hipDeviceSynchronize();
+                hipStreamSynchronize(this->m_exec_conf->getStream());
+                // hipDeviceSynchronize();
                 }
             }
 #endif
@@ -601,6 +600,7 @@ template<class T> class GlobalArray : public GPUArrayBase<T, GlobalArray<T>>
             {
             // synchronize all active GPUs
             auto gpu_map = this->m_exec_conf->getGPUIds();
+            auto streams = this->m_exec_conf->getStreams();
             for (int idev = this->m_exec_conf->getNumActiveGPUs() - 1; idev >= 0; --idev)
                 {
                 hipSetDevice(gpu_map[idev]);

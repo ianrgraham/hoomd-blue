@@ -204,6 +204,7 @@ void gpu_compute_cell_list(const hipStream_t& stream, unsigned int* d_cell_size,
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -218,7 +219,7 @@ void gpu_compute_cell_list(const hipStream_t& stream, unsigned int* d_cell_size,
                            dim3(n_blocks),
                            dim3(run_block_size),
                            0,
-                           stream,
+                           istream,
                            d_cell_size + idev * ci.getNumElements(),
                            d_xyzf ? d_xyzf + idev * cli.getNumElements() : 0,
                            d_tdb ? d_tdb + idev * cli.getNumElements() : 0,
@@ -412,12 +413,13 @@ hipError_t gpu_combine_cell_lists(const hipStream_t& stream, const unsigned int*
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         hipLaunchKernelGGL(HIP_KERNEL_NAME(gpu_combine_cell_lists_kernel),
                            grid,
                            threads,
                            0,
-                           stream,
+                           istream,
                            d_cell_size_scratch,
                            d_cell_size,
                            d_idx_scratch,

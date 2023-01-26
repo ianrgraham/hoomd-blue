@@ -216,6 +216,7 @@ void PPPMForceComputeGPU::initializeFFT()
 
 #ifdef __HIP_PLATFORM_NVCC__
         auto gpu_map = m_exec_conf->getGPUIds();
+        auto streams = m_exec_conf->getStreams();
         for (unsigned int idev = 0; idev < m_exec_conf->getNumActiveGPUs(); ++idev)
             {
             cudaMemAdvise(m_mesh_scratch.get() + idev * mesh_elements,
@@ -224,7 +225,7 @@ void PPPMForceComputeGPU::initializeFFT()
                           gpu_map[idev]);
             cudaMemPrefetchAsync(m_mesh_scratch.get() + idev * mesh_elements,
                                  mesh_elements * sizeof(hipfftComplex),
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             CHECK_CUDA_ERROR();
             }
 

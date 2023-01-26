@@ -404,6 +404,7 @@ void hpmc_update_pdata(const hipStream_t& stream, const hpmc_update_args_t& args
     for (int idev = args.gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = args.gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = args.gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
         const unsigned int num_blocks = nwork / block_size + 1;
@@ -412,7 +413,7 @@ void hpmc_update_pdata(const hipStream_t& stream, const hpmc_update_args_t& args
                            dim3(num_blocks),
                            dim3(block_size),
                            0,
-                           stream,
+                           istream,
                            args.d_postype,
                            args.d_orientation,
                            args.d_vel,

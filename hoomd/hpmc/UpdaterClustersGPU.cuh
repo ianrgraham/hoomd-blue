@@ -582,7 +582,7 @@ void cluster_overlaps_launcher(const cluster_args_t& args,
                 grid,
                 thread,
                 shared_bytes,
-                args.streams[idev],
+                args.streams[idev],  // ian: this may need to change
                 args.d_postype,
                 args.d_orientation,
                 args.d_trial_postype,
@@ -719,6 +719,7 @@ void transform_particles(const hipStream_t& stream, const clusters_transform_arg
     for (int idev = args.gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = args.gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = args.gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
         const unsigned int num_blocks = nwork / run_block_size + 1;
@@ -728,7 +729,7 @@ void transform_particles(const hipStream_t& stream, const clusters_transform_arg
                            grid,
                            threads,
                            shared_bytes,
-                           stream,
+                           istream,
                            args.d_postype,
                            args.d_orientation,
                            args.d_image,

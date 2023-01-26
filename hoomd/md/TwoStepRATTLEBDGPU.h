@@ -148,14 +148,15 @@ template<class Manifold> void TwoStepRATTLEBDGPU<Manifold>::integrateStepOne(uin
         {
         // prefetch gammas
         auto& gpu_map = this->m_exec_conf->getGPUIds();
+        auto& streams = this->m_exec_conf->getStreams();
         for (unsigned int idev = 0; idev < this->m_exec_conf->getNumActiveGPUs(); ++idev)
             {
             cudaMemPrefetchAsync(this->m_gamma.get(),
                                  sizeof(Scalar) * this->m_gamma.getNumElements(),
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             cudaMemPrefetchAsync(this->m_gamma_r.get(),
                                  sizeof(Scalar) * this->m_gamma_r.getNumElements(),
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             }
         if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
             CHECK_CUDA_ERROR();
@@ -237,11 +238,12 @@ template<class Manifold> void TwoStepRATTLEBDGPU<Manifold>::includeRATTLEForce(u
         {
         // prefetch gammas
         auto& gpu_map = this->m_exec_conf->getGPUIds();
+        auto& streams = this->m_exec_conf->getStreams();
         for (unsigned int idev = 0; idev < this->m_exec_conf->getNumActiveGPUs(); ++idev)
             {
             cudaMemPrefetchAsync(this->m_gamma.get(),
                                  sizeof(Scalar) * this->m_gamma.getNumElements(),
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             }
         if (this->m_exec_conf->isCUDAErrorCheckingEnabled())
             CHECK_CUDA_ERROR();

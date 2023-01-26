@@ -557,6 +557,7 @@ hipError_t gpu_compute_thermo_partial(const hipStream_t& stream, Scalar* d_prope
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -569,7 +570,7 @@ hipError_t gpu_compute_thermo_partial(const hipStream_t& stream, Scalar* d_prope
                            dim3(grid),
                            dim3(threads),
                            shared_bytes,
-                           stream,
+                           istream,
                            args.d_scratch,
                            args.d_net_force,
                            args.d_net_virial,
@@ -593,7 +594,7 @@ hipError_t gpu_compute_thermo_partial(const hipStream_t& stream, Scalar* d_prope
                                dim3(grid),
                                dim3(threads),
                                shared_bytes,
-                               stream,
+                               istream,
                                args.d_scratch_pressure_tensor,
                                args.d_net_force,
                                args.d_net_virial,
@@ -619,7 +620,7 @@ hipError_t gpu_compute_thermo_partial(const hipStream_t& stream, Scalar* d_prope
                                dim3(grid),
                                dim3(threads),
                                shared_bytes,
-                               stream,
+                               istream,
                                args.d_scratch_rot,
                                args.d_orientation,
                                args.d_angmom,

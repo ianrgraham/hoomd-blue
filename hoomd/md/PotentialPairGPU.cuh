@@ -607,6 +607,7 @@ gpu_compute_pair_forces(const hipStream_t& stream, const pair_args_t& pair_args,
     for (int idev = pair_args.gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = pair_args.gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = pair_args.gpu_partition.getStream(idev);
 
         // Launch kernel
         if (pair_args.compute_virial)
@@ -615,21 +616,21 @@ gpu_compute_pair_forces(const hipStream_t& stream, const pair_args_t& pair_args,
                 {
             case 0:
                 {
-                PairForceComputeKernel<evaluator, 0, 1, gpu_pair_force_max_tpp>::launch(stream, pair_args,
+                PairForceComputeKernel<evaluator, 0, 1, gpu_pair_force_max_tpp>::launch(istream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
                 }
             case 1:
                 {
-                PairForceComputeKernel<evaluator, 1, 1, gpu_pair_force_max_tpp>::launch(stream, pair_args,
+                PairForceComputeKernel<evaluator, 1, 1, gpu_pair_force_max_tpp>::launch(istream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
                 }
             case 2:
                 {
-                PairForceComputeKernel<evaluator, 2, 1, gpu_pair_force_max_tpp>::launch(stream, pair_args,
+                PairForceComputeKernel<evaluator, 2, 1, gpu_pair_force_max_tpp>::launch(istream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
@@ -644,21 +645,21 @@ gpu_compute_pair_forces(const hipStream_t& stream, const pair_args_t& pair_args,
                 {
             case 0:
                 {
-                PairForceComputeKernel<evaluator, 0, 0, gpu_pair_force_max_tpp>::launch(stream, pair_args,
+                PairForceComputeKernel<evaluator, 0, 0, gpu_pair_force_max_tpp>::launch(istream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
                 }
             case 1:
                 {
-                PairForceComputeKernel<evaluator, 1, 0, gpu_pair_force_max_tpp>::launch(stream, pair_args,
+                PairForceComputeKernel<evaluator, 1, 0, gpu_pair_force_max_tpp>::launch(istream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;
                 }
             case 2:
                 {
-                PairForceComputeKernel<evaluator, 2, 0, gpu_pair_force_max_tpp>::launch(stream, pair_args,
+                PairForceComputeKernel<evaluator, 2, 0, gpu_pair_force_max_tpp>::launch(istream, pair_args,
                                                                                         range,
                                                                                         d_params);
                 break;

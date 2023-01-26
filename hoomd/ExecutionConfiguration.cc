@@ -123,7 +123,6 @@ ExecutionConfiguration::ExecutionConfiguration(executionMode mode,
             for (auto it = gpu_id.begin(); it != gpu_id.end(); ++it)
                 initializeGPU(*it);
             }
-        hipStreamCreate(&m_stream);
         }
 #else
     if (exec_mode == GPU)
@@ -226,10 +225,12 @@ ExecutionConfiguration::ExecutionConfiguration(executionMode mode,
 
 #if defined(ENABLE_HIP)
     // setup synchronization events
+    m_streams.resize(m_gpu_id.size());
     m_events.resize(m_gpu_id.size());
     for (int idev = (unsigned int)(m_gpu_id.size() - 1); idev >= 0; --idev)
         {
         hipSetDevice(m_gpu_id[idev]);
+        hipStreamCreate(&m_streams[idev]);
         hipEventCreateWithFlags(&m_events[idev], hipEventDisableTiming);
         }
 #endif
@@ -523,7 +524,7 @@ void ExecutionConfiguration::multiGPUBarrier() const
         for (int idev = (unsigned int)(m_gpu_id.size() - 1); idev >= 0; --idev)
             {
             hipSetDevice(m_gpu_id[idev]);
-            hipEventRecord(m_events[idev], 0);
+            hipEventRecord(m_events[idev], m_streams[idev]);
             }
 
         // wait for all those events on all GPUs
@@ -531,7 +532,7 @@ void ExecutionConfiguration::multiGPUBarrier() const
             {
             hipSetDevice(m_gpu_id[idev_i]);
             for (int idev_j = 0; idev_j < (int)m_gpu_id.size(); ++idev_j)
-                hipStreamWaitEvent(0, m_events[idev_j], 0);  // likey want to use a dedicated stream here
+                hipStreamWaitEvent(m_streams[idev_j], m_events[idev_j], 0);  // likey want to use a dedicated stream here
             }
         }
 #endif
@@ -545,15 +546,16 @@ void ExecutionConfiguration::beginMultiGPU() const
     // implement a one-to-n barrier
     if (getNumActiveGPUs() > 1)
         {
-        // record a syncrhonization point on GPU 0
-        hipEventRecord(m_events[0], 0);
+        // re    GPU 0
+        auto root_stream = m_streams[0];
+        hipEventRecord(m_events[0], root_stream);
 
         // wait for that event on all GPUs (except GPU 0, for which we rely on implicit
         // synchronization)
         for (int idev = (unsigned int)(m_gpu_id.size() - 1); idev >= 1; --idev)
             {
             hipSetDevice(m_gpu_id[idev]);
-            hipStreamWaitEvent(0, m_events[0], 0);  // likey want to use a dedicated stream here
+            hipStreamWaitEvent(m_streams[idev], m_events[0], 0);
             }
 
         // set GPU 0
@@ -580,14 +582,15 @@ void ExecutionConfiguration::endMultiGPU() const
         for (int idev = (unsigned int)(m_gpu_id.size() - 1); idev >= 1; --idev)
             {
             hipSetDevice(m_gpu_id[idev]);
-            hipEventRecord(m_events[idev], 0);
+            hipEventRecord(m_events[idev], m_streams[idev]);
             }
 
         // wait for these events on GPU 0
         hipSetDevice(m_gpu_id[0]);
+        auto root_stream = m_streams[0];
         for (int idev = (unsigned int)(m_gpu_id.size() - 1); idev >= 1; --idev)
             {
-            hipStreamWaitEvent(0, m_events[idev], 0);  // likey want to use a dedicated stream here
+            hipStreamWaitEvent(root_stream, m_events[idev], 0);  // likey want to use a dedicated stream here
             }
 
         if (isCUDAErrorCheckingEnabled())

@@ -394,6 +394,7 @@ hipError_t gpu_rattle_brownian_step_one(const hipStream_t& stream, Scalar4* d_po
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -415,7 +416,7 @@ hipError_t gpu_rattle_brownian_step_one(const hipStream_t& stream, Scalar4* d_po
                            dim3(grid),
                            dim3(threads),
                            shared_bytes,
-                           stream,
+                           istream,
                            d_pos,
                            d_image,
                            d_vel,
@@ -656,6 +657,7 @@ hipError_t gpu_include_rattle_force_bd(const hipStream_t& stream, const Scalar4*
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
 
         unsigned int nwork = range.second - range.first;
 
@@ -677,7 +679,7 @@ hipError_t gpu_include_rattle_force_bd(const hipStream_t& stream, const Scalar4*
                            dim3(grid),
                            dim3(threads),
                            shared_bytes,
-                           stream,
+                           istream,
                            d_pos,
                            d_net_force,
                            d_net_virial,

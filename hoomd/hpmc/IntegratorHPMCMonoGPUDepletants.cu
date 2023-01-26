@@ -194,7 +194,7 @@ void generate_num_depletants(const hipStream_t& stream, const uint16_t seed,
                            nwork / run_block_size + 1,
                            run_block_size,
                            0,
-                           streams[idev],
+                           streams[idev],  // ian: this may need to change
                            seed,
                            timestep,
                            select,
@@ -253,7 +253,7 @@ void generate_num_depletants_ntrial(const hipStream_t& stream, const Scalar4* d_
                            grid,
                            threads,
                            0,
-                           streams[idev],
+                           streams[idev],  // ian: this may need to change
                            d_vel,
                            d_trial_vel,
                            ntrial,
@@ -281,9 +281,9 @@ void get_max_num_depletants(unsigned int* d_n_depletants,
         auto range = gpu_partition.getRangeAndSetGPU(idev);
 
 #ifdef __HIP_PLATFORM_HCC__
-        max_n_depletants[idev] = thrust::reduce(thrust::hip::par(alloc).on(streams[idev]),
+        max_n_depletants[idev] = thrust::reduce(thrust::hip::par(alloc).on(streams[idev]),  // ian: this may need to change
 #else
-        max_n_depletants[idev] = thrust::reduce(thrust::cuda::par(alloc).on(streams[idev]),
+        max_n_depletants[idev] = thrust::reduce(thrust::cuda::par(alloc).on(streams[idev]),  // ian: this may need to change
 #endif
                                                 n_depletants + range.first,
                                                 n_depletants + range.second,
@@ -315,9 +315,9 @@ void get_max_num_depletants_ntrial(const unsigned int ntrial,
             nwork += n_ghosts;
 
 #ifdef __HIP_PLATFORM_HCC__
-        max_n_depletants[idev] = thrust::reduce(thrust::hip::par(alloc).on(streams[idev]),
+        max_n_depletants[idev] = thrust::reduce(thrust::hip::par(alloc).on(streams[idev]),  // ian: this may need to change
 #else
-        max_n_depletants[idev] = thrust::reduce(thrust::cuda::par(alloc).on(streams[idev]),
+        max_n_depletants[idev] = thrust::reduce(thrust::cuda::par(alloc).on(streams[idev]),  // ian: this may need to change
 #endif
                                                 n_depletants + range.first * 2 * ntrial,
                                                 n_depletants + (range.first + nwork) * 2 * ntrial,
@@ -379,13 +379,14 @@ void hpmc_depletants_accept(const hipStream_t& stream, const uint16_t seed,
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
         unsigned int nwork = range.second - range.first;
 
         hipLaunchKernelGGL(kernel::hpmc_depletants_accept,
                            nwork / run_block_size + 1,
                            run_block_size,
                            0,
-                           stream,
+                           istream,
                            seed,
                            timestep,
                            select,

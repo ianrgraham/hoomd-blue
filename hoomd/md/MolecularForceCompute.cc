@@ -193,7 +193,7 @@ void MolecularForceCompute::initMoleculesGPU()
     // distribute molecules evenly over GPUs
     // NOTE: going forward we could slave the GPU partition of the molecules
     // to that of the local particles in the ParticleData
-    m_gpu_partition = GPUPartition(m_exec_conf->getGPUIds());
+    m_gpu_partition = GPUPartition(m_exec_conf->getGPUIds(), m_exec_conf->getStreams());
     m_gpu_partition.setN(n_local_molecules);
 
 #if defined(ENABLE_HIP) && defined(__HIP_PLATFORM_NVCC__)

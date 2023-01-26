@@ -682,7 +682,7 @@ void depletants_launcher(const hpmc_args_t& args,
                 dim3(grid),
                 dim3(threads),
                 shared_bytes,
-                implicit_args.streams[idev],
+                implicit_args.streams[idev],  // ian: this may need to change
                 args.d_trial_postype,
                 args.d_trial_orientation,
                 args.d_trial_move_type,

@@ -178,7 +178,7 @@ ParticleGroup::ParticleGroup(std::shared_ptr<SystemDefinition> sysdef,
     {
 #ifdef ENABLE_HIP
     if (m_pdata->getExecConf()->isCUDAEnabled())
-        m_gpu_partition = GPUPartition(m_exec_conf->getGPUIds());
+        m_gpu_partition = GPUPartition(m_exec_conf->getGPUIds(), m_exec_conf->getStreams());
 #endif
 
     // update member tag arrays
@@ -275,7 +275,7 @@ ParticleGroup::ParticleGroup(std::shared_ptr<SystemDefinition> sysdef,
 
 #ifdef ENABLE_HIP
     if (m_pdata->getExecConf()->isCUDAEnabled())
-        m_gpu_partition = GPUPartition(m_exec_conf->getGPUIds());
+        m_gpu_partition = GPUPartition(m_exec_conf->getGPUIds(), m_exec_conf->getStreams());
 #endif
 
     // now that the tag list is completely set up and all memory is allocated, rebuild the index
@@ -702,6 +702,7 @@ void ParticleGroup::updateGPUAdvice() const
         {
         // split preferred location of group indices across GPUs
         auto gpu_map = m_exec_conf->getGPUIds();
+        auto streams = m_exec_conf->getStreams();
         for (unsigned int idev = 0; idev < m_exec_conf->getNumActiveGPUs(); ++idev)
             {
             auto range = m_gpu_partition.getRange(idev);
@@ -722,10 +723,10 @@ void ParticleGroup::updateGPUAdvice() const
             // migrate data to preferred location
             cudaMemPrefetchAsync(m_member_idx.get() + range.first,
                                  sizeof(unsigned int) * nelem,
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             cudaMemPrefetchAsync(m_is_member.get() + range.first,
                                  sizeof(unsigned int) * nelem,
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             }
         CHECK_CUDA_ERROR();
         }

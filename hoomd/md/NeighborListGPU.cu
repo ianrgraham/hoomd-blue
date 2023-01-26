@@ -102,6 +102,7 @@ hipError_t gpu_nlist_needs_update_check_new(const hipStream_t& stream, unsigned 
     for (int idev = gpu_partition.getNumActiveGPUs() - 1; idev >= 0; --idev)
         {
         auto range = gpu_partition.getRangeAndSetGPU(idev);
+        auto istream = gpu_partition.getStream(idev);
         unsigned int nwork = range.second - range.first;
 
         int n_blocks = nwork / block_size + 1;
@@ -109,7 +110,7 @@ hipError_t gpu_nlist_needs_update_check_new(const hipStream_t& stream, unsigned 
                            dim3(n_blocks),
                            dim3(block_size),
                            0,
-                           stream,
+                           istream,
                            d_result,
                            d_last_pos,
                            d_pos,

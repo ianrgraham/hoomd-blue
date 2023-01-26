@@ -458,7 +458,7 @@ void ForceCompositeGPU::findRigidCenters()
                                    n_rigid);
 
     // distribute rigid body centers over GPUs
-    m_gpu_partition = GPUPartition(m_exec_conf->getGPUIds());
+    m_gpu_partition = GPUPartition(m_exec_conf->getGPUIds(), m_exec_conf->getStreams());
     m_gpu_partition.setN(n_rigid);
     }
 

@@ -902,7 +902,7 @@ void clusters_depletants_launcher(const cluster_args_t& args,
                 dim3(grid),
                 dim3(threads),
                 shared_bytes,
-                implicit_args.streams[idev],
+                implicit_args.streams[idev],  // ian: this may need to change
                 args.d_postype,
                 args.d_orientation,
                 args.line,

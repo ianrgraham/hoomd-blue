@@ -1090,8 +1090,8 @@ template<class T> void GPUArray<T>::memcpyDeviceToHost(bool async) const
 // if we are using mapped pinned memory, no need to copy, only synchronize
 #ifdef ENABLE_HIP
         if (!async)
-            hipDeviceSynchronize();
-            // hipStreamSynchronize(this->m_exec_conf->getStream());
+            // hipDeviceSynchronize();
+            hipStreamSynchronize(this->m_exec_conf->getStream());
 #endif
         return;
         }

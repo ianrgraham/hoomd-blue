@@ -384,11 +384,12 @@ PotentialPair<evaluator>::PotentialPair(std::shared_ptr<SystemDefinition> sysdef
                       cudaMemAdviseSetReadMostly,
                       0);
         auto& gpu_map = m_exec_conf->getGPUIds();
+        auto& streams = m_exec_conf->getStreams();
         for (unsigned int idev = 0; idev < m_exec_conf->getNumActiveGPUs(); ++idev)
             {
             cudaMemPrefetchAsync(m_params.data(),
                                  sizeof(param_type) * m_params.size(),
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             }
 
         // m_rcutsq and m_ronsq only in unified memory if allConcurrentManagedAccess
@@ -407,10 +408,10 @@ PotentialPair<evaluator>::PotentialPair(std::shared_ptr<SystemDefinition> sysdef
                 // prefetch data on all GPUs
                 cudaMemPrefetchAsync(m_rcutsq.get(),
                                      sizeof(Scalar) * m_rcutsq.getNumElements(),
-                                     gpu_map[idev]);
+                                     gpu_map[idev], streams[idev]);
                 cudaMemPrefetchAsync(m_ronsq.get(),
                                      sizeof(Scalar) * m_ronsq.getNumElements(),
-                                     gpu_map[idev]);
+                                     gpu_map[idev], streams[idev]);
                 }
             }
         }

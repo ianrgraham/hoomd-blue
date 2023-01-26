@@ -263,7 +263,7 @@ NeighborList::NeighborList(std::shared_ptr<SystemDefinition> sysdef, Scalar r_bu
 
 #ifdef ENABLE_HIP
     if (m_exec_conf->isCUDAEnabled())
-        m_last_gpu_partition = GPUPartition(m_exec_conf->getGPUIds());
+        m_last_gpu_partition = GPUPartition(m_exec_conf->getGPUIds(), m_exec_conf->getStreams());
 #endif
 
 #ifdef ENABLE_MPI

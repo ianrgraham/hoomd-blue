@@ -107,14 +107,15 @@ void TwoStepBDGPU::integrateStepOne(uint64_t timestep)
         {
         // prefetch gammas
         auto& gpu_map = m_exec_conf->getGPUIds();
+        auto& streams = m_exec_conf->getStreams();
         for (unsigned int idev = 0; idev < m_exec_conf->getNumActiveGPUs(); ++idev)
             {
             cudaMemPrefetchAsync(m_gamma.get(),
                                  sizeof(Scalar) * m_gamma.getNumElements(),
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             cudaMemPrefetchAsync(m_gamma_r.get(),
                                  sizeof(Scalar) * m_gamma_r.getNumElements(),
-                                 gpu_map[idev]);
+                                 gpu_map[idev], streams[idev]);
             }
         if (m_exec_conf->isCUDAErrorCheckingEnabled())
             CHECK_CUDA_ERROR();

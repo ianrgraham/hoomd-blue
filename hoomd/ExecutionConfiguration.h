@@ -149,6 +149,11 @@ class PYBIND11_EXPORT ExecutionConfiguration
         return m_gpu_id;
         }
 
+    const std::vector<hipStream_t>& getStreams() const
+        {
+        return m_streams;
+        }
+
     void hipProfileStart() const
         {
         for (int idev = (unsigned int)(m_gpu_id.size() - 1); idev >= 0; idev--)
@@ -297,7 +302,7 @@ class PYBIND11_EXPORT ExecutionConfiguration
 
     const hipStream_t& getStream() const
         {
-        return m_stream;
+        return m_streams[0];
         }
 #endif
 
@@ -367,6 +372,7 @@ class PYBIND11_EXPORT ExecutionConfiguration
     static void scanGPUs();
 
     std::vector<hipEvent_t> m_events; //!< A list of events to synchronize between GPUs
+    std::vector<hipStream_t> m_streams;
 
     /// IDs of active GPUs
     std::vector<unsigned int> m_gpu_id;
@@ -404,8 +410,6 @@ class PYBIND11_EXPORT ExecutionConfiguration
     mutable bool m_in_multigpu_block; //!< Tracks whether we are in a multi-GPU block
 
 #if defined(ENABLE_HIP)
-    /// Concurrent stream used for GPU kernel launches
-    hipStream_t m_stream;
     
     std::unique_ptr<CachedAllocator> m_cached_alloc; //!< Cached allocator for temporary allocations
     std::unique_ptr<CachedAllocator>
